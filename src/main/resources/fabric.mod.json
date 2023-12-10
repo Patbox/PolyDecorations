@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "polydecorations",
+  "version": "${version}",
+
+  "name": "PolyDecorations",
+  "description": "",
+  "authors": [
+    "Patbox"
+  ],
+  "contact": {
+    "homepage": "https://pb4.eu",
+    "sources": "https://github.com/Patbox/PolyDecorations"
+  },
+
+  "license": "LGPLv3",
+  "icon": "assets/polydecorations/textures/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "eu.pb4.polydecorations.ModInit"
+    ],
+    "fabric-datagen": [
+      "eu.pb4.polydecorations.datagen.DataGenInit"
+    ]
+  },
+  "mixins": [
+    "polydecorations.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": ">=1.20.3-",
+    "polymer-core": ">=0.7.0",
+    "polymer-resource-pack": ">=0.7.0",
+    "polymer-virtual-entity": ">=0.7.0",
+    "java": ">=17"
+  },
+  "breaks": {
+    "banner": "*",
+    "cardboard": "*"
+  }
+}
