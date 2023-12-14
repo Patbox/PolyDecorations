@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "PolyDecorations",
-  "description": "",
+  "description": "Decorate your world! A server side furniture/decorations mod!",
   "authors": [
     "Patbox"
   ],

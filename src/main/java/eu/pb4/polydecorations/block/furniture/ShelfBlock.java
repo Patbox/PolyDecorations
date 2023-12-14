@@ -14,6 +14,8 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -51,7 +53,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     @Nullable
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return waterLog(ctx, this.getDefaultState().with(FACING, ctx.getSide()));
+        return waterLog(ctx, this.getDefaultState().with(FACING, ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing()));
     }
 
     @Override
@@ -74,6 +76,10 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         tickWater(state, world, pos);
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    }
+
+    public FluidState getFluidState(BlockState state) {
+        return (Boolean)state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
     @Override
@@ -99,14 +105,17 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
         public Model(BlockState state) {
             this.main = LodItemDisplayElement.createSimple(state.getBlock().asItem());
             this.main.setScale(new Vector3f(2));
+            this.main.setDisplaySize(1, 1);
+
             var yaw = state.get(FACING).asRotation();
             this.main.setYaw(yaw);
             this.addElement(this.main);
             for (int i = 0; i < 3; i++) {
                 var item = LodItemDisplayElement.createSimple();
                 item.setViewRange(0.6f);
+                item.setDisplaySize(1, 1);
                 item.setModelTransformation(ModelTransformationMode.NONE);
-                item.setTranslation(new Vector3f(-5 / 16f + i * (5 / 16f), 2.5f / 16f, -5 / 16f));
+                item.setTranslation(new Vector3f(-5 / 16f + i * (5 / 16f), -1.5f / 16f, -3 / 16f));
                 item.setScale(new Vector3f(5 / 16f));
                 item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
                 item.setYaw(yaw);

@@ -10,7 +10,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class DecorationsRecipeSerializers {
-
+    public static final RecipeSerializer<BedBannerCraftingRecipe> BED_BANNER = register("bed_banner", BedBannerCraftingRecipe.CODEC);
     public static void register() {
 
     }

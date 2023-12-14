@@ -6,6 +6,11 @@
             "prefix": "sgui/elements/"
         },
         {
+            "type": "directory",
+            "source": "entity/signs",
+            "prefix": "entity/signs/"
+        },
+        {
             "type": "single",
             "resource": "polyfactory:icon"
         }

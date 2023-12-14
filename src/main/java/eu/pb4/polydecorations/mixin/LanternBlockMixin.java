@@ -36,7 +36,7 @@ public class LanternBlockMixin {
     }
     @Inject(method = "getPlacementState", at = @At("RETURN"), cancellable = true)
     private void swapNullForWallAttached(ItemPlacementContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (cir.getReturnValue() != null) {
+        if (cir.getReturnValue() != null || ctx.getSide().getAxis() == Direction.Axis.Y) {
             return;
         }
         var pos = ctx.getBlockPos().offset(ctx.getSide(), -1);

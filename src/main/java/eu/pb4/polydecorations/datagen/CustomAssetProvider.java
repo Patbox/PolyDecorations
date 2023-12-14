@@ -12,7 +12,6 @@ import net.minecraft.util.Util;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -39,9 +38,9 @@ class CustomAssetProvider implements DataProvider {
         }, Util.getMainWorkerExecutor());
     }
 
-    private static final String SHELF_MODEL_JSON = """
+    private static final String BASE_MODEL_JSON = """
             {
-              "parent": "polydecorations:block/base_shelf",
+              "parent": "polydecorations:block/base_|TYPE|",
               "textures": {
                 "planks": "|PLANKS|",
                 "logs": "|LOG|"
@@ -58,7 +57,8 @@ class CustomAssetProvider implements DataProvider {
     private void writeBlocksAndItems(BiConsumer<String, byte[]> writer) {
         var t = new StringBuilder();
         DecorationsItems.SHELF.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf.json", SHELF_MODEL_JSON
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "shelf")
                     .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
                     .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
                     .getBytes(StandardCharsets.UTF_8)
@@ -69,7 +69,50 @@ class CustomAssetProvider implements DataProvider {
                     .getBytes(StandardCharsets.UTF_8)
             );
         });
-        System.out.println(t);
+
+        DecorationsItems.BENCH.forEach((type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "bench")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench_left.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "bench_left")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench_right.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "bench_right")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench_middle.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "bench_middle")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/item/" + type.name() + "_bench.json", ITEM_MODEL_JSON
+                    .replace("|I|", type.name() + "_bench")
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_sign_post.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "sign_post")
+                    .replace("|PLANKS|", "minecraft:entity/signs/" + type.name())
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/item/" + type.name() + "_sign_post.json", ITEM_MODEL_JSON
+                    .replace("|I|", type.name() + "_sign_post")
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+        });
     }
 
     @Override

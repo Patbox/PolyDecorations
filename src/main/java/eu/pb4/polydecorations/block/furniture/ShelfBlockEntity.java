@@ -41,6 +41,9 @@ public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInve
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
         Inventories.readNbt(nbt, this.items);
+        if (this.model != null) {
+            this.model.updateItems(this.getStacks());
+        }
     }
 
     @Override
@@ -63,7 +66,13 @@ public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInve
 
     @Override
     public void onListenerUpdate(WorldChunk chunk) {
-        this.model = (ShelfBlock.Model) BlockBoundAttachment.get(chunk, this.getPos()).holder();
+        try {
+            this.model = (ShelfBlock.Model) BlockBoundAttachment.get(chunk, this.getPos()).holder();
+            this.model.updateItems(this.items);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
     }
 
 
