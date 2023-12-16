@@ -2,6 +2,8 @@ package eu.pb4.polydecorations;
 
 import eu.pb4.factorytools.impl.DebugData;
 
+import eu.pb4.polydecorations.block.other.BrazierBlock;
+import eu.pb4.polydecorations.block.other.GlobeBlock;
 import eu.pb4.polydecorations.block.plus.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.entity.DecorationsEntities;
 import eu.pb4.polydecorations.polydex.PolydexCompat;
@@ -65,5 +67,7 @@ public class ModInit implements ModInitializer {
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private void initModels() {
 		WallAttachedLanternBlock.Model.MODEL.isEmpty();
+		BrazierBlock.Model.UNLIT.isEmpty();
+		GlobeBlock.Model.GLOBE_BASE.isEmpty();
 	}
 }

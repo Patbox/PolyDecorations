@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.furniture.ShelfBlock;
 import eu.pb4.polydecorations.block.furniture.ShelfBlockEntity;
+import eu.pb4.polydecorations.block.other.GlobeBlockEntity;
 import eu.pb4.polydecorations.block.plus.BedWithBannerBlock;
 import eu.pb4.polydecorations.block.plus.BedWithBannerBlockEntity;
 import eu.pb4.polydecorations.block.plus.SignPostBlock;
@@ -24,6 +25,8 @@ public class DecorationsBlockEntities {
     public static final BlockEntityType<?> SIGN_POST = register("sign_post",
             FabricBlockEntityTypeBuilder.create(SignPostBlockEntity::new)
                     .addBlocks(DecorationsBlocks.SIGN_POST.values().toArray(new SignPostBlock[0])));
+    public static final BlockEntityType<?> GLOBE = register("globe",
+            FabricBlockEntityTypeBuilder.create(GlobeBlockEntity::new).addBlock(DecorationsBlocks.GLOBE));
     ;
 
     //public static final BlockEntityType<?> BANNER_BED = register("banner_bed",

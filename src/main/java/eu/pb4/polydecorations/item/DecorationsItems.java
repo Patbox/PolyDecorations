@@ -35,6 +35,7 @@ public class DecorationsItems {
 
     public static final Item BRAZIER = register(DecorationsBlocks.BRAZIER);
     public static final Item SOUL_BRAZIER = register(DecorationsBlocks.SOUL_BRAZIER);
+    public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
     public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF);
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> new SignPostItem(new Item.Settings()));
@@ -53,6 +54,7 @@ public class DecorationsItems {
                     WoodUtil.<Item>forEach(List.of(BENCH, SHELF, SIGN_POST), entries::add);
                     entries.add(BRAZIER);
                     entries.add(SOUL_BRAZIER);
+                    entries.add(GLOBE);
                 })).build()
         );
     }

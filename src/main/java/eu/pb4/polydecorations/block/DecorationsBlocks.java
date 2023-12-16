@@ -4,6 +4,7 @@ import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.furniture.BenchBlock;
 import eu.pb4.polydecorations.block.furniture.ShelfBlock;
 import eu.pb4.polydecorations.block.other.BrazierBlock;
+import eu.pb4.polydecorations.block.other.GlobeBlock;
 import eu.pb4.polydecorations.block.plus.SignPostBlock;
 import eu.pb4.polydecorations.block.plus.WallAttachedLanternBlock;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
@@ -30,21 +31,24 @@ public class DecorationsBlocks {
     public static final WallAttachedLanternBlock WALL_SOUL_LANTERN = register("wall_soul_lantern",
             new WallAttachedLanternBlock((LanternBlock) Blocks.SOUL_LANTERN));
 
-    public static final BrazierBlock BRAZIER = register("brazier", new BrazierBlock(AbstractBlock.Settings.copy(Blocks.LANTERN).luminance(x -> {
+    public static final BrazierBlock BRAZIER = register("brazier", new BrazierBlock(AbstractBlock.Settings.copy(Blocks.LANTERN).nonOpaque().luminance(x -> {
                 return x.get(BrazierBlock.LIT) ? Blocks.CAMPFIRE.getDefaultState().getLuminance() : 0;
             }))
 
     );
-    public static final BrazierBlock SOUL_BRAZIER = register("soul_brazier", new BrazierBlock(AbstractBlock.Settings.copy(Blocks.SOUL_LANTERN).luminance(x -> {
+    public static final BrazierBlock SOUL_BRAZIER = register("soul_brazier", new BrazierBlock(AbstractBlock.Settings.copy(Blocks.SOUL_LANTERN).nonOpaque().luminance(x -> {
                 return x.get(BrazierBlock.LIT) ? Blocks.SOUL_CAMPFIRE.getDefaultState().getLuminance() : 0;
             }))
     );
+
+    public static final GlobeBlock GLOBE = register("globe", new GlobeBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).nonOpaque()));
 
     public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x) -> {
         var planks = new Identifier(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new ShelfBlock(
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
+                            .solidBlock(Blocks::never)
             );
         }
 

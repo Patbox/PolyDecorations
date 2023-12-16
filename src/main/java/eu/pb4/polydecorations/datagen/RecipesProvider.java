@@ -12,6 +12,7 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
@@ -74,6 +75,16 @@ class RecipesProvider extends FabricRecipeProvider {
                 .pattern(" i ")
                 .input('c', Items.SOUL_CAMPFIRE)
                 .input('i', Items.IRON_INGOT)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                .offerTo(exporter);
+
+        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.GLOBE, 1)
+                .pattern(" s")
+                .pattern("sw")
+                .pattern(" b")
+                .input('s', Items.STICK)
+                .input('b', Items.POLISHED_DEEPSLATE_SLAB)
+                .input('w', ItemTags.WOOL)
                 .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
                 .offerTo(exporter);
 

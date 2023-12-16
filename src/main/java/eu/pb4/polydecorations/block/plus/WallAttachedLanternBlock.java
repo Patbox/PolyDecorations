@@ -46,7 +46,7 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
     public static final EnumProperty<Attached> ATTACHED = EnumProperty.of("attached", Attached.class);
 
     public WallAttachedLanternBlock(LanternBlock block) {
-        super(AbstractBlock.Settings.copy(block).dropsLike(block));
+        super(AbstractBlock.Settings.copy(block).nonOpaque().dropsLike(block));
         this.lantern = block;
         VANILLA2WALL.put(block, this);
     }

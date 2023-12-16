@@ -15,5 +15,6 @@ class LootTables extends FabricBlockLootTableProvider {
         DecorationsBlocks.BENCH.forEach((t, b) -> this.addDrop(b));
         this.addDrop(DecorationsBlocks.BRAZIER);
         this.addDrop(DecorationsBlocks.SOUL_BRAZIER);
+        this.addDrop(DecorationsBlocks.GLOBE);
     }
 }

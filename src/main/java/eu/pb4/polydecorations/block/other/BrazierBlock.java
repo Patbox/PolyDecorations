@@ -137,7 +137,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
     }
 
     public static final class Model extends BaseModel {
-        private static final ItemStack UNLIT = BaseItemProvider.requestModel(id("block/unlit_brazier"));
+        public static final ItemStack UNLIT = BaseItemProvider.requestModel(id("block/unlit_brazier"));
         private final LodItemDisplayElement main;
 
         public Model(BlockState state) {
