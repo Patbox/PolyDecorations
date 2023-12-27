@@ -60,6 +60,20 @@ class RecipesProvider extends FabricRecipeProvider {
                     .offerTo(exporter);
         }));
 
+        DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
+            var planks = Registries.ITEM.get(new Identifier(woodType.name() + "_planks"));
+            if (planks == null) {
+                return;
+            }
+            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 2)
+                    .group("polydecorations:sign_post")
+                    .pattern("ss-")
+                    .input('-', Items.STICK)
+                    .input('s', planks)
+                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                    .offerTo(exporter);
+        }));
+
         new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.BRAZIER, 1)
                 .group("polydecorations:brazier")
                 .pattern("ici")

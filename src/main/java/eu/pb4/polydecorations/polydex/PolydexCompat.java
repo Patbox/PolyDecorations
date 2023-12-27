@@ -14,7 +14,7 @@ public class PolydexCompat {
         if (IS_PRESENT) {
             PolydexCompatImpl.register();
         } else {
-            LOGGER.warn("[PolyDecorations] Polydex not found! It's highly suggested to install it!");
+            //LOGGER.warn("[PolyDecorations] Polydex not found! It's highly suggested to install it!");
         }
     }
 
