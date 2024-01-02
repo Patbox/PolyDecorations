@@ -2,9 +2,9 @@ package eu.pb4.polydecorations;
 
 import eu.pb4.factorytools.impl.DebugData;
 
-import eu.pb4.polydecorations.block.other.BrazierBlock;
-import eu.pb4.polydecorations.block.other.GlobeBlock;
-import eu.pb4.polydecorations.block.plus.WallAttachedLanternBlock;
+import eu.pb4.polydecorations.block.furniture.BrazierBlock;
+import eu.pb4.polydecorations.block.item.GlobeBlock;
+import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.entity.DecorationsEntities;
 import eu.pb4.polydecorations.polydex.PolydexCompat;
 import eu.pb4.polydecorations.recipe.DecorationsRecipeSerializers;
@@ -18,7 +18,6 @@ import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.LanternBlock;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

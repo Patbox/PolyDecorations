@@ -5,17 +5,12 @@ import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.factorytools.api.item.MultiBlockItem;
 import eu.pb4.factorytools.api.block.MultiBlock;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
-import eu.pb4.polydecorations.block.furniture.ShelfBlock;
-import eu.pb4.polydecorations.block.plus.BedWithBannerBlock;
-import eu.pb4.polydecorations.block.plus.SignPostBlock;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.core.api.item.PolymerBlockItem;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polydecorations.ModInit;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.FenceBlock;
 import net.minecraft.block.WoodType;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -23,7 +18,6 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +34,11 @@ public class DecorationsItems {
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> new SignPostItem(new Item.Settings()));
     //public static final Map<DyeColor, Item> BANNER_BED = register(DecorationsBlocks.BANNER_BED);
+
+    public static final Item DISPLAY_CASE = register(DecorationsBlocks.DISPLAY_CASE);
+    public static final Item LARGE_FLOWER_POT = register(DecorationsBlocks.LARGE_FLOWER_POT);
+    public static final Item CANVAS = register("canvas", new CanvasItem(new Item.Settings().maxCount(16)));
+
     private static <T extends Block & PolymerBlock, B> Map<B, Item> register(Map<B, T> blockMap) {
         var map = new HashMap<B, Item>();
         blockMap.forEach((a, b) -> map.put(a, register(b)));
@@ -54,7 +53,10 @@ public class DecorationsItems {
                     WoodUtil.<Item>forEach(List.of(BENCH, SHELF, SIGN_POST), entries::add);
                     entries.add(BRAZIER);
                     entries.add(SOUL_BRAZIER);
+                    entries.add(LARGE_FLOWER_POT);
+                    entries.add(DISPLAY_CASE);
                     entries.add(GLOBE);
+                    entries.add(CANVAS);
                 })).build()
         );
     }
@@ -93,9 +95,7 @@ public class DecorationsItems {
     public static <E extends Block & PolymerBlock> BlockItem register(E block) {
         var id = Registries.BLOCK.getId(block);
         BlockItem item;
-        if (block instanceof BedWithBannerBlock bed) {
-            item = new PolymerBlockItem(bed, new Item.Settings().maxCount(1), bed.getBacking().asItem());
-        } else if (block instanceof MultiBlock multiBlock) {
+        if (block instanceof MultiBlock multiBlock) {
             item = new MultiBlockItem(multiBlock, new Item.Settings());
         } else {
             item = new FactoryBlockItem(block, new Item.Settings());

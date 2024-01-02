@@ -1,4 +1,4 @@
-package eu.pb4.polydecorations.block.other;
+package eu.pb4.polydecorations.block.item;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
@@ -6,15 +6,13 @@ import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BaseModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
+import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import net.minecraft.SharedConstants;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.SkullBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -40,7 +39,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -70,11 +68,11 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GlobeBlockEntity be) {
+        if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be) {
             if (player.getMainHandStack().isIn(DecorationsItemTags.GLOBE_REPLACEMENT) && be.getStack().isEmpty()) {
-                be.replaceItem(player, player.getMainHandStack(), hand);
+                be.dropReplaceItem(player, player.getMainHandStack(), hand);
             } else if (player.getMainHandStack().isIn(ItemTags.AXES) && !be.getStack().isEmpty()) {
-                be.replaceItem(player, ItemStack.EMPTY, null);
+                be.dropReplaceItem(player, ItemStack.EMPTY, null);
             } else {
                 var delta = state.get(WORLD_BOUND) ? 0.05f : 0.5f;
                 var model = (Model) BlockBoundAttachment.get(world, pos).holder();
@@ -92,6 +90,10 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
         return ActionResult.PASS;
     }
 
+    @Override
+    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+        return Blocks.SPRUCE_PLANKS.getDefaultState();
+    }
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
@@ -127,10 +129,10 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new GlobeBlockEntity(pos, state);
+        return GenericSingleItemBlockEntity.globe(pos, state);
     }
 
-    public static final class Model extends BaseModel {
+    public static final class Model extends BaseModel implements GenericSingleItemBlockEntity.ItemSetter {
         public static final ItemStack GLOBE_BASE = BaseItemProvider.requestModel(id("block/globe_base"));
         public static final ItemStack GLOBE_EARTH = BaseItemProvider.requestModel(id("block/globe_earth"));
 
@@ -159,7 +161,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
             this.rotating.setYaw(direction);
             this.rotating.setInterpolationDuration(1);
             this.rotating.setModelTransformation(ModelTransformationMode.NONE);
-            setItem(TATER);
+            setItem(ItemStack.EMPTY);
             this.addElement(this.rotating);
         }
 

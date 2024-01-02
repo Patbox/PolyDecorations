@@ -34,10 +34,25 @@
   "block.polydecorations.mangrove_sign_post": "Mangrove Sign Post",
   "block.polydecorations.warped_sign_post": "Warped Sign Post",
   "block.polydecorations.cherry_sign_post": "Cherry Sign Post",
+  "block.polydecorations.nether_brick_sign_post": "Nether Brick Sign Post",
 
   "block.polydecorations.brazier": "Brazier",
   "block.polydecorations.soul_brazier": "Soul Brazier",
   "block.polydecorations.globe": "Globe",
+  "block.polydecorations.display_case": "Display Case",
+  "block.polydecorations.large_flower_pot": "Large Flower Pot",
 
-  "entity.polydecorations.seat": "Seat"
+  "item.polydecorations.canvas": "Canvas",
+  "item.polydecorations.canvas.empty": "Empty Canvas",
+  "item.polydecorations.canvas.waxed": "Waxed Canvas",
+  "item.polydecorations.canvas.glowing": "Glowing Canvas",
+  "item.polydecorations.canvas.glowing.empty": "Glowing Empty Canvas",
+  "item.polydecorations.canvas.glowing.waxed": "Glowing Waxed Canvas",
+
+  "entity.polydecorations.canvas": "Canvas",
+
+  "entity.polydecorations.seat": "Seat",
+
+  "subtitles.polydecorations.entity.canvas.break": "Canvas breaks",
+  "subtitles.polydecorations.entity.canvas.place": "Canvas placed"
 }

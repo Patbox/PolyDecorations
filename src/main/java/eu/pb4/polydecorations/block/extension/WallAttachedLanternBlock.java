@@ -1,4 +1,4 @@
-package eu.pb4.polydecorations.block.plus;
+package eu.pb4.polydecorations.block.extension;
 
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;

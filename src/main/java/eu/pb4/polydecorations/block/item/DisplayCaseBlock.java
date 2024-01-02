@@ -1,23 +1,29 @@
-package eu.pb4.polydecorations.block.furniture;
+package eu.pb4.polydecorations.block.item;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BaseModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
+import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
+import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -26,7 +32,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -34,13 +39,12 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public class ShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
     public static final DirectionProperty FACING = Properties.FACING;
 
-    public ShelfBlock(Settings settings) {
+    public DisplayCaseBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
     }
@@ -53,13 +57,19 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     @Nullable
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return waterLog(ctx, this.getDefaultState().with(FACING, ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing()));
+        return waterLog(ctx, this.getDefaultState().with(FACING, ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite()));
+    }
+
+    @Override
+    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+        return Blocks.GLASS.getDefaultState();
     }
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
-            be.openGui((ServerPlayerEntity) player);
+        if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be && be.getStack().isEmpty() && !player.getStackInHand(hand).isEmpty()) {
+            be.setStack(player.getStackInHand(hand).copyWithCount(1));
+            player.getStackInHand(hand).decrement(1);
             return ActionResult.SUCCESS;
         }
 
@@ -79,7 +89,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     public FluidState getFluidState(BlockState state) {
-        return (Boolean)state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
     @Override
@@ -90,7 +100,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new ShelfBlockEntity(pos, state);
+        return GenericSingleItemBlockEntity.displayCase(pos, state);
     }
 
     @Override
@@ -98,9 +108,10 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
         return new Model(initialBlockState);
     }
 
-    public static final class Model extends BaseModel {
+    public static final class Model extends BaseModel implements GenericSingleItemBlockEntity.ItemSetter {
         private final LodItemDisplayElement main;
-        private final LodItemDisplayElement[] items = new LodItemDisplayElement[3];
+        private final LodItemDisplayElement item;
+        private final TextDisplayElement text;
 
         public Model(BlockState state) {
             this.main = LodItemDisplayElement.createSimple(state.getBlock().asItem());
@@ -110,42 +121,62 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
             var yaw = state.get(FACING).asRotation();
             this.main.setYaw(yaw);
             this.addElement(this.main);
-            for (int i = 0; i < 3; i++) {
-                var item = LodItemDisplayElement.createSimple();
-                item.setViewRange(0.6f);
-                item.setDisplaySize(1, 1);
-                item.setModelTransformation(ModelTransformationMode.NONE);
-                item.setTranslation(new Vector3f(-5 / 16f + i * (5 / 16f), -1.5f / 16f, -3 / 16f));
-                item.setScale(new Vector3f(5 / 16f));
-                item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-                item.setYaw(yaw);
-                items[i] = item;
-                this.addElement(item);
-            }
+
+            this.item = LodItemDisplayElement.createSimple();
+            this.item.setViewRange(0.6f);
+            this.item.setDisplaySize(1, 1);
+            this.item.setModelTransformation(ModelTransformationMode.NONE);
+            this.setDefaultScale();
+            this.item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+            this.item.setYaw(yaw);
+            this.addElement(item);
+
+            this.text = new TextDisplayElement();
+            this.text.setViewRange(0.4f);
+            this.text.setDisplaySize(2, 1);
+            this.text.setTranslation(new Vector3f(0, 6 / 16f, 0));
+            this.text.setScale(new Vector3f(10 / 16f));
+            this.text.setBillboardMode(DisplayEntity.BillboardMode.VERTICAL);
+        }
+
+        private void setDefaultScale() {
+            this.item.setTranslation(new Vector3f(0, -2 / 16f, 0));
+            this.item.setScale(new Vector3f(10 / 16f));
+        }
+
+        private void setUnScaled() {
+            this.item.setTranslation(new Vector3f(0, 1 / 16f, 0));
+            this.item.setScale(new Vector3f(1));
         }
 
         @Override
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockBoundAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockBound().getBlockState();
-                var yaw = state.get(FACING).asRotation();
-                this.main.setYaw(yaw);
-                for (int i = 0; i < 3; i++) {
-                    this.items[i].setYaw(yaw);
+                var direction = state.get(FACING).asRotation();
+                this.item.setYaw(direction);
+            }
+        }
+        @Override
+        public void setItem(ItemStack stack) {
+            this.item.setItem(stack.copy());
+            if (stack.isIn(DecorationsItemTags.UNSCALED_DISPLAY_CASE)) {
+                this.setUnScaled();
+            } else {
+                this.setDefaultScale();
+            }
+            if (stack.hasCustomName() || stack.isOf(Items.PLAYER_HEAD)) {
+                this.text.setText(stack.getName());
+                if (this.getElements().contains(this.text)) {
+                    this.text.tick();
+                } else {
+                    this.addElement(this.text);
                 }
-                this.tick();
+            } else {
+                this.removeElement(this.text);
             }
-        }
 
-        public void setItem(int i, ItemStack stack) {
-            this.items[i].setItem(stack.copy());
-            this.items[i].tick();
-        }
-
-        public void updateItems(DefaultedList<ItemStack> stacks) {
-            for (int i = 0; i < 3; i++) {
-                setItem(i, stacks.get(i));
-            }
+            this.item.tick();
         }
     }
 }

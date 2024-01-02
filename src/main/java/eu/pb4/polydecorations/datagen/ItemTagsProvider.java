@@ -25,5 +25,12 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
                 .add(Items.SKELETON_SKULL)
                 .add(Items.WITHER_SKELETON_SKULL)
         ;
-    }
+
+        this.getOrCreateTagBuilder(DecorationsItemTags.UNSCALED_DISPLAY_CASE)
+                .add(Items.PLAYER_HEAD)
+                .add(Items.ZOMBIE_HEAD)
+                .add(Items.CREEPER_HEAD)
+                .add(Items.SKELETON_SKULL)
+                .add(Items.WITHER_SKELETON_SKULL)
+        ;    }
 }

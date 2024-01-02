@@ -13,8 +13,6 @@ import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -27,11 +25,9 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.*;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
@@ -45,13 +41,20 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
     private final ItemStack leftModel;
     private final ItemStack rightModel;
     private final ItemStack middleModel;
+    private final Block base;
 
-    public BenchBlock(Identifier identifier, Settings settings) {
+    public BenchBlock(Identifier identifier, Settings settings, Block planks) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
         this.leftModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
         this.rightModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
         this.middleModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
+        this.base = planks;
+    }
+
+    @Override
+    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+        return this.base.getDefaultState();
     }
 
     public ItemStack getModel(BlockState state) {

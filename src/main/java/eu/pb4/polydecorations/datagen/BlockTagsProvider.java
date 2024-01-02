@@ -2,13 +2,9 @@ package eu.pb4.polydecorations.datagen;
 
 import eu.pb4.polydecorations.block.DecorationsBlockTags;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
-import eu.pb4.polydecorations.block.furniture.ShelfBlock;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.BlockTags;
 
@@ -31,6 +27,28 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.WALL_SOUL_LANTERN)
                 .add(DecorationsBlocks.BRAZIER)
                 .add(DecorationsBlocks.SOUL_BRAZIER)
+                .add(DecorationsBlocks.LARGE_FLOWER_POT)
+                .add(DecorationsBlocks.DISPLAY_CASE)
+        ;
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.BRAZIERS)
+                .add(DecorationsBlocks.BRAZIER, DecorationsBlocks.SOUL_BRAZIER);
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.SHELVES)
+                .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]));
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.SIGN_POSTS)
+                .add(DecorationsBlocks.SIGN_POST.values().toArray(new Block[0]));
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.BENCHES)
+                .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]));
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.UNCONNECTABLE)
+                .addOptionalTag(DecorationsBlockTags.BENCHES)
+                .addOptionalTag(DecorationsBlockTags.SHELVES)
+                .addOptionalTag(DecorationsBlockTags.BRAZIERS)
+                .add(DecorationsBlocks.DISPLAY_CASE)
+                .add(DecorationsBlocks.LARGE_FLOWER_POT)
         ;
     }
 }

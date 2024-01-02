@@ -2,18 +2,23 @@ package eu.pb4.polydecorations.datagen;
 
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsItems;
-import eu.pb4.polydecorations.recipe.BedBannerCraftingRecipe;
+import eu.pb4.polydecorations.recipe.NbtCloningCraftingRecipe;
+import eu.pb4.polydecorations.recipe.ShapelessNbtCopyRecipe;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancement.criterion.InventoryChangedCriterion;
 import net.minecraft.data.server.recipe.*;
 import net.minecraft.item.DyeItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 
 import java.util.List;
 
@@ -101,6 +106,54 @@ class RecipesProvider extends FabricRecipeProvider {
                 .input('w', ItemTags.WOOL)
                 .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
                 .offerTo(exporter);
+
+        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.CANVAS, 1)
+                .pattern("sss")
+                .pattern("sxs")
+                .pattern("sss")
+                .input('s', Items.STICK)
+                .input('x', Items.PAPER)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.PAPER))
+                .offerTo(exporter);
+
+        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.DISPLAY_CASE, 1)
+                .pattern("g")
+                .pattern("s")
+                .input('g', Items.GLASS)
+                .input('s', Items.SMOOTH_STONE_SLAB)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.GLASS))
+                .offerTo(exporter);
+
+        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.LARGE_FLOWER_POT, 1)
+                .pattern("b b")
+                .pattern("bdb")
+                .pattern("bbb")
+                .input('b', Items.BRICK)
+                .input('d', Items.DIRT)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
+                .offerTo(exporter);
+
+        {
+            var waxed = new ItemStack(DecorationsItems.CANVAS);
+            waxed.getOrCreateNbt().putBoolean("waxed", true);
+            exporter.accept(id("canvas_waxing"), new ShapelessNbtCopyRecipe("", CraftingRecipeCategory.MISC,
+                    waxed, Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.HONEYCOMB))), null);
+
+            var glowing = new ItemStack(DecorationsItems.CANVAS);
+            glowing.getOrCreateNbt().putBoolean("glowing", true);
+
+            exporter.accept(id("canvas_glowing"), new ShapelessNbtCopyRecipe("", CraftingRecipeCategory.MISC,
+                    glowing, Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
+
+            var unglowing = new ItemStack(DecorationsItems.CANVAS);
+            unglowing.getOrCreateNbt().putBoolean("glowing", false);
+
+            exporter.accept(id("canvas_unglowing"), new ShapelessNbtCopyRecipe("", CraftingRecipeCategory.MISC,
+                    unglowing, Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
+
+            exporter.accept(id("canvas_clone"), new NbtCloningCraftingRecipe("", DecorationsItems.CANVAS), null);
+        }
+
 
         /*DecorationsBlocks.BANNER_BED.forEach(((dye, item) -> {
             exporter.accept(

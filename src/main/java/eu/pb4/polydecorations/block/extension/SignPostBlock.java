@@ -1,4 +1,4 @@
-package eu.pb4.polydecorations.block.plus;
+package eu.pb4.polydecorations.block.extension;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;

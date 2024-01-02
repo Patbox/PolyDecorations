@@ -2,8 +2,8 @@ package eu.pb4.polydecorations.item;
 
 import eu.pb4.factorytools.api.item.AutoModeledPolymerItem;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
-import eu.pb4.polydecorations.block.plus.SignPostBlock;
-import eu.pb4.polydecorations.block.plus.SignPostBlockEntity;
+import eu.pb4.polydecorations.block.extension.SignPostBlock;
+import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
@@ -32,23 +32,18 @@ public class SignPostItem extends Item implements AutoModeledPolymerItem {
     public ActionResult useOnBlock(ItemUsageContext context) {
         var upper = (context.getHitPos().getY() - (int) context.getHitPos().getY()) >= 0.5;
         var blockState = context.getWorld().getBlockState(context.getBlockPos());
-        if (blockState.getBlock() instanceof SignPostBlock) {
-            if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof SignPostBlockEntity be) {
-                var text = be.getText(upper);
-                if (text.item() == Items.AIR) {
-                    be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), 180 + context.getPlayerYaw()));
-                    if (context.getPlayer() instanceof ServerPlayerEntity player) {
-                        be.openText(upper, player);
-                    }
-                }
-            }
-        } else if (SignPostBlock.MAP.containsKey(blockState.getBlock())) {
+        if (SignPostBlock.MAP.containsKey(blockState.getBlock())) {
             context.getWorld().setBlockState(context.getBlockPos(), SignPostBlock.MAP.get(blockState.getBlock()).getDefaultState().with(Properties.WATERLOGGED, blockState.get(Properties.WATERLOGGED)));
-            if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof SignPostBlockEntity be) {
+        }
+
+        if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof SignPostBlockEntity be) {
+            var text = be.getText(upper);
+            if (text.item() == Items.AIR) {
                 be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), 180 + context.getPlayerYaw()));
                 if (context.getPlayer() instanceof ServerPlayerEntity player) {
                     be.openText(upper, player);
                 }
+                context.getStack().decrement(1);
             }
         }
         return super.useOnBlock(context);

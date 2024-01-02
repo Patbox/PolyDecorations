@@ -1,0 +1,30 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        "a": 5,
+        "b": -1,
+        "c": -80
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "polydecorations:sgui/pixel.png",
+      "ascent": 5,
+      "height": 5,
+      "chars": [
+        "-"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "polydecorations:sgui/pixel.png",
+      "ascent": 0,
+      "height": 5,
+      "chars": [
+        "_"
+      ]
+    }
+  ]
+}

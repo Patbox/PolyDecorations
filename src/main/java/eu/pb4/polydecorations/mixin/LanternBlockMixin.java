@@ -1,7 +1,6 @@
 package eu.pb4.polydecorations.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import eu.pb4.polydecorations.block.plus.WallAttachedLanternBlock;
+import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LanternBlock;
 import net.minecraft.item.ItemPlacementContext;

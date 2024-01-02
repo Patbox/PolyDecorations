@@ -1,3 +1,19 @@
 {
-
+  "entity.canvas.break": {
+    "sounds": [
+      "entity/itemframe/break1",
+      "entity/itemframe/break2",
+      "entity/itemframe/break3"
+    ],
+    "subtitle": "subtitles.polydecorations.entity.canvas.break"
+  },
+  "entity.canvas.place": {
+    "sounds": [
+      "entity/itemframe/place1",
+      "entity/itemframe/place2",
+      "entity/itemframe/place3",
+      "entity/itemframe/place4"
+    ],
+    "subtitle": "subtitles.polydecorations.entity.canvas.place"
+  }
 }

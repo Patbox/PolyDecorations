@@ -2,33 +2,34 @@ package eu.pb4.polydecorations.block.other;
 
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.util.SingleItemInventory;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
-import net.minecraft.block.BedBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.BedPart;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.inventory.SingleStackInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 
-public class GlobeBlockEntity extends BlockEntity implements BlockEntityExtraListener, SingleStackInventory, SidedInventory {
-    private static final int[] SLOTS = new int[] { 0 };
+public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEntityExtraListener, SingleItemInventory {
     private ItemStack item = ItemStack.EMPTY;
-    private GlobeBlock.Model model;
+    private ItemSetter model;
 
-    public GlobeBlockEntity(BlockPos pos, BlockState state) {
-        super(DecorationsBlockEntities.GLOBE, pos, state);
+    public GenericSingleItemBlockEntity(BlockEntityType<?> blockEntityType, BlockPos pos, BlockState state) {
+        super(blockEntityType, pos, state);
+    }
+
+    public static GenericSingleItemBlockEntity globe(BlockPos pos, BlockState state) {
+        return new GenericSingleItemBlockEntity(DecorationsBlockEntities.GLOBE, pos, state);
+    }
+
+    public static GenericSingleItemBlockEntity displayCase(BlockPos pos, BlockState state) {
+        return new GenericSingleItemBlockEntity(DecorationsBlockEntities.DISPLAY_CASE, pos, state);
     }
 
     public void setItem(ItemStack item) {
@@ -53,15 +54,15 @@ public class GlobeBlockEntity extends BlockEntity implements BlockEntityExtraLis
 
     @Override
     public void onListenerUpdate(WorldChunk chunk) {
-        this.model = (GlobeBlock.Model) BlockBoundAttachment.get(chunk, this.pos).holder();
+        this.model = (ItemSetter) BlockBoundAttachment.get(chunk, this.pos).holder();
         this.model.setItem(this.item.copy());
     }
 
-    public void replaceItem(PlayerEntity player, ItemStack stack, @Nullable Hand hand) {
+    public void dropReplaceItem(PlayerEntity player, ItemStack stack, @Nullable Hand hand) {
         if (!this.item.isEmpty()) {
             var out = this.item;
             this.item = ItemStack.EMPTY;
-            ItemScatterer.spawn(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, out);
+            ItemScatterer.spawn(this.world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, out);
         }
 
         var cpy = stack.copyWithCount(1);
@@ -96,18 +97,7 @@ public class GlobeBlockEntity extends BlockEntity implements BlockEntityExtraLis
         return this;
     }
 
-    @Override
-    public int[] getAvailableSlots(Direction side) {
-        return SLOTS;
-    }
-
-    @Override
-    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return this.item.isEmpty();
-    }
-
-    @Override
-    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        return true;
+    public interface ItemSetter {
+        void setItem(ItemStack stack);
     }
 }

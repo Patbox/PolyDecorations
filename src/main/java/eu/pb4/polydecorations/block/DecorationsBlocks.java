@@ -2,15 +2,18 @@ package eu.pb4.polydecorations.block;
 
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.furniture.BenchBlock;
-import eu.pb4.polydecorations.block.furniture.ShelfBlock;
-import eu.pb4.polydecorations.block.other.BrazierBlock;
-import eu.pb4.polydecorations.block.other.GlobeBlock;
-import eu.pb4.polydecorations.block.plus.SignPostBlock;
-import eu.pb4.polydecorations.block.plus.WallAttachedLanternBlock;
+import eu.pb4.polydecorations.block.furniture.LargeFlowerPotBlock;
+import eu.pb4.polydecorations.block.item.DisplayCaseBlock;
+import eu.pb4.polydecorations.block.item.ShelfBlock;
+import eu.pb4.polydecorations.block.furniture.BrazierBlock;
+import eu.pb4.polydecorations.block.item.GlobeBlock;
+import eu.pb4.polydecorations.block.extension.SignPostBlock;
+import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.Instrument;
 import net.minecraft.loot.LootTable;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -42,13 +45,16 @@ public class DecorationsBlocks {
     );
 
     public static final GlobeBlock GLOBE = register("globe", new GlobeBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).nonOpaque()));
+    public static final DisplayCaseBlock DISPLAY_CASE = register("display_case", new DisplayCaseBlock(AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque()));
+    public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", new LargeFlowerPotBlock(
+            AbstractBlock.Settings.create().mapColor(MapColor.ORANGE).instrument(Instrument.BASEDRUM).strength(1.25F).nonOpaque()));
 
     public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x) -> {
         var planks = new Identifier(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new ShelfBlock(
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
-                            .solidBlock(Blocks::never)
+                            .solidBlock(Blocks::never), Registries.BLOCK.get(planks)
             );
         }
 
@@ -59,7 +65,8 @@ public class DecorationsBlocks {
         var planks = new Identifier(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new BenchBlock(id(x.name() + "_bench"),
-                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
+                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
+                    Registries.BLOCK.get(planks)
             );
         }
 
@@ -74,6 +81,8 @@ public class DecorationsBlocks {
 
         return null;
     });
+
+    public static final SignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", new SignPostBlock((FenceBlock) Blocks.NETHER_BRICK_FENCE));
 
     //public static final Map<DyeColor, BedWithBannerBlock> BANNER_BED = registerDye("banner_bed", (x) -> {
     //    return new BedWithBannerBlock((BedBlock) Registries.BLOCK.get(new Identifier(x.name().toLowerCase(Locale.ROOT) + "_bed")));

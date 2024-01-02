@@ -4,7 +4,10 @@
   "package": "eu.pb4.polydecorations.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlockMixin",
     "LanternBlockMixin",
+    "PlantBlockMixin",
+    "SaplingBlockMixin",
     "SignBlockEntityMixin"
   ],
   "client": [

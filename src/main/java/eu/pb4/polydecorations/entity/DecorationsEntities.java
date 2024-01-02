@@ -11,6 +11,9 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class DecorationsEntities {
+    public static final EntityType<CanvasEntity> CANVAS = register("canvas", FabricEntityTypeBuilder
+            .create().dimensions(EntityDimensions.changing(0.5f, 0.5f)).entityFactory(CanvasEntity::new));
+
     public static final EntityType<SeatEntity> SEAT = register("seat", FabricEntityTypeBuilder
             .create().fireImmune().dimensions(EntityDimensions.fixed(0f, 0f)).entityFactory(SeatEntity::new).disableSaving().disableSummon());
 

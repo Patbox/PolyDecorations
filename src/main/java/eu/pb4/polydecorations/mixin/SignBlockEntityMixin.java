@@ -1,6 +1,6 @@
 package eu.pb4.polydecorations.mixin;
 
-import eu.pb4.polydecorations.block.plus.SignPostBlockEntity;
+import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
