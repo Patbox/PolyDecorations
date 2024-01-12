@@ -9,6 +9,7 @@ import eu.pb4.polydecorations.block.furniture.BrazierBlock;
 import eu.pb4.polydecorations.block.item.GlobeBlock;
 import eu.pb4.polydecorations.block.extension.SignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
+import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
@@ -91,7 +92,7 @@ public class DecorationsBlocks {
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, Function<WoodType, T> object) {
         var map = new HashMap<WoodType, T>();
 
-        WoodType.stream().forEach(x -> {
+        WoodUtil.VANILLA.forEach(x -> {
             var y = object.apply(x);
             if (y != null) {
                 map.put(x, register(x.name() + "_" + id, y));

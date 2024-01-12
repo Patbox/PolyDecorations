@@ -1,14 +1,23 @@
 package eu.pb4.polydecorations.util;
 
+import net.minecraft.block.BlockSetType;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.WoodType;
 import net.minecraft.item.Item;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundEvents;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class WoodUtil {
+    public static List<WoodType> VANILLA = List.of(
+            WoodType.OAK, WoodType.SPRUCE, WoodType.BIRCH, WoodType.ACACIA,
+            WoodType.CHERRY, WoodType.JUNGLE, WoodType.DARK_OAK,
+            WoodType.CRIMSON, WoodType.WARPED, WoodType.MANGROVE,
+            WoodType.BAMBOO);
+
     public static boolean isWood(WoodType type) {
         return !isHyphae(type) && !isBlock(type);
     }

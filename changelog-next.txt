@@ -1,5 +1,0 @@
-- Added Canvas! It can be placed on walls and painted with dyes, coal and bone meal. It can be combined with Honey Comb to protect the painting or with Glow Ink Sac to make it glow.
-- Added Display Case! It can be placed to show a single item. If item is named (or is a player head) it will be display its name.
-- Added Large Flower Pot! It can be used for glowing some crops, placing large and regular flowers and saplings (which won't grow)!
-- Sign Posts can now be placed on Nether Brick Fences.
-- Fixed bugs.
