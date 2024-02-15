@@ -2,7 +2,8 @@ package eu.pb4.polydecorations.block.extension;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
-import eu.pb4.factorytools.api.virtualentity.BaseModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.virtualentity.api.BlockWithElementHolder;
@@ -106,7 +107,7 @@ public class SignPostBlock extends BlockWithEntity implements PolymerBlock, Bloc
         return this.fence;
     }
 
-    public static final class Model extends BaseModel {
+    public static final class Model extends BlockModel {
         private final LodItemDisplayElement upperBack;
         private final TextDisplayElement upperText;
         private final LodItemDisplayElement lowerBack;

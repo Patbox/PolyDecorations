@@ -14,6 +14,7 @@ import static eu.pb4.polydecorations.ui.UiResourceCreator.*;
 public class GuiTextures {
     public static final GuiElement EMPTY = icon16("empty").get().build();
     public static final Function<Text, Text> SHELF = background("shelf");
+    public static final Function<Text, Text> SHELF_2 = background("shelf_2");
 
     public static final Supplier<GuiElementBuilder> POLYDEX_BUTTON = icon32("polydex");
 

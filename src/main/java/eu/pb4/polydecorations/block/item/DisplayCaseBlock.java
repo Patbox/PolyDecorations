@@ -3,12 +3,12 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.virtualentity.BaseModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import net.minecraft.block.Block;
@@ -108,7 +108,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
         return new Model(initialBlockState);
     }
 
-    public static final class Model extends BaseModel implements GenericSingleItemBlockEntity.ItemSetter {
+    public static final class Model extends BlockModel implements GenericSingleItemBlockEntity.ItemSetter {
         private final LodItemDisplayElement main;
         private final LodItemDisplayElement item;
         private final TextDisplayElement text;
@@ -151,8 +151,8 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
 
         @Override
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
-            if (updateType == BlockBoundAttachment.BLOCK_STATE_UPDATE) {
-                var state = this.blockBound().getBlockState();
+            if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
+                var state = this.blockState();
                 var direction = state.get(FACING).asRotation();
                 this.item.setYaw(direction);
             }

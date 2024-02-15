@@ -12,6 +12,7 @@ import net.minecraft.util.Util;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -48,6 +49,24 @@ class CustomAssetProvider implements DataProvider {
             }
             """;
 
+    private static final String STATUE_MODEL_JSON = """
+            {
+              "parent": "polydecorations:block/statue/stone/|TYPE|",
+              "textures": {
+                "0": "|TXT|"
+              }
+            }
+            """;
+
+    private static final String STATUE_ITEM_JSON = """
+            {
+              "parent": "polydecorations:item/stone_statue",
+              "textures": {
+                "0": "|TXT|"
+              }
+            }
+            """;
+
     private static final String ITEM_MODEL_JSON = """
             {
               "parent": "polydecorations:block/|I|"
@@ -59,6 +78,20 @@ class CustomAssetProvider implements DataProvider {
         DecorationsItems.SHELF.forEach((type, item) -> {
             writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf.json", BASE_MODEL_JSON
                     .replace("|TYPE|", "shelf")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf_top.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "shelf_top")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf_double.json", BASE_MODEL_JSON
+                    .replace("|TYPE|", "shelf_double")
                     .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
                     .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
                     .getBytes(StandardCharsets.UTF_8)
@@ -112,7 +145,33 @@ class CustomAssetProvider implements DataProvider {
                     .replace("|I|", type.name() + "_sign_post")
                     .getBytes(StandardCharsets.UTF_8)
             );
+
+            writeStatue(type.name(), "block/" + type.name() + "_planks", writer);
+
         });
+
+
+        writeStatue("deepslate", "block/deepslate_top", writer);
+        writeStatue("blackstone", "block/blackstone", writer);
+        writeStatue("prismarine", "block/prismarine", writer);
+        writeStatue("sandstone", "block/sandstone_top", writer);
+        writeStatue("red_sandstone", "block/red_sandstone_top", writer);
+        writeStatue("quartz", "block/quartz_block_bottom", writer);
+    }
+
+    private void writeStatue(String type, String texture, BiConsumer<String, byte[]> writer) {
+        for (var x : List.of("head", "body", "left_leg", "right_leg", "left_arm", "right_arm")) {
+            writer.accept("assets/polydecorations/models/block/statue/" + type + "/" + x + ".json", STATUE_MODEL_JSON
+                    .replace("|TYPE|", x)
+                    .replace("|TXT|", texture)
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+        }
+
+        writer.accept("assets/polydecorations/models/item/" + type + "_statue.json", STATUE_ITEM_JSON
+                .replace("|TXT|", texture)
+                .getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     @Override

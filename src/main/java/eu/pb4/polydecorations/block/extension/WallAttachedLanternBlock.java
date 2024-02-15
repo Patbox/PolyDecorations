@@ -2,12 +2,12 @@ package eu.pb4.polydecorations.block.extension;
 
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
-import eu.pb4.factorytools.api.virtualentity.BaseModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.virtualentity.api.BlockWithElementHolder;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.block.*;
@@ -30,6 +30,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -49,6 +50,11 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
         super(AbstractBlock.Settings.copy(block).nonOpaque().dropsLike(block));
         this.lantern = block;
         VANILLA2WALL.put(block, this);
+    }
+
+    @Override
+    public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state) {
+        return this.lantern.getPickStack(world, pos, this.lantern.getDefaultState());
     }
 
     @Override
@@ -113,7 +119,7 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
         return new Model(initialBlockState);
     }
 
-    public final class Model extends BaseModel {
+    public final class Model extends BlockModel {
         public static final ItemStack MODEL = BaseItemProvider.requestModel(id("block/lantern_support"));
         public static final ItemStack MODEL_WALL = BaseItemProvider.requestModel(id("block/lantern_support_wall"));
         public static final ItemStack MODEL_FENCE = BaseItemProvider.requestModel(id("block/lantern_support_fence"));
@@ -135,8 +141,8 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
 
         @Override
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
-            if (updateType == BlockBoundAttachment.BLOCK_STATE_UPDATE) {
-                var state = this.blockBound().getBlockState();
+            if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
+                var state = this.blockState();
                 this.main.setItem(model(state));
                 this.main.setYaw(state.get(FACING).getOpposite().asRotation());
                 this.tick();

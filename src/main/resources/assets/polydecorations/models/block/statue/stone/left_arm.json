@@ -1,0 +1,25 @@
+{
+	"textures": {
+		"0": "block/stone"
+	},
+	"elements": [
+		{
+			"from": [5, -2, 6],
+			"to": [9, 10, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [9, 4, 13, 16], "texture": "#0"},
+				"east": {"uv": [8, 4, 12, 16], "texture": "#0"},
+				"south": {"uv": [11, 4, 15, 16], "texture": "#0"},
+				"west": {"uv": [10, 4, 14, 16], "texture": "#0"},
+				"up": {"uv": [13, 16, 9, 12], "texture": "#0"},
+				"down": {"uv": [14, 12, 10, 16], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"head": {
+			"rotation": [0, 180, 0]
+		}
+	}
+}

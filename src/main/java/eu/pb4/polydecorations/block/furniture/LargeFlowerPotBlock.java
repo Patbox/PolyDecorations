@@ -4,10 +4,10 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
-import eu.pb4.factorytools.api.virtualentity.BaseModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import net.minecraft.block.*;
 import net.minecraft.entity.decoration.Brightness;
@@ -80,7 +80,7 @@ public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierB
         return new Model(initialBlockState);
     }
 
-    public static final class Model extends BaseModel {
+    public static final class Model extends BlockModel {
         private final LodItemDisplayElement main;
 
         public Model(BlockState state) {

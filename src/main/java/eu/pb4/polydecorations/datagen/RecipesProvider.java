@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.datagen;
 
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsItems;
+import eu.pb4.polydecorations.item.StatueItem;
 import eu.pb4.polydecorations.recipe.NbtCloningCraftingRecipe;
 import eu.pb4.polydecorations.recipe.ShapelessNbtCopyRecipe;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -154,6 +155,18 @@ class RecipesProvider extends FabricRecipeProvider {
             exporter.accept(id("canvas_clone"), new NbtCloningCraftingRecipe("", DecorationsItems.CANVAS), null);
         }
 
+        for (var x : Registries.ITEM) {
+            if (x instanceof StatueItem item) {
+                new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 1)
+                        .pattern(" x ")
+                        .pattern("x#x")
+                        .pattern(" x ")
+                        .input('#', Items.ARMOR_STAND)
+                        .input('x', item.getType().block())
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.ARMOR_STAND))
+                        .offerTo(exporter);
+            }
+        }
 
         /*DecorationsBlocks.BANNER_BED.forEach(((dye, item) -> {
             exporter.accept(

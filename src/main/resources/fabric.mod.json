@@ -28,15 +28,18 @@
   "mixins": [
     "polydecorations.mixins.json"
   ],
-
+  "accessWidener": "polydecorations.accesswidener",
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": "*",
     "minecraft": ">=1.20.3-",
-    "polymer-core": ">=0.7.0",
-    "polymer-resource-pack": ">=0.7.0",
-    "polymer-virtual-entity": ">=0.7.0",
+    "polymer-core": ">=0.7.5",
+    "polymer-resource-pack": ">=0.7.5",
+    "polymer-virtual-entity": ">=0.7.5",
     "java": ">=17"
+  },
+  "suggests": {
+    "armor-stand-editor": "*"
   },
   "breaks": {
     "banner": "*",

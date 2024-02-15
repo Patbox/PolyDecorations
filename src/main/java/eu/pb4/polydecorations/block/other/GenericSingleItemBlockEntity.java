@@ -3,7 +3,7 @@ package eu.pb4.polydecorations.block.other;
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.util.SingleItemInventory;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -54,7 +54,7 @@ public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEn
 
     @Override
     public void onListenerUpdate(WorldChunk chunk) {
-        this.model = (ItemSetter) BlockBoundAttachment.get(chunk, this.pos).holder();
+        this.model = (ItemSetter) BlockAwareAttachment.get(chunk, this.pos).holder();
         this.model.setItem(this.item.copy());
     }
 

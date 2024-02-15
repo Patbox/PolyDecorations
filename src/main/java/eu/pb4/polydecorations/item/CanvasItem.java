@@ -9,6 +9,7 @@ import net.minecraft.item.*;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -68,6 +69,22 @@ public class CanvasItem extends ModeledItem {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         if (!stack.hasNbt()) {
+                tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+                        .append(Text.translatable(super.getTranslationKey() + ".tooltip.1",
+                                        Text.translatable("text.polydecorations.tooltip.any_dye").formatted(Formatting.WHITE))
+                                .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
+            tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+                    .append(Text.translatable(super.getTranslationKey() + ".tooltip.2",
+                                    Text.translatable("text.polydecorations.tooltip.coal_and_bone_meal").formatted(Formatting.WHITE))
+                            .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
+            tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+                    .append(Text.translatable(super.getTranslationKey() + ".tooltip.3",
+                                    Items.SPONGE.getName().copy().formatted(Formatting.WHITE))
+                            .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
+            tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+                    .append(Text.translatable(super.getTranslationKey() + ".tooltip.4",
+                                    Items.BRUSH.getName().copy().formatted(Formatting.WHITE))
+                            .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             return;
         }
         var data = stack.getNbt().getByteArray("data");

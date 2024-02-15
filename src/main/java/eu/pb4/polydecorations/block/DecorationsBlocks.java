@@ -55,7 +55,7 @@ public class DecorationsBlocks {
         if (Registries.BLOCK.containsId(planks)) {
             return new ShelfBlock(
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
-                            .solidBlock(Blocks::never), Registries.BLOCK.get(planks)
+                            .solidBlock(Blocks::never), Registries.BLOCK.get(planks), id(x.name() + "_shelf")
             );
         }
 

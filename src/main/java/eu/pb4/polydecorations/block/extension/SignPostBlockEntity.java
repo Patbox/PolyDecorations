@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.sgui.api.gui.SignGui;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -91,7 +92,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
     @Override
     public void onListenerUpdate(WorldChunk chunk) {
         try {
-            this.model = (SignPostBlock.Model) BlockBoundAttachment.get(chunk, this.getPos()).holder();
+            this.model = (SignPostBlock.Model) BlockAwareAttachment.get(chunk, this.getPos()).holder();
             this.model.update(this.upperText, this.lowerText);
         } catch (Throwable e) {
             e.printStackTrace();

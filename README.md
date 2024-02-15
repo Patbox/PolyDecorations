@@ -21,6 +21,10 @@ Simplest way to handle automatic resource pack generation for your server!
 While bundled by main distribution of [Polymer](https://modrinth.com/mod/polymer), you need to enable it by hand
 as it will be otherwise disabled. But it is quick and simple!
 
+### Armor Stand Editor
+The best™ server side pose editor for Armor Stand (and by extension, Statues!). Highly suggested for better customizability!
+[Checkout Modrinth page for more information!](https://modrinth.com/mod/armorstandeditor)
+
 ### PolyFactory
 The first of my mods in this style! But instead being purely decorative, it adds some functional stuff, new crafting stations
 and automation. [Checkout Modrinth page for more information!](https://modrinth.com/mod/polyfactory)

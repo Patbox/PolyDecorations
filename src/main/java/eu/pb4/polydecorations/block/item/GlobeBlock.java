@@ -4,12 +4,12 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
-import eu.pb4.factorytools.api.virtualentity.BaseModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.*;
@@ -75,7 +75,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
                 be.dropReplaceItem(player, ItemStack.EMPTY, null);
             } else {
                 var delta = state.get(WORLD_BOUND) ? 0.05f : 0.5f;
-                var model = (Model) BlockBoundAttachment.get(world, pos).holder();
+                var model = (Model) BlockAwareAttachment.get(world, pos).holder();
                 var axisDir = state.get(FACING).rotateYClockwise();
                 var axis = hit.getPos().getComponentAlongAxis(axisDir.getAxis());
 
@@ -132,7 +132,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
         return GenericSingleItemBlockEntity.globe(pos, state);
     }
 
-    public static final class Model extends BaseModel implements GenericSingleItemBlockEntity.ItemSetter {
+    public static final class Model extends BlockModel implements GenericSingleItemBlockEntity.ItemSetter {
         public static final ItemStack GLOBE_BASE = BaseItemProvider.requestModel(id("block/globe_base"));
         public static final ItemStack GLOBE_EARTH = BaseItemProvider.requestModel(id("block/globe_earth"));
 
@@ -202,8 +202,8 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
         @Override
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
-            if (updateType == BlockBoundAttachment.BLOCK_STATE_UPDATE) {
-                var state = this.blockBound().getBlockState();
+            if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
+                var state = this.blockState();
                 this.worldBound = state.get(WORLD_BOUND);
                 var direction = state.get(FACING).asRotation();
                 this.main.setYaw(direction);

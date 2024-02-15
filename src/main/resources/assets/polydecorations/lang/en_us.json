@@ -42,16 +42,42 @@
   "block.polydecorations.display_case": "Display Case",
   "block.polydecorations.large_flower_pot": "Large Flower Pot",
 
+  "item.polydecorations.stone_statue": "Stone Statue",
+  "item.polydecorations.deepslate_statue": "Deepslate Statue",
+  "item.polydecorations.blackstone_statue": "Blackstone Statue",
+  "item.polydecorations.prismarine_statue": "Prismatine Statue",
+  "item.polydecorations.sandstone_statue": "Sandstone Statue",
+  "item.polydecorations.red_sandstone_statue": "Red Sandstone Statue",
+  "item.polydecorations.quartz_statue": "Quartz Statue",
+  "item.polydecorations.birch_statue": "Birch Statue",
+  "item.polydecorations.bamboo_statue": "Bamboo Statue",
+  "item.polydecorations.dark_oak_statue": "Dark Oak Statue",
+  "item.polydecorations.crimson_statue": "Crimson Statue",
+  "item.polydecorations.oak_statue": "Oak Statue",
+  "item.polydecorations.spruce_statue": "Spruce Statue",
+  "item.polydecorations.jungle_statue": "Jungle Statue",
+  "item.polydecorations.acacia_statue": "Acacia Statue",
+  "item.polydecorations.mangrove_statue": "Mangrove Statue",
+  "item.polydecorations.warped_statue": "Warped Statue",
+  "item.polydecorations.cherry_statue": "Cherry Statue",
+
   "item.polydecorations.canvas": "Canvas",
   "item.polydecorations.canvas.empty": "Empty Canvas",
   "item.polydecorations.canvas.waxed": "Waxed Canvas",
   "item.polydecorations.canvas.glowing": "Glowing Canvas",
   "item.polydecorations.canvas.glowing.empty": "Glowing Empty Canvas",
   "item.polydecorations.canvas.glowing.waxed": "Glowing Waxed Canvas",
+  "item.polydecorations.canvas.tooltip.1": "Use %s to color a pixel",
+  "item.polydecorations.canvas.tooltip.2": "Use %s to change lightness",
+  "item.polydecorations.canvas.tooltip.3": "Use %s to clear a pixel",
+  "item.polydecorations.canvas.tooltip.4": "Use %s to apply offhand item in 3x3 area",
 
   "entity.polydecorations.canvas": "Canvas",
 
   "entity.polydecorations.seat": "Seat",
+
+  "text.polydecorations.tooltip.any_dye": "Any Dye",
+  "text.polydecorations.tooltip.coal_and_bone_meal": "Coal and Bone Meal",
 
   "subtitles.polydecorations.entity.canvas.break": "Canvas breaks",
   "subtitles.polydecorations.entity.canvas.place": "Canvas placed"

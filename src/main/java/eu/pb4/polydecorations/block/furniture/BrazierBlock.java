@@ -4,10 +4,10 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
-import eu.pb4.factorytools.api.virtualentity.BaseModel;
+import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockBoundAttachment;
+import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.block.*;
@@ -138,7 +138,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
         }
     }
 
-    public static final class Model extends BaseModel {
+    public static final class Model extends BlockModel {
         public static final ItemStack UNLIT = BaseItemProvider.requestModel(id("block/unlit_brazier"));
         private final LodItemDisplayElement main;
 
@@ -152,8 +152,8 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
 
         @Override
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
-            if (updateType == BlockBoundAttachment.BLOCK_STATE_UPDATE) {
-                var state = this.blockBound().getBlockState();
+            if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
+                var state = this.blockState();
                 this.main.setBrightness(state.get(LIT) ? new Brightness(15, 15) : null);
                 this.main.setItem(state.get(LIT) ? LodItemDisplayElement.getModel(state.getBlock().asItem()) : UNLIT);
 
