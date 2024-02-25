@@ -83,7 +83,7 @@ public class DecorationsItems {
     private static <T extends Item> Map<WoodType, T> registerWood(String id, Function<WoodType, T> object) {
         var map = new HashMap<WoodType, T>();
 
-        WoodType.stream().forEach(x -> {
+        WoodUtil.VANILLA.forEach(x -> {
             var y = object.apply(x);
             if (y != null) {
                 map.put(x, register(x.name() + "_" + id, y));
