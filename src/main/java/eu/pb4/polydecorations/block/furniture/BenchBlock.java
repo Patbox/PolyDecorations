@@ -5,11 +5,13 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polydecorations.entity.SeatEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
@@ -59,7 +61,7 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
 
     public ItemStack getModel(BlockState state) {
         return switch (state.get(TYPE)) {
-            case BOTH -> LodItemDisplayElement.getModel(this.asItem());
+            case BOTH -> ItemDisplayElementUtil.getModel(this.asItem());
             case LEFT -> leftModel;
             case RIGHT -> rightModel;
             case MIDDLE -> middleModel;
@@ -161,10 +163,10 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
     }
 
     public final class Model extends BlockModel {
-        private final LodItemDisplayElement main;
+        private final ItemDisplayElement main;
 
         public Model(BlockState state) {
-            this.main = LodItemDisplayElement.createSimple(getModel(state));
+            this.main = ItemDisplayElementUtil.createSimple(getModel(state));
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             var yaw = state.get(FACING).asRotation();

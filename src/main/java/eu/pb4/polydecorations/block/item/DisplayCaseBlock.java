@@ -4,12 +4,14 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -109,12 +111,12 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
     }
 
     public static final class Model extends BlockModel implements GenericSingleItemBlockEntity.ItemSetter {
-        private final LodItemDisplayElement main;
-        private final LodItemDisplayElement item;
+        private final ItemDisplayElement main;
+        private final ItemDisplayElement item;
         private final TextDisplayElement text;
 
         public Model(BlockState state) {
-            this.main = LodItemDisplayElement.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
@@ -122,7 +124,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
             this.main.setYaw(yaw);
             this.addElement(this.main);
 
-            this.item = LodItemDisplayElement.createSimple();
+            this.item = ItemDisplayElementUtil.createSimple();
             this.item.setViewRange(0.6f);
             this.item.setDisplaySize(1, 1);
             this.item.setModelTransformation(ModelTransformationMode.NONE);

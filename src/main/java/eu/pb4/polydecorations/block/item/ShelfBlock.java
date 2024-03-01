@@ -5,10 +5,12 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
@@ -144,11 +146,11 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     public final class Model extends BlockModel {
-        private final LodItemDisplayElement main;
-        private final LodItemDisplayElement[] items = new LodItemDisplayElement[6];
+        private final ItemDisplayElement main;
+        private final ItemDisplayElement[] items = new ItemDisplayElement[6];
 
         public Model(BlockState state) {
-            this.main = LodItemDisplayElement.createSimple(this.getModel(state));
+            this.main = ItemDisplayElementUtil.createSimple(this.getModel(state));
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
@@ -156,7 +158,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
             this.main.setYaw(yaw);
             this.addElement(this.main);
             for (int i = 0; i < 6; i++) {
-                var item = LodItemDisplayElement.createSimple();
+                var item = ItemDisplayElementUtil.createSimple();
 
                 var x = i % 3;
                 var y = i / 3;
@@ -175,7 +177,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
         private ItemStack getModel(BlockState state) {
             return switch (state.get(TYPE)) {
-                case BOTTOM -> LodItemDisplayElement.getModel(state.getBlock().asItem());
+                case BOTTOM -> ItemDisplayElementUtil.getModel(state.getBlock().asItem());
                 case DOUBLE -> doubleModel;
                 case TOP -> topModel;
             };

@@ -3,12 +3,14 @@ package eu.pb4.polydecorations.block.extension;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.virtualentity.api.BlockWithElementHolder;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.block.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
@@ -119,14 +121,14 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
         return new Model(initialBlockState);
     }
 
-    public final class Model extends BlockModel {
+    public static final class Model extends BlockModel {
         public static final ItemStack MODEL = BaseItemProvider.requestModel(id("block/lantern_support"));
         public static final ItemStack MODEL_WALL = BaseItemProvider.requestModel(id("block/lantern_support_wall"));
         public static final ItemStack MODEL_FENCE = BaseItemProvider.requestModel(id("block/lantern_support_fence"));
-        private final LodItemDisplayElement main;
+        private final ItemDisplayElement main;
 
         private Model(BlockState state) {
-            this.main = LodItemDisplayElement.createSimple(model(state));
+            this.main = ItemDisplayElementUtil.createSimple(model(state));
             this.main.setYaw(state.get(FACING).getOpposite().asRotation());
             this.addElement(main);
         }

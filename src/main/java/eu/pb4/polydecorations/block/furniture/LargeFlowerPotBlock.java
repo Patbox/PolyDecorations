@@ -5,10 +5,12 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.block.*;
 import net.minecraft.entity.decoration.Brightness;
 import net.minecraft.entity.player.PlayerEntity;
@@ -81,10 +83,10 @@ public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierB
     }
 
     public static final class Model extends BlockModel {
-        private final LodItemDisplayElement main;
+        private final ItemDisplayElement main;
 
         public Model(BlockState state) {
-            this.main = LodItemDisplayElement.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             this.addElement(this.main);

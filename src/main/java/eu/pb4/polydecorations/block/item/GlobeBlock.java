@@ -5,12 +5,14 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -79,11 +81,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
                 var axisDir = state.get(FACING).rotateYClockwise();
                 var axis = hit.getPos().getComponentAlongAxis(axisDir.getAxis());
 
-                model.spin(
-                        hit.getSide().getAxis() == axisDir.getAxis()
-                                ? delta * (hit.getSide().getDirection() == axisDir.getDirection() ? -1 : 1)
-                                : MathHelper.clamp(-((float) (axis - (int) axis) - 0.5f) * 20, -delta, delta)
-                );
+                model.spin(hit.getSide().getAxis() == axisDir.getAxis() ? delta * (hit.getSide().getDirection() == axisDir.getDirection() ? -1 : 1) : MathHelper.clamp(-((float) (axis - (int) axis) - 0.5f) * 20, -delta, delta));
             }
             return ActionResult.SUCCESS;
         }
@@ -138,20 +136,20 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
         public static final ItemStack TATER = BaseItemProvider.requestModel(id("block/tiny_potato"));
         private final ServerWorld world;
+        private final ItemDisplayElement main;
+        private final LodItemDisplayElement rotating;
         private boolean worldBound;
         private float velocity = 0;
         private float rotation = 0;
         private float offset = 0;
         private float scale = 1;
-        private final LodItemDisplayElement main;
-        private final LodItemDisplayElement rotating;
 
         public Model(ServerWorld world, BlockState state) {
             this.worldBound = state.get(WORLD_BOUND);
             this.world = world;
             var direction = state.get(FACING).asRotation();
 
-            this.main = LodItemDisplayElement.createSimple(GLOBE_BASE);
+            this.main = ItemDisplayElementUtil.createSimple(GLOBE_BASE);
             this.main.setScale(new Vector3f(2));
             this.main.setYaw(direction);
             this.addElement(this.main);
@@ -184,17 +182,15 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
                 updateAngle();
 
-                this.velocity = this.velocity < 0 ? Math.min(this.velocity + 0.01f, 0): Math.max(this.velocity - 0.01f, 0);
+                this.velocity = this.velocity < 0 ? Math.min(this.velocity + 0.01f, 0) : Math.max(this.velocity - 0.01f, 0);
             }
         }
 
         private void updateAngle() {
-            this.rotating.setTransformation(
-                    mat.identity()
-                            .rotateZ(-MathHelper.HALF_PI / 4)
-                            .translate(-1.5f / 16f, (6.5f + this.offset) / 16f + 1 / 6f / 16f, 0)
-                            .rotateY(this.rotation)
-                            .scale(this.scale)
+            this.rotating.setTransformation(mat()
+                    .rotateZ(-MathHelper.HALF_PI / 4)
+                    .translate(-1.5f / 16f, (6.5f + this.offset) / 16f + 1 / 6f / 16f, 0)
+                    .rotateY(this.rotation).scale(this.scale)
             );
 
             this.rotating.startInterpolation();

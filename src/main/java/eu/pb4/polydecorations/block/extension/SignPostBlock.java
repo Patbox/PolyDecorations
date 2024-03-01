@@ -4,10 +4,12 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.virtualentity.api.BlockWithElementHolder;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
+import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.block.*;
@@ -108,14 +110,14 @@ public class SignPostBlock extends BlockWithEntity implements PolymerBlock, Bloc
     }
 
     public static final class Model extends BlockModel {
-        private final LodItemDisplayElement upperBack;
+        private final ItemDisplayElement upperBack;
         private final TextDisplayElement upperText;
-        private final LodItemDisplayElement lowerBack;
+        private final ItemDisplayElement lowerBack;
         private final TextDisplayElement lowerText;
 
 
         public Model() {
-            this.upperBack = LodItemDisplayElement.createSimple();
+            this.upperBack = ItemDisplayElementUtil.createSimple();
             this.upperBack.setScale(new Vector3f(2));
             this.upperBack.setDisplaySize(1, 1);
 
