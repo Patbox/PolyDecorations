@@ -16,6 +16,7 @@ class LootTables extends FabricBlockLootTableProvider {
         this.addDrop(DecorationsBlocks.BRAZIER);
         this.addDrop(DecorationsBlocks.SOUL_BRAZIER);
         this.addDrop(DecorationsBlocks.GLOBE);
+        this.addDrop(DecorationsBlocks.GHOST_LIGHT);
         this.addDrop(DecorationsBlocks.DISPLAY_CASE);
         this.addDrop(DecorationsBlocks.LARGE_FLOWER_POT);
     }

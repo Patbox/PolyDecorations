@@ -1,6 +1,3 @@
-- Added Statues! Armor Stand-like entity, but with more full player model. It can be made out of wood and few stone-like blocks.
-  Adding/Using [Armor Stand Editor](https://modrinth.com/mod/armorstandeditor) is recommended!
-- You can now place 2 shelves of the same type within the same block! Additionally, shelf can be placed on top or bottom of the block (like slabs).
-- Added tooltip to Empty Canvas informing about how to use it.
-- Changed order of items in the Item Group (Changes Polydex/Creative)
-- Fixed some mod incompatibilities.
+- Added Ghost Light - A new light source.
+- You can now place Sign Post signs on wall blocks.
+- You can now remove back of the bench with an axe.

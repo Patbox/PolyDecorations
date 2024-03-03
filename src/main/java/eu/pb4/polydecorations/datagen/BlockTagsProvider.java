@@ -19,10 +19,11 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
     protected void configure(RegistryWrapper.WrapperLookup arg) {
         this.getOrCreateTagBuilder(BlockTags.AXE_MINEABLE)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.SIGN_POST.values().toArray(new Block[0]))
+                .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]));
 
         this.getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
+                .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WALL_LANTERN)
                 .add(DecorationsBlocks.WALL_SOUL_LANTERN)
                 .add(DecorationsBlocks.BRAZIER)
@@ -38,7 +39,8 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]));
 
         this.getOrCreateTagBuilder(DecorationsBlockTags.SIGN_POSTS)
-                .add(DecorationsBlocks.SIGN_POST.values().toArray(new Block[0]));
+                .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
+                .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]));
 
         this.getOrCreateTagBuilder(DecorationsBlockTags.BENCHES)
                 .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]));

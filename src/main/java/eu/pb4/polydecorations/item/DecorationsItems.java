@@ -51,6 +51,8 @@ public class DecorationsItems {
     public static final StatueItem RED_SANDSTONE_STATUE = register("red_sandstone_statue", new StatueItem(StatueEntity.Type.RED_SANDSTONE, new Item.Settings().maxCount(16)));
     public static final StatueItem QUARTZ_STATUE = register("quartz_statue", new StatueItem(StatueEntity.Type.QUARTZ, new Item.Settings().maxCount(16)));
 
+
+    public static final Item GHOST_LIGHT = register(DecorationsBlocks.GHOST_LIGHT);
     private static <T extends Block & PolymerBlock, B> Map<B, Item> register(Map<B, T> blockMap) {
         var map = new HashMap<B, Item>();
         blockMap.forEach((a, b) -> map.put(a, register(b)));
@@ -64,6 +66,7 @@ public class DecorationsItems {
                 .entries(((context, entries) -> {
                     entries.add(BRAZIER);
                     entries.add(SOUL_BRAZIER);
+                    entries.add(GHOST_LIGHT);
                     entries.add(LARGE_FLOWER_POT);
                     entries.add(DISPLAY_CASE);
                     entries.add(GLOBE);

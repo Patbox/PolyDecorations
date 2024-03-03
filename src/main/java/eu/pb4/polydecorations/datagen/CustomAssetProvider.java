@@ -5,6 +5,7 @@ import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.ui.UiResourceCreator;
 import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.block.WoodType;
 import net.minecraft.data.DataOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
@@ -104,30 +105,7 @@ class CustomAssetProvider implements DataProvider {
         });
 
         DecorationsItems.BENCH.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench.json", BASE_MODEL_JSON
-                    .replace("|TYPE|", "bench")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench_left.json", BASE_MODEL_JSON
-                    .replace("|TYPE|", "bench_left")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench_right.json", BASE_MODEL_JSON
-                    .replace("|TYPE|", "bench_right")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench_middle.json", BASE_MODEL_JSON
-                    .replace("|TYPE|", "bench_middle")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writeBench(type, writer);
 
             writer.accept("assets/polydecorations/models/item/" + type.name() + "_bench.json", ITEM_MODEL_JSON
                     .replace("|I|", type.name() + "_bench")
@@ -157,6 +135,38 @@ class CustomAssetProvider implements DataProvider {
         writeStatue("sandstone", "block/sandstone_top", writer);
         writeStatue("red_sandstone", "block/red_sandstone_top", writer);
         writeStatue("quartz", "block/quartz_block_bottom", writer);
+    }
+
+    private void writeBench(WoodType name, BiConsumer<String, byte[]> writer) {
+        writeBenchSet(name, "", writer);
+        writeBenchSet(name, "_norest", writer);
+    }
+
+    private void writeBenchSet(WoodType type, String suffix, BiConsumer<String, byte[]> writer) {
+        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + ".json", BASE_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix)
+                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                .getBytes(StandardCharsets.UTF_8)
+        );
+        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + "_left.json", BASE_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix + "_left")
+                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                .getBytes(StandardCharsets.UTF_8)
+        );
+        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + "_right.json", BASE_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix + "_right")
+                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                .getBytes(StandardCharsets.UTF_8)
+        );
+        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + "_middle.json", BASE_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix + "_middle")
+                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                .getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     private void writeStatue(String type, String texture, BiConsumer<String, byte[]> writer) {

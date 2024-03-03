@@ -4,7 +4,7 @@ import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.item.ShelfBlock;
 import eu.pb4.polydecorations.block.item.ShelfBlockEntity;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
-import eu.pb4.polydecorations.block.extension.SignPostBlock;
+import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -22,7 +22,10 @@ public class DecorationsBlockEntities {
 
     public static final BlockEntityType<?> SIGN_POST = register("sign_post",
             FabricBlockEntityTypeBuilder.create(SignPostBlockEntity::new)
-                    .addBlocks(DecorationsBlocks.SIGN_POST.values().toArray(new SignPostBlock[0])));
+                    .addBlocks(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new AttachedSignPostBlock[0]))
+                    .addBlocks(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new AttachedSignPostBlock[0]))
+                    .addBlock(DecorationsBlocks.NETHER_BRICK_SIGN_POST)
+    );
     public static final BlockEntityType<?> GLOBE = register("globe",
             FabricBlockEntityTypeBuilder.create(GenericSingleItemBlockEntity::globe).addBlock(DecorationsBlocks.GLOBE));
     ;

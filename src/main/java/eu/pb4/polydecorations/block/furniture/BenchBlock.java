@@ -1,6 +1,7 @@
 package eu.pb4.polydecorations.block.furniture;
 
 import com.mojang.serialization.MapCodec;
+import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
@@ -20,9 +21,13 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
@@ -40,10 +45,15 @@ import java.util.Locale;
 public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
     public static final DirectionProperty FACING = Properties.FACING;
     public static final EnumProperty<Type> TYPE = EnumProperty.of("type", Type.class);
+    public static final BooleanProperty HAS_REST = BooleanProperty.of("has_rest");
     private final ItemStack leftModel;
     private final ItemStack rightModel;
     private final ItemStack middleModel;
     private final Block base;
+    private final ItemStack noRestModel;
+    private final ItemStack leftNoRestModel;
+    private final ItemStack rightNoRestModel;
+    private final ItemStack middleNoRestModel;
 
     public BenchBlock(Identifier identifier, Settings settings, Block planks) {
         super(settings);
@@ -51,6 +61,10 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
         this.leftModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
         this.rightModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
         this.middleModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
+        this.noRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest"));
+        this.leftNoRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_left"));
+        this.rightNoRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
+        this.middleNoRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
         this.base = planks;
     }
 
@@ -60,17 +74,26 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
     }
 
     public ItemStack getModel(BlockState state) {
-        return switch (state.get(TYPE)) {
-            case BOTH -> ItemDisplayElementUtil.getModel(this.asItem());
-            case LEFT -> leftModel;
-            case RIGHT -> rightModel;
-            case MIDDLE -> middleModel;
-        };
+        if (state.get(HAS_REST)) {
+            return switch (state.get(TYPE)) {
+                case BOTH -> ItemDisplayElementUtil.getModel(this.asItem());
+                case LEFT -> leftModel;
+                case RIGHT -> rightModel;
+                case MIDDLE -> middleModel;
+            };
+        } else {
+            return switch (state.get(TYPE)) {
+                case BOTH -> noRestModel;
+                case LEFT -> leftNoRestModel;
+                case RIGHT -> rightNoRestModel;
+                case MIDDLE -> middleNoRestModel;
+            };
+        }
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, TYPE, WATERLOGGED);
+        builder.add(FACING, TYPE, HAS_REST, WATERLOGGED);
     }
 
     public FluidState getFluidState(BlockState state) {
@@ -84,12 +107,12 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
 
         var dir = ctx.getHorizontalPlayerFacing().getOpposite();
         var right = ctx.getWorld().getBlockState(ctx.getBlockPos().offset(dir.rotateYClockwise()));
-        if (right.isOf(this) && right.get(FACING) == dir) {
+        if (right.isOf(this) && right.get(FACING) == dir && right.get(HAS_REST)) {
             type = Type.RIGHT;
         }
 
         var left = ctx.getWorld().getBlockState(ctx.getBlockPos().offset(dir.rotateYCounterclockwise()));
-        if (left.isOf(this) && left.get(FACING) == dir) {
+        if (left.isOf(this) && left.get(FACING) == dir && left.get(HAS_REST)) {
             type = type == Type.RIGHT ? Type.MIDDLE : Type.LEFT;
         }
 
@@ -98,7 +121,12 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && !player.isSneaking() && SeatEntity.create(world, pos, 1 / 16f, state.get(FACING), player)) {
+        if (player.getStackInHand(hand).isIn(ItemTags.AXES) && state.get(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player)) {
+            world.setBlockState(pos, state.with(HAS_REST, false));
+            player.getStackInHand(hand).damage(1, player.getRandom(), player instanceof ServerPlayerEntity serverPlayer ? serverPlayer : null);
+            world.playSound(null, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            return ActionResult.SUCCESS;
+        } else if (hand == Hand.MAIN_HAND && !player.isSneaking() && SeatEntity.create(world, pos, 1 / 16f, state.get(FACING), player)) {
             return ActionResult.SUCCESS;
         }
 
@@ -111,9 +139,10 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
         tickWater(state, world, pos);
         var facing = state.get(FACING);
         var type = state.get(TYPE);
+        var rest = state.get(HAS_REST);
 
         if (facing.rotateYClockwise() == direction) {
-            if (neighborState.isOf(this) && state.get(FACING) == facing) {
+            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && state.get(FACING) == facing) {
                 state = state.with(TYPE, switch (type) {
                     case MIDDLE, LEFT -> Type.MIDDLE;
                     case RIGHT, BOTH -> Type.RIGHT;
@@ -125,7 +154,7 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
                 });
             }
         } else if (facing.rotateYCounterclockwise() == direction) {
-            if (neighborState.isOf(this) && state.get(FACING) == facing) {
+            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && state.get(FACING) == facing) {
                 state = state.with(TYPE, switch (type) {
                     case MIDDLE, RIGHT -> Type.MIDDLE;
                     case LEFT, BOTH -> Type.LEFT;

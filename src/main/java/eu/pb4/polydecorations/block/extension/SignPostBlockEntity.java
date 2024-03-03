@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.sgui.api.gui.SignGui;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -41,7 +40,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
     private Sign upperText = Sign.of();
     private Sign lowerText = Sign.of();
 
-    private SignPostBlock.Model model;
+    private AttachedSignPostBlock.Model model;
 
     public SignPostBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(DecorationsBlockEntities.SIGN_POST, blockPos, blockState);
@@ -92,7 +91,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
     @Override
     public void onListenerUpdate(WorldChunk chunk) {
         try {
-            this.model = (SignPostBlock.Model) BlockAwareAttachment.get(chunk, this.getPos()).holder();
+            this.model = (AttachedSignPostBlock.Model) BlockAwareAttachment.get(chunk, this.getPos()).holder();
             this.model.update(this.upperText, this.lowerText);
         } catch (Throwable e) {
             e.printStackTrace();
@@ -152,8 +151,8 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             var sign = this.getText(upper);
             this.setText(upper, Sign.of());
             if (this.lowerText.item == Items.AIR && this.upperText.item == Items.AIR) {
-                player.getWorld().setBlockState(pos, ((SignPostBlock) this.getCachedState().getBlock()).getBacking()
-                        .getDefaultState().with(Properties.WATERLOGGED, getCachedState().get(Properties.WATERLOGGED)));
+                player.getWorld().setBlockState(pos, ((AttachedSignPostBlock) this.getCachedState().getBlock()).getBacking()
+                        .getDefaultState().withIfExists(Properties.WATERLOGGED, getCachedState().get(Properties.WATERLOGGED)));
             }
             ItemScatterer.spawn(player.getWorld(), pos, DefaultedList.copyOf(ItemStack.EMPTY, sign.item.getDefaultStack()));
             return ActionResult.SUCCESS;

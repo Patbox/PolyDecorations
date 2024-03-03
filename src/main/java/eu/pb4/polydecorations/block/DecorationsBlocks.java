@@ -7,8 +7,9 @@ import eu.pb4.polydecorations.block.item.DisplayCaseBlock;
 import eu.pb4.polydecorations.block.item.ShelfBlock;
 import eu.pb4.polydecorations.block.furniture.BrazierBlock;
 import eu.pb4.polydecorations.block.item.GlobeBlock;
-import eu.pb4.polydecorations.block.extension.SignPostBlock;
+import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
+import eu.pb4.polydecorations.block.other.GhostLightBlock;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -16,11 +17,15 @@ import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.loot.LootTable;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -74,20 +79,35 @@ public class DecorationsBlocks {
         return null;
     });
 
-    public static final Map<WoodType, SignPostBlock> SIGN_POST = registerWood("sign_post", (x) -> {
+    public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = registerWood("sign_post", (x) -> {
         var planks = new Identifier(x.name() + "_fence");
-        if (Registries.BLOCK.get(planks) instanceof FenceBlock fenceBlock) {
-            return new SignPostBlock(fenceBlock);
+        var block = Registries.BLOCK.get(planks);
+        if (block instanceof FenceBlock) {
+            return new AttachedSignPostBlock(block, 4);
         }
 
         return null;
     });
 
-    public static final SignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", new SignPostBlock((FenceBlock) Blocks.NETHER_BRICK_FENCE));
+    public static final Map<Block, AttachedSignPostBlock> WALL_SIGN_POST = Util.make(() -> {
+      var map = new HashMap<Block, AttachedSignPostBlock>();
+      var l = new ArrayList<Block>();
+      for (var b : Registries.BLOCK) {
+          if (b instanceof WallBlock && Registries.BLOCK.getId(b).getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
+              l.add(b);
+          }
+      }
 
-    //public static final Map<DyeColor, BedWithBannerBlock> BANNER_BED = registerDye("banner_bed", (x) -> {
-    //    return new BedWithBannerBlock((BedBlock) Registries.BLOCK.get(new Identifier(x.name().toLowerCase(Locale.ROOT) + "_bed")));
-    //});
+      for (var b : l) {
+          map.put(b, register(Registries.BLOCK.getId(b).getPath() + "_sign_post", new AttachedSignPostBlock(b, 8)));
+      }
+      return map;
+    });
+
+    public static final AttachedSignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", new AttachedSignPostBlock(Blocks.NETHER_BRICK_FENCE, 4));
+    public static final GhostLightBlock GHOST_LIGHT = register("ghost_light",
+            new GhostLightBlock(AbstractBlock.Settings.create().nonOpaque()
+                    .noCollision().breakInstantly().luminance(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
 
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, Function<WoodType, T> object) {
         var map = new HashMap<WoodType, T>();

@@ -22,6 +22,7 @@
   "block.polydecorations.mangrove_bench": "Mangrove Bench",
   "block.polydecorations.warped_bench": "Warped Bench",
   "block.polydecorations.cherry_bench": "Cherry Bench",
+  "block.polydecorations.sign_post_typed": "%s with Sign Post",
   "block.polydecorations.sign_post": "Sign Post",
   "block.polydecorations.birch_sign_post": "Birch Sign Post",
   "block.polydecorations.bamboo_sign_post": "Bamboo Sign Post",
@@ -41,6 +42,7 @@
   "block.polydecorations.globe": "Globe",
   "block.polydecorations.display_case": "Display Case",
   "block.polydecorations.large_flower_pot": "Large Flower Pot",
+  "block.polydecorations.ghost_light": "Ghost Light",
 
   "item.polydecorations.stone_statue": "Stone Statue",
   "item.polydecorations.deepslate_statue": "Deepslate Statue",
