@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.furniture.BenchBlock;
 import eu.pb4.polydecorations.block.furniture.LargeFlowerPotBlock;
+import eu.pb4.polydecorations.block.item.MailboxBlock;
 import eu.pb4.polydecorations.block.item.DisplayCaseBlock;
 import eu.pb4.polydecorations.block.item.ShelfBlock;
 import eu.pb4.polydecorations.block.furniture.BrazierBlock;
@@ -24,8 +25,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -105,9 +104,20 @@ public class DecorationsBlocks {
     });
 
     public static final AttachedSignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", new AttachedSignPostBlock(Blocks.NETHER_BRICK_FENCE, 4));
+
+    public static final Map<WoodType, MailboxBlock> WOODEN_MAILBOX = registerWood("mailbox", (x) -> {
+        var planks = new Identifier(x.name() + "_planks");
+        if (Registries.BLOCK.containsId(planks)) {
+            return new MailboxBlock(Registries.BLOCK.get(planks));
+        }
+
+        return null;
+    });
     public static final GhostLightBlock GHOST_LIGHT = register("ghost_light",
             new GhostLightBlock(AbstractBlock.Settings.create().nonOpaque()
                     .noCollision().breakInstantly().luminance(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
+
+
 
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, Function<WoodType, T> object) {
         var map = new HashMap<WoodType, T>();

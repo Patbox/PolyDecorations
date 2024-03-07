@@ -20,6 +20,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
         this.getOrCreateTagBuilder(BlockTags.AXE_MINEABLE)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
+                .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]));
 
         this.getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
@@ -38,6 +39,9 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
         this.getOrCreateTagBuilder(DecorationsBlockTags.SHELVES)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]));
 
+        this.getOrCreateTagBuilder(DecorationsBlockTags.MAILBOXES)
+                .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
+
         this.getOrCreateTagBuilder(DecorationsBlockTags.SIGN_POSTS)
                 .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]));
@@ -49,8 +53,12 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .addOptionalTag(DecorationsBlockTags.BENCHES)
                 .addOptionalTag(DecorationsBlockTags.SHELVES)
                 .addOptionalTag(DecorationsBlockTags.BRAZIERS)
+                .addOptionalTag(DecorationsBlockTags.MAILBOXES)
                 .add(DecorationsBlocks.DISPLAY_CASE)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT)
         ;
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)
+                .addOptionalTag(DecorationsBlockTags.MAILBOXES);
     }
 }

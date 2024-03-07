@@ -1,6 +1,8 @@
 package eu.pb4.polydecorations.block;
 
 import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.block.item.MailboxBlock;
+import eu.pb4.polydecorations.block.item.MailboxBlockEntity;
 import eu.pb4.polydecorations.block.item.ShelfBlock;
 import eu.pb4.polydecorations.block.item.ShelfBlockEntity;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
@@ -25,6 +27,11 @@ public class DecorationsBlockEntities {
                     .addBlocks(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new AttachedSignPostBlock[0]))
                     .addBlocks(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new AttachedSignPostBlock[0]))
                     .addBlock(DecorationsBlocks.NETHER_BRICK_SIGN_POST)
+    );
+
+    public static final BlockEntityType<?> MAILBOX = register("mailbox",
+            FabricBlockEntityTypeBuilder.create(MailboxBlockEntity::new)
+                    .addBlocks(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new MailboxBlock[0]))
     );
     public static final BlockEntityType<?> GLOBE = register("globe",
             FabricBlockEntityTypeBuilder.create(GenericSingleItemBlockEntity::globe).addBlock(DecorationsBlocks.GLOBE));

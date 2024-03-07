@@ -1,3 +1,11 @@
+- Added Mailboxes!
+  - A new storage block, that adds per player 6-slot inventory, accessible only by the author and owner of the mailbox!
+  - Has a visual indicator whatever something is in it or not.
+  - Crafted with logs, slabs, copper ingot and some paper.
 - Added Ghost Light - A new light source.
+  - Gives light of level 7.
+  - It can be crafted by combining Soul Sand with Fire Charge.
 - You can now place Sign Post signs on wall blocks.
-- You can now remove back of the bench with an axe.
+- You can now remove back of the bench by using an axe.
+- Changed textures of sign posts to make them look more consistent.
+- Fixed Pitcher Pod not being plantable in Large Flower Pot

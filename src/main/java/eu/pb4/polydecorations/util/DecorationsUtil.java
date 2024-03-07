@@ -5,10 +5,13 @@ import eu.pb4.polydecorations.ModInit;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,5 +45,13 @@ public class DecorationsUtil {
 
     public static Identifier id(String path) {
         return new Identifier(ModInit.ID, path);
+    }
+
+    public static Text someones(@Nullable GameProfile owner, Text thing) {
+        if (owner != null && owner.getName() != null) {
+            return Text.translatable("text.polydecorations.someones", owner.getName(), thing);
+        }
+
+        return thing;
     }
 }

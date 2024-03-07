@@ -11,6 +11,17 @@
   "block.polydecorations.mangrove_shelf": "Mangrove Shelf",
   "block.polydecorations.warped_shelf": "Warped Shelf",
   "block.polydecorations.cherry_shelf": "Cherry Shelf",
+  "block.polydecorations.birch_mailbox": "Birch Mailbox",
+  "block.polydecorations.bamboo_mailbox": "Bamboo Mailbox",
+  "block.polydecorations.dark_oak_mailbox": "Dark Oak Mailbox",
+  "block.polydecorations.crimson_mailbox": "Crimson Mailbox",
+  "block.polydecorations.oak_mailbox": "Oak Mailbox",
+  "block.polydecorations.spruce_mailbox": "Spruce Mailbox",
+  "block.polydecorations.jungle_mailbox": "Jungle Mailbox",
+  "block.polydecorations.acacia_mailbox": "Acacia Mailbox",
+  "block.polydecorations.mangrove_mailbox": "Mangrove Mailbox",
+  "block.polydecorations.warped_mailbox": "Warped Mailbox",
+  "block.polydecorations.cherry_mailbox": "Cherry Mailbox",
   "block.polydecorations.birch_bench": "Birch Bench",
   "block.polydecorations.bamboo_bench": "Bamboo Bench",
   "block.polydecorations.dark_oak_bench": "Dark Oak Bench",
@@ -78,6 +89,8 @@
 
   "entity.polydecorations.seat": "Seat",
 
+  "text.polydecorations.someones": "%s's %s",
+  "text.polydecorations.your": "Your %s",
   "text.polydecorations.tooltip.any_dye": "Any Dye",
   "text.polydecorations.tooltip.coal_and_bone_meal": "Coal and Bone Meal",
 

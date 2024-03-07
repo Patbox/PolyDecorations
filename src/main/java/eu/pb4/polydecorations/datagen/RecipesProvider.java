@@ -5,6 +5,7 @@ import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.StatueItem;
 import eu.pb4.polydecorations.recipe.NbtCloningCraftingRecipe;
 import eu.pb4.polydecorations.recipe.ShapelessNbtCopyRecipe;
+import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancement.criterion.InventoryChangedCriterion;
@@ -14,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.Registries;
@@ -61,6 +63,25 @@ class RecipesProvider extends FabricRecipeProvider {
                     .pattern("sss")
                     .pattern("- -")
                     .input('-', Items.STICK)
+                    .input('s', slab)
+                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                    .offerTo(exporter);
+        }));
+
+        DecorationsItems.WOODEN_MAILBOX.forEach(((woodType, item) -> {
+            var log = Registries.ITEM.get(new Identifier(WoodUtil.getLogName(woodType)));
+            var slab = Registries.ITEM.get(new Identifier(woodType.name() + "_slab"));
+            var planks = Registries.ITEM.get(new Identifier(woodType.name() + "_planks"));
+            if (slab == Items.AIR) {
+                return;
+            }
+            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 2)
+                    .group("polydecorations:mailbox")
+                    .pattern(" lc")
+                    .pattern("sps")
+                    .input('p', Items.PAPER)
+                    .input('c', Items.COPPER_INGOT)
+                    .input('l', log)
                     .input('s', slab)
                     .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
                     .offerTo(exporter);
@@ -131,6 +152,12 @@ class RecipesProvider extends FabricRecipeProvider {
                 .pattern("bbb")
                 .input('b', Items.BRICK)
                 .input('d', Items.DIRT)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
+                .offerTo(exporter);
+
+        new ShapelessRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.GHOST_LIGHT, 1)
+                .input(Items.FIRE_CHARGE)
+                .input(ItemTags.SOUL_FIRE_BASE_BLOCKS)
                 .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
                 .offerTo(exporter);
 

@@ -132,6 +132,7 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
 
             this.upperText = new TextDisplayElement();
             this.upperText.setBackground(0);
+            this.upperText.setViewRange(0.6f);
             this.upperText.setScale(new Vector3f(0.5f));
             this.upperText.setDisplaySize(1, 1);
             this.upperText.setInvisible(true);
@@ -143,6 +144,7 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
             this.lowerText = new TextDisplayElement();
             this.lowerText.setInvisible(true);
             this.lowerText.setBackground(0);
+            this.lowerText.setViewRange(0.6f);
             this.lowerText.setScale(new Vector3f(0.5f));
             this.lowerText.setDisplaySize(1, 1);
 
@@ -165,18 +167,22 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
             var r = MathHelper.sqrt(MathHelper.square(radius * max) + MathHelper.square(radius));
 
             var zOffset = (upperText.flip() ? -1 : 1) * (r + 0.5f / 16f);
-            var zOffsetText = (upperText.flip() ? -1 : 1) * (r + 0.65f / 16f);
+            var zOffsetText = (r + 1.05f / 16f);
 
             this.upperText.setText(upperText.getText());
             this.upperText.setBrightness(upperText.text().isGlowing() ? new Brightness(15, 15) : null);
-            this.upperText.setTranslation(new Vector3f(0, 4 / 16f, zOffsetText));
+            this.upperText.setTranslation(new Vector3f(0, 3.5f / 16f, zOffsetText));
             this.upperText.setYaw(upperText.yaw());
             this.upperText.tick();
 
+            this.upperBack.setTeleportDuration(0);
             this.upperBack.setYaw(upperText.flip() ? 180 + upperText.yaw() : upperText.yaw());
             this.upperBack.setTranslation(new Vector3f(0, 4 / 16f, zOffset));
             this.upperBack.setItem(ItemDisplayElementUtil.getModel(upperText.item()));
             this.upperBack.tick();
+            this.upperBack.setTeleportDuration(1);
+            this.upperBack.tick();
+
         }
         public void updateLower(SignPostBlockEntity.Sign lowerText) {
             var cos = MathHelper.abs(MathHelper.cos(lowerText.yaw() * MathHelper.RADIANS_PER_DEGREE));
@@ -186,17 +192,20 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
             var r = MathHelper.sqrt(MathHelper.square(radius * max) + MathHelper.square(radius));
 
             var zOffset = (lowerText.flip() ? -1 : 1) * (r + 0.5f / 16f);
-            var zOffsetText = (lowerText.flip() ? -1 : 1) * (r + 0.65f / 16f);
+            var zOffsetText = (r + 1.05f / 16f);
 
             this.lowerText.setText(lowerText.getText());
             this.lowerText.setYaw(lowerText.yaw());
             this.lowerText.setBrightness(lowerText.text().isGlowing() ? new Brightness(15, 15) : null);
-            this.lowerText.setTranslation(new Vector3f(0, -4 / 16f, zOffsetText));
+            this.lowerText.setTranslation(new Vector3f(0, -4.5f / 16f, zOffsetText));
             this.lowerText.tick();
 
+            this.lowerBack.setTeleportDuration(0);
             this.lowerBack.setYaw(lowerText.flip() ? 180 + lowerText.yaw() : lowerText.yaw());
             this.lowerBack.setTranslation(new Vector3f(0, -4 / 16f, zOffset));
             this.lowerBack.setItem(ItemDisplayElementUtil.getModel(lowerText.item()));
+            this.lowerBack.tick();
+            this.lowerBack.setTeleportDuration(1);
             this.lowerBack.tick();
         }
     }

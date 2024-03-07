@@ -8,7 +8,6 @@ import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.entity.StatueEntity;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
-import eu.pb4.polymer.core.api.item.PolymerBlockItem;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polydecorations.ModInit;
 import net.minecraft.block.Block;
@@ -33,6 +32,7 @@ public class DecorationsItems {
     public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
     public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF);
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH);
+    public static final Map<WoodType, Item> WOODEN_MAILBOX = register(DecorationsBlocks.WOODEN_MAILBOX);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> new SignPostItem(new Item.Settings()));
     public static final Map<WoodType, StatueItem> WOODEN_STATUE = registerWood("statue", (x) -> {
         var planks = Registries.BLOCK.get(new Identifier(x.name() + "_planks"));
@@ -71,7 +71,7 @@ public class DecorationsItems {
                     entries.add(DISPLAY_CASE);
                     entries.add(GLOBE);
                     entries.add(CANVAS);
-                    WoodUtil.<Item>forEach(List.of(BENCH, SHELF, SIGN_POST, WOODEN_STATUE), entries::add);
+                    WoodUtil.<Item>forEach(List.of(BENCH, SHELF, SIGN_POST, WOODEN_MAILBOX, WOODEN_STATUE), entries::add);
                     entries.add(STONE_STATUE);
                     entries.add(DEEPSLATE_STATUE);
                     entries.add(BLACKSTONE_STATUE);

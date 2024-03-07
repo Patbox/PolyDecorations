@@ -15,8 +15,12 @@ public class GuiTextures {
     public static final GuiElement EMPTY = icon16("empty").get().build();
     public static final Function<Text, Text> SHELF = background("shelf");
     public static final Function<Text, Text> SHELF_2 = background("shelf_2");
+    public static final Function<Text, Text> MAILBOX_SELECT = background("mailbox_select");
 
     public static final Supplier<GuiElementBuilder> POLYDEX_BUTTON = icon32("polydex");
+    public static final Supplier<GuiElementBuilder> NEXT_PAGE_BUTTON = icon16("next_page");
+    public static final Supplier<GuiElementBuilder> PREVIOUS_PAGE_BUTTON = icon16("previous_page");
+    public static final Supplier<GuiElementBuilder> BACK_BUTTON = icon16("back");
 
     public static void register() {
         PolydexTextures.register();

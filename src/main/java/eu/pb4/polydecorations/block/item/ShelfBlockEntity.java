@@ -144,7 +144,7 @@ public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInve
 
         @Override
         public void onTick() {
-            if (player.getPos().squaredDistanceTo(Vec3d.ofCenter(ShelfBlockEntity.this.pos)) > (18 * 18)) {
+            if (isRemoved() || player.getPos().squaredDistanceTo(Vec3d.ofCenter(ShelfBlockEntity.this.pos)) > (18 * 18)) {
                 this.close();
             }
             if (this.state != getCachedState()) {
