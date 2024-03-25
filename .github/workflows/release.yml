@@ -31,7 +31,7 @@ jobs:
       - name: runDatagen
         run: ./gradlew runDatagen
       - name: Build and publish with Gradle
-        run: ./gradlew build publish
+        run: ./gradlew downloadTranslations build publish
         env:
           MODRINTH: ${{ secrets.MODRINTH }}
           CHANGELOG: ${{ github.event.release.body }}
