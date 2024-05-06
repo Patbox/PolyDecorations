@@ -3,17 +3,20 @@ package eu.pb4.polydecorations.datagen;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
 import net.minecraft.advancement.AdvancementEntry;
+import net.minecraft.registry.RegistryWrapper;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 
 class AdvancementsProvider extends FabricAdvancementProvider {
 
-    protected AdvancementsProvider(FabricDataOutput output) {
-        super(output);
+
+    protected AdvancementsProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+        super(output, registryLookup);
     }
 
-    @Override
+    //@Override
     public void generateAdvancement(Consumer<AdvancementEntry> exporter) {
         /*var root = Advancement.Builder.create()
                 .display(
@@ -31,5 +34,10 @@ class AdvancementsProvider extends FabricAdvancementProvider {
                 ))
                 .build(exporter, "polyfactory:main/root");
 */
+    }
+
+    @Override
+    public void generateAdvancement(RegistryWrapper.WrapperLookup registryLookup, Consumer<AdvancementEntry> consumer) {
+
     }
 }

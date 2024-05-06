@@ -10,6 +10,8 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
@@ -41,15 +43,15 @@ public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEn
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        nbt.put("item", this.item.writeNbt(new NbtCompound()));
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.writeNbt(nbt, lookup);
+        nbt.put("item", this.item.encodeAllowEmpty(lookup));
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        setItem(ItemStack.fromNbt(nbt.getCompound("item")));
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.readNbt(nbt, lookup);
+        setItem(ItemStack.fromNbtOrEmpty(lookup, nbt.getCompound("item")));
     }
 
     @Override
@@ -93,9 +95,10 @@ public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEn
     }
 
     @Override
-    public BlockEntity asBlockEntity() {
-        return this;
+    public boolean canPlayerUse(PlayerEntity player) {
+        return true;
     }
+
 
     public interface ItemSetter {
         void setItem(ItemStack stack);

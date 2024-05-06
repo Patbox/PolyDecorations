@@ -60,15 +60,9 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(WATERLOGGED);
     }
-
-    @Override
-    public Block getPolymerBlock(BlockState state) {
-        return this.baseBlock;
-    }
-
     @Override
     public BlockState getPolymerBlockState(BlockState state) {
-        return this.getPolymerBlock(state).getDefaultState().withIfExists(WATERLOGGED, state.get(WATERLOGGED));
+        return this.baseBlock.getDefaultState().withIfExists(WATERLOGGED, state.get(WATERLOGGED));
     }
 
     @Override
@@ -77,12 +71,12 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && world.getBlockEntity(pos) instanceof SignPostBlockEntity be) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be) {
             return be.onUse(player, hit.getPos().getY() - (int) hit.getPos().getY() >= 0.5, hit);
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     @Override

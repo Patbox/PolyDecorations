@@ -16,6 +16,7 @@ import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -120,17 +121,17 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (player.getStackInHand(hand).isIn(ItemTags.AXES) && state.get(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player)) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (player.getMainHandStack().isIn(ItemTags.AXES) && state.get(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player)) {
             world.setBlockState(pos, state.with(HAS_REST, false));
-            player.getStackInHand(hand).damage(1, player.getRandom(), player instanceof ServerPlayerEntity serverPlayer ? serverPlayer : null);
+            player.getMainHandStack().damage(1, player, EquipmentSlot.MAINHAND);
             world.playSound(null, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
             return ActionResult.SUCCESS;
-        } else if (hand == Hand.MAIN_HAND && !player.isSneaking() && SeatEntity.create(world, pos, 1 / 16f, state.get(FACING), player)) {
+        } else if (!player.isSneaking() && SeatEntity.create(world, pos, 1 / 16f, state.get(FACING), player)) {
             return ActionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
 

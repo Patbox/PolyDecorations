@@ -11,6 +11,8 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import it.unimi.dsi.fastutil.chars.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -63,21 +65,19 @@ public class UiResourceCreator {
 
     public static Supplier<GuiElementBuilder> icon16(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, BASE_MODEL);
-        return () -> new GuiElementBuilder(model.item()).setName(Text.empty()).hideFlags().setCustomModelData(model.value());
+        return () -> new GuiElementBuilder(model.item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(model.value());
     }
 
     public static Supplier<GuiElementBuilder> icon32(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, X32_MODEL);
-        return () -> new GuiElementBuilder(model.item()).setName(Text.empty()).hideFlags().setCustomModelData(model.value());
+        return () -> new GuiElementBuilder(model.item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(model.value());
     }
 
     public static IntFunction<GuiElementBuilder> icon32Color(String path) {
         var model = genericIconRaw(Items.LEATHER_LEGGINGS, path, X32_MODEL);
         return (i) -> {
-            var b = new GuiElementBuilder(model.item()).setName(Text.empty()).hideFlags().setCustomModelData(model.value());
-            var display = new NbtCompound();
-            display.putInt("color", i);
-            b.getOrCreateNbt().put("display", display);
+            var b = new GuiElementBuilder(model.item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(model.value());
+            b.setComponent(DataComponentTypes.DYED_COLOR, new DyedColorComponent(i, false));
             return b;
         };
     }
@@ -88,7 +88,7 @@ public class UiResourceCreator {
         for (var i = 0; i < size; i++) {
             models[i] = genericIconRaw(Items.ALLIUM, path + "_" + i, BASE_MODEL);
         }
-        return (i) -> new GuiElementBuilder(models[i].item()).setName(Text.empty()).hideFlags().setCustomModelData(models[i].value());
+        return (i) -> new GuiElementBuilder(models[i].item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(models[i].value());
     }
 
     public static IntFunction<GuiElementBuilder> horizontalProgress16(String path, int start, int stop, boolean reverse) {
@@ -124,7 +124,7 @@ public class UiResourceCreator {
         for (var i = start; i < stop; i++) {
             models[i - start] = genericIconRaw(Items.ALLIUM,  "gen/" + path + "_" + i, base);
         }
-        return (i) -> new GuiElementBuilder(models[i].item()).setName(Text.empty()).hideFlags().setCustomModelData(models[i].value());
+        return (i) -> new GuiElementBuilder(models[i].item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(models[i].value());
     }
 
     public static PolymerModelData genericIconRaw(Item item, String path, String base) {

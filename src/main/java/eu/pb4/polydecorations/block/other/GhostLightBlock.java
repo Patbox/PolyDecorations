@@ -27,8 +27,8 @@ public class GhostLightBlock extends Block implements FactoryBlock {
     }
 
     @Override
-    public Block getPolymerBlock(BlockState state) {
-        return Blocks.STRUCTURE_VOID;
+    public BlockState getPolymerBlockState(BlockState state) {
+        return Blocks.STRUCTURE_VOID.getDefaultState();
     }
 
     @Override

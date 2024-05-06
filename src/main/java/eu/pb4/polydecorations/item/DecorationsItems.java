@@ -10,6 +10,7 @@ import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.WoodType;
 import net.minecraft.item.*;
@@ -60,6 +61,8 @@ public class DecorationsItems {
     }
 
     public static void register() {
+        Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(ModInit.ID, "canvas_data"), CanvasItem.DATA_TYPE);
+        PolymerItemUtils.markAsPolymer(CanvasItem.DATA_TYPE);
         PolymerItemGroupUtils.registerPolymerItemGroup(new Identifier(ModInit.ID, "a_group"), ItemGroup.create(ItemGroup.Row.BOTTOM, -1)
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultStack())
                 .displayName(Text.translatable("itemgroup." + ModInit.ID))

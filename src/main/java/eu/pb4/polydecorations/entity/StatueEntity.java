@@ -12,6 +12,7 @@ import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -84,7 +85,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     protected void breakAndDropItem(DamageSource damageSource) {
         ItemStack itemStack = this.stack.copy();
         if (this.hasCustomName()) {
-            itemStack.setCustomName(this.getCustomName());
+            itemStack.set(DataComponentTypes.CUSTOM_NAME, this.getCustomName());
         }
 
         Block.dropStack(this.getWorld(), this.getBlockPos(), itemStack);
@@ -101,13 +102,13 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.put("stack", this.stack.writeNbt(new NbtCompound()));
+        nbt.put("stack", this.stack.encodeAllowEmpty(this.getRegistryManager()));
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        setStack(ItemStack.fromNbt(nbt.getCompound("stack")));
+        setStack(ItemStack.fromNbtOrEmpty(this.getRegistryManager(), nbt.getCompound("stack")));
     }
 
     @Override
@@ -212,7 +213,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         var sendFlags = initial;
         for (var i = 0; i < data.size(); i++) {
             var x = data.get(i);
-            if (x.id() == EntityTrackedData.FLAGS.getId()) {
+            if (x.id() == EntityTrackedData.FLAGS.id()) {
                 data.set(i, DataTracker.SerializedEntry.of(EntityTrackedData.FLAGS, (byte) (((byte) x.value()) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
                 sendFlags = false;
             }
@@ -313,7 +314,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
 
         public BlockSoundGroup soundGroup() {
-            return block.getSoundGroup(block.getDefaultState());
+            return block.getDefaultState().getSoundGroup();
         }
     }
 

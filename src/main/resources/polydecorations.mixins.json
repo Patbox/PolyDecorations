@@ -8,7 +8,10 @@
     "LanternBlockMixin",
     "PlantBlockMixin",
     "SaplingBlockMixin",
-    "SignBlockEntityMixin"
+    "SignBlockEntityMixin",
+    "datafixer.ItemStackComponentizationFixMixin",
+    "datafixer.Schema100Accessor",
+    "datafixer.Schema1460Mixin"
   ],
   "client": [
   ],

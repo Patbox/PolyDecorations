@@ -6,3 +6,4 @@ extendable method net/minecraft/entity/decoration/ArmorStandEntity playBreakSoun
 extendable method net/minecraft/entity/decoration/ArmorStandEntity spawnBreakParticles ()V
 extendable method net/minecraft/entity/decoration/ArmorStandEntity setSmall (Z)V
 extendable method net/minecraft/entity/Entity setGlowing (Z)V
+accessible class net/minecraft/datafixer/fix/ItemStackComponentizationFix$StackData

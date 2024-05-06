@@ -69,10 +69,10 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be) {
             if (player.getMainHandStack().isIn(DecorationsItemTags.GLOBE_REPLACEMENT) && be.getStack().isEmpty()) {
-                be.dropReplaceItem(player, player.getMainHandStack(), hand);
+                be.dropReplaceItem(player, player.getMainHandStack(), Hand.MAIN_HAND);
             } else if (player.getMainHandStack().isIn(ItemTags.AXES) && !be.getStack().isEmpty()) {
                 be.dropReplaceItem(player, ItemStack.EMPTY, null);
             } else {

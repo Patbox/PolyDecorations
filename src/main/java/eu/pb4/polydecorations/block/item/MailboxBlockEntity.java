@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.factorytools.api.block.OwnedBlockEntity;
 import eu.pb4.factorytools.api.block.entity.LockableBlockEntity;
+import eu.pb4.factorytools.api.util.LegacyNbtHelper;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.ui.GuiTextures;
 import eu.pb4.polydecorations.util.DecorationsUtil;
@@ -21,6 +22,7 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
@@ -50,16 +52,16 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.writeNbt(nbt, lookup);
         if (this.owner != null) {
-            nbt.put("owner", NbtHelper.writeGameProfile(new NbtCompound(), this.owner));
+            nbt.put("owner", LegacyNbtHelper.writeGameProfile(new NbtCompound(), this.owner));
         }
 
         var inv = new NbtList();
         for (var x : inventories.entrySet()) {
             var cpd = new NbtCompound();
-            Inventories.writeNbt(cpd, x.getValue().heldStacks);
+            Inventories.writeNbt(cpd, x.getValue().heldStacks, lookup);
             cpd.put("uuid", NbtHelper.fromUuid(x.getKey()));
             inv.add(cpd);
         }
@@ -67,10 +69,10 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.readNbt(nbt, lookup);
         if (nbt.contains("owner")) {
-            this.owner = NbtHelper.toGameProfile(nbt.getCompound("owner"));
+            this.owner = LegacyNbtHelper.toGameProfile(nbt.getCompound("owner"));
         } else {
             this.owner = null;
         }
@@ -82,7 +84,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             var cpd = (NbtCompound) x;
             var uuid = NbtHelper.toUuid(Objects.requireNonNull(cpd.get("uuid")));
             var inv = createInventory();
-            Inventories.readNbt(cpd, inv.heldStacks);
+            Inventories.readNbt(cpd, inv.heldStacks, lookup);
             this.inventories.put(uuid, inv);
         }
         if (model != null) {
@@ -201,7 +203,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
         }
 
         private void clickSound() {
-            player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.5f, 1);
+            player.playSoundToPlayer(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.5f, 1);
         }
 
         private void updateElements() {

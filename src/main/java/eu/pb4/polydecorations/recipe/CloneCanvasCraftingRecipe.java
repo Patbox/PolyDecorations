@@ -1,32 +1,32 @@
 package eu.pb4.polydecorations.recipe;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
+import eu.pb4.polydecorations.item.CanvasItem;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public record NbtCloningCraftingRecipe(String group, Item input) implements CraftingRecipe {
-    public static final Codec<NbtCloningCraftingRecipe> CODEC = RecordCodecBuilder.create(x -> x.group(
-                    Codec.STRING.optionalFieldOf("group", "").forGetter(NbtCloningCraftingRecipe::group),
-                    Registries.ITEM.getCodec().fieldOf("input").forGetter(NbtCloningCraftingRecipe::input)
-            ).apply(x, NbtCloningCraftingRecipe::new)
+public record CloneCanvasCraftingRecipe(String group, Item input) implements CraftingRecipe {
+    public static final MapCodec<CloneCanvasCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(x -> x.group(
+                    Codec.STRING.optionalFieldOf("group", "").forGetter(CloneCanvasCraftingRecipe::group),
+                    Registries.ITEM.getCodec().fieldOf("input").forGetter(CloneCanvasCraftingRecipe::input)
+            ).apply(x, CloneCanvasCraftingRecipe::new)
     );
 
 
-    public static RecipeEntry<NbtCloningCraftingRecipe> of(String id, Item item) {
-        return new RecipeEntry<>(id(id), new NbtCloningCraftingRecipe("", item));
+    public static RecipeEntry<CloneCanvasCraftingRecipe> of(String id, Item item) {
+        return new RecipeEntry<>(id(id), new CloneCanvasCraftingRecipe("", item));
     }
 
     @Override
@@ -41,10 +41,10 @@ public record NbtCloningCraftingRecipe(String group, Item input) implements Craf
 
         for (var stack : inventory.getHeldStacks()) {
             if (stack.isOf(this.input)) {
-                if (hasNbt && stack.hasNbt()) {
+                if (hasNbt && stack.contains(CanvasItem.DATA_TYPE)) {
                     return false;
                 }
-                hasNbt |= stack.hasNbt();
+                hasNbt |= stack.contains(CanvasItem.DATA_TYPE);
                 count++;
             }
         }
@@ -52,19 +52,19 @@ public record NbtCloningCraftingRecipe(String group, Item input) implements Craf
     }
 
     @Override
-    public ItemStack craft(RecipeInputInventory inventory, DynamicRegistryManager registryManager) {
-        NbtCompound nbt = null;
+    public ItemStack craft(RecipeInputInventory inventory, RegistryWrapper.WrapperLookup wrapperLookup) {
+        CanvasItem.Data nbt = null;
         int count = 0;
         for (var stack : inventory.getHeldStacks()) {
             if (stack.isOf(this.input)) {
-                if (stack.hasNbt()) {
-                    nbt = stack.getNbt();
+                if (stack.contains(CanvasItem.DATA_TYPE)) {
+                    nbt = stack.get(CanvasItem.DATA_TYPE);
                 }
                 count++;
             }
         }
         var stack = new ItemStack(this.input, count);
-        stack.setNbt(nbt);
+        stack.set(CanvasItem.DATA_TYPE, nbt);
         return stack;
     }
 
@@ -74,13 +74,13 @@ public record NbtCloningCraftingRecipe(String group, Item input) implements Craf
     }
 
     @Override
-    public ItemStack getResult(DynamicRegistryManager registryManager) {
+    public ItemStack getResult(RegistryWrapper.WrapperLookup registryManager) {
         return input.getDefaultStack();
     }
 
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return DecorationsRecipeSerializers.NBT_CLONING;
+        return DecorationsRecipeSerializers.CANVAS_CLONE;
     }
 }

@@ -18,6 +18,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -109,11 +110,6 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
 
     public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
         return false;
-    }
-
-    @Override
-    public Block getPolymerBlock(BlockState state) {
-        return this.lantern;
     }
 
     @Override

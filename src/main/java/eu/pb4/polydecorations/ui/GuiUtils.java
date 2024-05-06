@@ -13,7 +13,7 @@ public class GuiUtils {
     public static final GuiElement EMPTY = GuiElement.EMPTY;
 
     public static final void playClickSound(ServerPlayerEntity player) {
-        player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.5f, 1);
+        player.playSoundToPlayer(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.5f, 1);
     }
 }
 

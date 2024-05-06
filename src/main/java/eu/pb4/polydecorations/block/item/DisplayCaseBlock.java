@@ -19,6 +19,8 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.component.DataComponentType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
@@ -33,6 +35,7 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -68,14 +71,14 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be && be.getStack().isEmpty() && !player.getStackInHand(hand).isEmpty()) {
             be.setStack(player.getStackInHand(hand).copyWithCount(1));
             player.getStackInHand(hand).decrement(1);
-            return ActionResult.SUCCESS;
+            return ItemActionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
     }
 
     @Override
@@ -167,7 +170,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
             } else {
                 this.setDefaultScale();
             }
-            if (stack.hasCustomName() || stack.isOf(Items.PLAYER_HEAD)) {
+            if (stack.contains(DataComponentTypes.CUSTOM_NAME) || stack.isOf(Items.PLAYER_HEAD)) {
                 this.text.setText(stack.getName());
                 if (this.getElements().contains(this.text)) {
                     this.text.tick();

@@ -4,6 +4,7 @@ import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -42,6 +43,11 @@ public class SeatEntity extends Entity implements PolymerEntity {
     }
 
     @Override
+    protected void initDataTracker(DataTracker.Builder builder) {
+
+    }
+
+    @Override
     protected void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
     }
@@ -63,9 +69,6 @@ public class SeatEntity extends Entity implements PolymerEntity {
     public Vec3d updatePassengerForDismount(LivingEntity passenger) {
         return Vec3d.ofBottomCenter(this.getBlockPos()).offset(this.direction, 1);
     }
-
-    @Override
-    protected void initDataTracker() {}
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {}

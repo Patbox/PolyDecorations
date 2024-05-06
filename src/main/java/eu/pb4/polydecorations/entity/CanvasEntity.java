@@ -7,10 +7,12 @@ import eu.pb4.mapcanvas.api.core.PlayerCanvas;
 import eu.pb4.mapcanvas.api.font.DefaultFonts;
 import eu.pb4.mapcanvas.api.utils.CanvasUtils;
 import eu.pb4.mapcanvas.api.utils.VirtualDisplay;
+import eu.pb4.polydecorations.item.CanvasItem;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.block.MapColor;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
@@ -33,6 +35,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
@@ -125,9 +128,9 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         if (stack.isIn(ConventionalItemTags.DYES)) {
             if (stack.getItem() instanceof DyeItem dyeItem) {
                 color = CanvasColor.from(dyeItem.getColor().getMapColor(), MapColor.Brightness.NORMAL);
-            } else if (stack.hasNbt() && stack.getNbt().contains("color", NbtElement.INT_TYPE)) {
+            } /*else if (stack.hasNbt() && stack.getNbt().contains("color", NbtElement.INT_TYPE)) {
                 color = CanvasUtils.findClosestColor(stack.getNbt().getInt("color"));
-            }
+            }*/
         } else if (stack.isOf(Items.SPONGE)) {
             color = CanvasColor.CLEAR;
         } else if (stack.isOf(Items.COAL)) {
@@ -193,17 +196,16 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     }
 
     public void loadFromStack(ItemStack stack) {
-        if (!stack.hasNbt()) {
+        if (!stack.contains(CanvasItem.DATA_TYPE)) {
             return;
         }
+        var comp = stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT);
 
-        if (stack.getNbt().contains("data", NbtElement.BYTE_ARRAY_TYPE)) {
-            this.fromByteArray(stack.getNbt().getByteArray("data"));
-        }
+        comp.image().ifPresent(this::fromByteArray);
 
-        this.glowing = stack.getNbt().getBoolean("glowing");
-        this.waxed = stack.getNbt().getBoolean("waxed");
-        this.name = stack.hasCustomName() ? stack.getName() : null;
+        this.glowing = comp.glowing();
+        this.waxed = comp.waxed();
+        this.name = stack.get(DataComponentTypes.CUSTOM_NAME);
     }
 
     @Override
@@ -214,7 +216,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         this.glowing = nbt.getBoolean("glowing");
         this.waxed = nbt.getBoolean("waxed");
         if (nbt.contains("name")) {
-            this.name = Text.Serialization.fromLenientJson(nbt.getString("name"));
+            this.name = Text.Serialization.fromLenientJson(nbt.getString("name"), this.getRegistryManager());
         }
         this.setFacing(this.facing);
     }
@@ -227,7 +229,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         nbt.putBoolean("glowing", this.glowing);
         nbt.putBoolean("waxed", this.waxed);
         if (this.name != null) {
-            nbt.putString("name", Text.Serialization.toJsonString(this.name));
+            nbt.putString("name", Text.Serialization.toJsonString(this.name, this.getRegistryManager()));
         }
     }
 
@@ -250,7 +252,8 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         this.playSound(SoundEvent.of(id("entity.canvas.break")), 1.0F, 1.0F);
 
         var stack = this.toStack();
-        if (entity instanceof PlayerEntity player && player.isCreative() && (!stack.hasNbt() || !stack.getNbt().contains("data"))) {
+        if (entity instanceof PlayerEntity player && player.isCreative()
+                && (stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isEmpty())) {
             return;
         }
 
@@ -265,23 +268,18 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
 
     private ItemStack toStack() {
         var stack = new ItemStack(DecorationsItems.CANVAS);
+        byte[] data = null;
         for (byte b : this.data) {
             if (b != 0) {
-                stack.getOrCreateNbt().putByteArray("data", Arrays.copyOf(this.data, this.data.length));
+                data = Arrays.copyOf(this.data, this.data.length);
                 break;
             }
         }
 
-        if (this.waxed) {
-            stack.getOrCreateNbt().putBoolean("waxed", true);
-        }
-
-        if (this.glowing) {
-            stack.getOrCreateNbt().putBoolean("glowing", true);
-        }
+        stack.set(CanvasItem.DATA_TYPE, new CanvasItem.Data(Optional.ofNullable(data), this.glowing, this.waxed));
 
         if (this.name != null) {
-            stack.setCustomName(this.name);
+            stack.set(DataComponentTypes.CUSTOM_NAME, this.name);
         }
 
         return stack;

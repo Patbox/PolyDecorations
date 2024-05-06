@@ -1,6 +1,6 @@
 package eu.pb4.polydecorations.recipe;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.recipe.LazyRecipeSerializer;
 import eu.pb4.polydecorations.ModInit;
 import net.minecraft.recipe.Recipe;
@@ -10,8 +10,8 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class DecorationsRecipeSerializers {
-    public static final LazyRecipeSerializer<ShapelessNbtCopyRecipe> CRAFTING_SHAPELESS_NBT_COPY = register("crafting/shapeless_nbt_copy", ShapelessNbtCopyRecipe.CODEC);
-    public static final LazyRecipeSerializer<NbtCloningCraftingRecipe> NBT_CLONING = register("crafting/nbt_cloning", NbtCloningCraftingRecipe.CODEC);
+    public static final LazyRecipeSerializer<CanvasTransformRecipe> CANVAS_TRANSFORM = register("crafting/canvas_transform", CanvasTransformRecipe.CODEC);
+    public static final LazyRecipeSerializer<CloneCanvasCraftingRecipe> CANVAS_CLONE = register("crafting/canvas_cloning", CloneCanvasCraftingRecipe.CODEC);
 
     public static void register() {
 
@@ -21,7 +21,7 @@ public class DecorationsRecipeSerializers {
         return Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(ModInit.ID, path), recipeSerializer);
     }
 
-    public static <T extends Recipe<?>> LazyRecipeSerializer<T> register(String path, Codec<T> codec) {
+    public static <T extends Recipe<?>> LazyRecipeSerializer<T> register(String path, MapCodec<T> codec) {
         return Registry.register(Registries.RECIPE_SERIALIZER, new Identifier(ModInit.ID, path), new LazyRecipeSerializer<>(codec));
     }
 }

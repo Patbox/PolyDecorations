@@ -19,6 +19,7 @@ import net.minecraft.item.SignChangingItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
@@ -71,17 +72,17 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        Sign.CODEC.encodeStart(NbtOps.INSTANCE, this.upperText).result().ifPresent(x -> nbt.put("upper", x));
-        Sign.CODEC.encodeStart(NbtOps.INSTANCE, this.lowerText).result().ifPresent(x->  nbt.put("lower", x));
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.writeNbt(nbt, lookup);
+        Sign.CODEC.encodeStart(lookup.getOps(NbtOps.INSTANCE), this.upperText).result().ifPresent(x -> nbt.put("upper", x));
+        Sign.CODEC.encodeStart(lookup.getOps(NbtOps.INSTANCE), this.lowerText).result().ifPresent(x->  nbt.put("lower", x));
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        Sign.CODEC.decode(NbtOps.INSTANCE, nbt.get("upper")).result().ifPresent(x -> this.upperText = x.getFirst());
-        Sign.CODEC.decode(NbtOps.INSTANCE, nbt.get("lower")).result().ifPresent(x -> this.lowerText = x.getFirst());
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
+        super.readNbt(nbt, lookup);
+        Sign.CODEC.decode(lookup.getOps(NbtOps.INSTANCE), nbt.get("upper")).result().ifPresent(x -> this.upperText = x.getFirst());
+        Sign.CODEC.decode(lookup.getOps(NbtOps.INSTANCE), nbt.get("lower")).result().ifPresent(x -> this.lowerText = x.getFirst());
 
         if (this.model != null) {
             this.model.update(this.upperText, this.lowerText);

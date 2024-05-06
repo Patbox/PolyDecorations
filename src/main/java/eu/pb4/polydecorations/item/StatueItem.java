@@ -42,7 +42,7 @@ public class StatueItem extends ModeledItem {
             if (world.isSpaceEmpty(null, box) && world.getOtherEntities(null, box).isEmpty()) {
                 if (world instanceof ServerWorld serverWorld) {
                     Consumer<StatueEntity> consumer = EntityType.copier(serverWorld, itemStack, context.getPlayer());
-                    var statueEntity = DecorationsEntities.STATUE.create(serverWorld, itemStack.getNbt(), consumer, blockPos, SpawnReason.SPAWN_EGG, true, true);
+                    var statueEntity = DecorationsEntities.STATUE.create(serverWorld, consumer, blockPos, SpawnReason.SPAWN_EGG, true, true);
                     if (statueEntity == null) {
                         return ActionResult.FAIL;
                     }
@@ -51,7 +51,7 @@ public class StatueItem extends ModeledItem {
                     statueEntity.refreshPositionAndAngles(statueEntity.getX(), statueEntity.getY(), statueEntity.getZ(), f, 0.0F);
                     serverWorld.spawnEntityAndPassengers(statueEntity);
                     world.playSound(
-                            null, statueEntity.getX(), statueEntity.getY(), statueEntity.getZ(), type.block().getSoundGroup(type.block().getDefaultState()).getPlaceSound(), SoundCategory.BLOCKS, 0.75F, 0.8F
+                            null, statueEntity.getX(), statueEntity.getY(), statueEntity.getZ(), type.block().getDefaultState().getSoundGroup().getPlaceSound(), SoundCategory.BLOCKS, 0.75F, 0.8F
                     );
                     statueEntity.emitGameEvent(GameEvent.ENTITY_PLACE, context.getPlayer());
                 }

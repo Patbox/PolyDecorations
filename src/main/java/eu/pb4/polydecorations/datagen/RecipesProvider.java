@@ -3,8 +3,8 @@ package eu.pb4.polydecorations.datagen;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.StatueItem;
-import eu.pb4.polydecorations.recipe.NbtCloningCraftingRecipe;
-import eu.pb4.polydecorations.recipe.ShapelessNbtCopyRecipe;
+import eu.pb4.polydecorations.recipe.CloneCanvasCraftingRecipe;
+import eu.pb4.polydecorations.recipe.CanvasTransformRecipe;
 import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
@@ -15,21 +15,24 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
 class RecipesProvider extends FabricRecipeProvider {
-    public RecipesProvider(FabricDataOutput output) {
-        super(output);
+
+
+    public RecipesProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override
@@ -163,23 +166,18 @@ class RecipesProvider extends FabricRecipeProvider {
 
         {
             var waxed = new ItemStack(DecorationsItems.CANVAS);
-            waxed.getOrCreateNbt().putBoolean("waxed", true);
-            exporter.accept(id("canvas_waxing"), new ShapelessNbtCopyRecipe("", CraftingRecipeCategory.MISC,
+            exporter.accept(id("canvas_waxing"), new CanvasTransformRecipe("", "wax", CraftingRecipeCategory.MISC,
                     waxed, Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.HONEYCOMB))), null);
 
             var glowing = new ItemStack(DecorationsItems.CANVAS);
-            glowing.getOrCreateNbt().putBoolean("glowing", true);
-
-            exporter.accept(id("canvas_glowing"), new ShapelessNbtCopyRecipe("", CraftingRecipeCategory.MISC,
+            exporter.accept(id("canvas_glowing"), new CanvasTransformRecipe("", "glow", CraftingRecipeCategory.MISC,
                     glowing, Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
 
             var unglowing = new ItemStack(DecorationsItems.CANVAS);
-            unglowing.getOrCreateNbt().putBoolean("glowing", false);
-
-            exporter.accept(id("canvas_unglowing"), new ShapelessNbtCopyRecipe("", CraftingRecipeCategory.MISC,
+            exporter.accept(id("canvas_unglowing"), new CanvasTransformRecipe("", "unglow", CraftingRecipeCategory.MISC,
                     unglowing, Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
 
-            exporter.accept(id("canvas_clone"), new NbtCloningCraftingRecipe("", DecorationsItems.CANVAS), null);
+            exporter.accept(id("canvas_clone"), new CloneCanvasCraftingRecipe("", DecorationsItems.CANVAS), null);
         }
 
         for (var x : Registries.ITEM) {

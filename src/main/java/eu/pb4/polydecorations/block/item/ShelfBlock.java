@@ -104,13 +104,13 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && (state.get(TYPE) == SlabType.DOUBLE || !player.getStackInHand(hand).isOf(this.asItem())) && !player.isSneaking() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
             be.openGui((ServerPlayerEntity) player);
             return ActionResult.SUCCESS;
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     @Override

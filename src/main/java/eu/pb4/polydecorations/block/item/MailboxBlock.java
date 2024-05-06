@@ -77,12 +77,12 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (hand == Hand.MAIN_HAND && world.getBlockEntity(pos) instanceof MailboxBlockEntity be) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player,  BlockHitResult hit) {
+        if (world.getBlockEntity(pos) instanceof MailboxBlockEntity be) {
             return be.onUse(player);
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, player, hit);
     }
 
     @Override

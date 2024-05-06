@@ -1,9 +1,13 @@
 package eu.pb4.polydecorations.item;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.polydecorations.entity.CanvasEntity;
-import net.minecraft.client.item.TooltipContext;
+import eu.pb4.polymer.core.api.item.PolymerItemComponent;
+import net.minecraft.client.item.TooltipType;
+import net.minecraft.component.DataComponentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.text.Style;
@@ -14,9 +18,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
-import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Optional;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
@@ -57,9 +62,12 @@ public class CanvasItem extends ModeledItem {
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return super.getTranslationKey(stack) +
-                (stack.hasNbt() && stack.getNbt().getBoolean("glowing") ? ".glowing" : "") +
-                (stack.hasNbt() && stack.getNbt().contains("data") ? stack.getNbt().getBoolean("waxed") ? ".waxed" : "" : ".empty");
+        if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isPresent()) {
+            return super.getTranslationKey(stack) +
+                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).glowing() ? ".glowing" : "") +
+                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).waxed() ? ".waxed" : "");
+        }
+        return super.getTranslationKey(stack) + ".empty";
     }
 
     protected boolean canPlaceOn(PlayerEntity player, Direction side, ItemStack stack, BlockPos pos) {
@@ -67,8 +75,8 @@ public class CanvasItem extends ModeledItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        if (!stack.hasNbt()) {
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+        if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isEmpty()) {
                 tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
                         .append(Text.translatable(super.getTranslationKey() + ".tooltip.1",
                                         Text.translatable("text.polydecorations.tooltip.any_dye").formatted(Formatting.WHITE))
@@ -87,10 +95,12 @@ public class CanvasItem extends ModeledItem {
                             .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             return;
         }
-        var data = stack.getNbt().getByteArray("data");
-        if (data.length != 16 * 16) {
+        var datac = stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image();
+        if (datac.isPresent() && datac.get().length != 16 * 16) {
             return;
         }
+        //noinspection OptionalGetWithoutIsPresent
+        var data = datac.get();
 
 
         for (var y = 0; y < 16*16; y += 32) {
@@ -117,5 +127,14 @@ public class CanvasItem extends ModeledItem {
             tooltip.add(text);
         }
         tooltip.add(Text.empty());
+    }
+    public static final DataComponentType<Data> DATA_TYPE = DataComponentType.<Data>builder().codec(Data.CODEC).cache().build();
+    public record Data(Optional<byte[]> image, boolean glowing, boolean waxed) implements PolymerItemComponent {
+        public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BYTE_BUFFER.xmap(ByteBuffer::array, ByteBuffer::wrap).optionalFieldOf("image").forGetter(Data::image),
+                Codec.BOOL.optionalFieldOf("glowing", false).forGetter(Data::glowing),
+                Codec.BOOL.optionalFieldOf("waxed", false).forGetter(Data::waxed)
+        ).apply(instance, Data::new));
+        public static final Data DEFAULT = new Data(Optional.empty(), false, false);
     }
 }
