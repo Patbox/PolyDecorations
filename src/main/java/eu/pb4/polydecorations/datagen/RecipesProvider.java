@@ -41,8 +41,8 @@ class RecipesProvider extends FabricRecipeProvider {
         var dyes = (List<DyeItem>) (Object) List.of(Items.BLACK_DYE, Items.BLUE_DYE, Items.BROWN_DYE, Items.CYAN_DYE, Items.GRAY_DYE, Items.GREEN_DYE, Items.LIGHT_BLUE_DYE, Items.LIGHT_GRAY_DYE, Items.LIME_DYE, Items.MAGENTA_DYE, Items.ORANGE_DYE, Items.PINK_DYE, Items.PURPLE_DYE, Items.RED_DYE, Items.YELLOW_DYE, Items.WHITE_DYE);
 
         DecorationsItems.SHELF.forEach(((woodType, item) -> {
-            var slab = Registries.ITEM.get(new Identifier(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(new Identifier(woodType.name() + "_planks"));
+            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
             if (slab == Items.AIR) {
                 return;
             }
@@ -56,8 +56,8 @@ class RecipesProvider extends FabricRecipeProvider {
         }));
 
         DecorationsItems.BENCH.forEach(((woodType, item) -> {
-            var slab = Registries.ITEM.get(new Identifier(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(new Identifier(woodType.name() + "_planks"));
+            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
             if (slab == Items.AIR) {
                 return;
             }
@@ -72,9 +72,9 @@ class RecipesProvider extends FabricRecipeProvider {
         }));
 
         DecorationsItems.WOODEN_MAILBOX.forEach(((woodType, item) -> {
-            var log = Registries.ITEM.get(new Identifier(WoodUtil.getLogName(woodType)));
-            var slab = Registries.ITEM.get(new Identifier(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(new Identifier(woodType.name() + "_planks"));
+            var log = Registries.ITEM.get(Identifier.ofVanilla(WoodUtil.getLogName(woodType)));
+            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
             if (slab == Items.AIR) {
                 return;
             }
@@ -91,7 +91,7 @@ class RecipesProvider extends FabricRecipeProvider {
         }));
 
         DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
-            var planks = Registries.ITEM.get(new Identifier(woodType.name() + "_planks"));
+            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
             if (planks == null) {
                 return;
             }

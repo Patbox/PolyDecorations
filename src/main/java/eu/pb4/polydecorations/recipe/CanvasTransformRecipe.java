@@ -13,6 +13,7 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.collection.DefaultedList;
@@ -68,9 +69,9 @@ public class CanvasTransformRecipe extends ShapelessRecipe implements PolymerRec
     }
 
     @Override
-    public ItemStack craft(RecipeInputInventory recipeInputInventory, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public ItemStack craft(CraftingRecipeInput recipeInputInventory, RegistryWrapper.WrapperLookup wrapperLookup) {
         var stack = super.craft(recipeInputInventory, wrapperLookup);
-        for (var tmp : recipeInputInventory.getHeldStacks()) {
+        for (var tmp : recipeInputInventory.getStacks()) {
             if (this.source.test(tmp)) {
                 stack.applyComponentsFrom(tmp.getComponents());
                 stack.apply(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {

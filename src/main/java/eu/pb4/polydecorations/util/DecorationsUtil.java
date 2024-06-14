@@ -44,7 +44,7 @@ public class DecorationsUtil {
     }
 
     public static Identifier id(String path) {
-        return new Identifier(ModInit.ID, path);
+        return Identifier.of(ModInit.ID, path);
     }
 
     public static Text someones(@Nullable GameProfile owner, Text thing) {

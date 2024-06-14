@@ -5,11 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.polydecorations.entity.CanvasEntity;
-import eu.pb4.polymer.core.api.item.PolymerItemComponent;
-import net.minecraft.client.item.TooltipType;
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -128,8 +127,8 @@ public class CanvasItem extends ModeledItem {
         }
         tooltip.add(Text.empty());
     }
-    public static final DataComponentType<Data> DATA_TYPE = DataComponentType.<Data>builder().codec(Data.CODEC).cache().build();
-    public record Data(Optional<byte[]> image, boolean glowing, boolean waxed) implements PolymerItemComponent {
+    public static final ComponentType<Data> DATA_TYPE = ComponentType.<Data>builder().codec(Data.CODEC).cache().build();
+    public record Data(Optional<byte[]> image, boolean glowing, boolean waxed) {
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.BYTE_BUFFER.xmap(ByteBuffer::array, ByteBuffer::wrap).optionalFieldOf("image").forGetter(Data::image),
                 Codec.BOOL.optionalFieldOf("glowing", false).forGetter(Data::glowing),

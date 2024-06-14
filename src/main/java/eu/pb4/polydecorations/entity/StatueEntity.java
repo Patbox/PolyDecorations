@@ -82,14 +82,14 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    protected void breakAndDropItem(DamageSource damageSource) {
+    protected void breakAndDropItem(ServerWorld world, DamageSource damageSource) {
         ItemStack itemStack = this.stack.copy();
         if (this.hasCustomName()) {
             itemStack.set(DataComponentTypes.CUSTOM_NAME, this.getCustomName());
         }
 
-        Block.dropStack(this.getWorld(), this.getBlockPos(), itemStack);
-        this.onBreak(damageSource);
+        Block.dropStack(world, this.getBlockPos(), itemStack);
+        this.onBreak(world, damageSource);
     }
 
     @Override
@@ -135,25 +135,25 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     public boolean damage(DamageSource source, float amount) {
-        if (!this.getWorld().isClient && !this.isRemoved()) {
+        if (this.getWorld() instanceof ServerWorld world && !this.isRemoved()) {
             if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                 this.kill();
                 return false;
             } else if (!this.isInvulnerableTo(source) && !this.isInvisible() && !this.isMarker()) {
                 if (source.isIn(DamageTypeTags.IS_EXPLOSION)) {
-                    this.onBreak(source);
+                    this.onBreak(world, source);
                     this.kill();
                     return false;
                 } else if (source.isIn(DamageTypeTags.IGNITES_ARMOR_STANDS) && !this.item.getType().fireproof()) {
                     if (this.isOnFire()) {
-                        this.updateHealth(source, 0.15F);
+                        this.updateHealth(world, source, 0.15F);
                     } else {
                         this.setOnFireFor(5);
                     }
 
                     return false;
                 } else if (source.isIn(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F && !this.item.getType().fireproof()) {
-                    this.updateHealth(source, 4.0F);
+                    this.updateHealth(world, source, 4.0F);
                     return false;
                 } else {
                     boolean bl = source.isIn(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
@@ -181,7 +181,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
                                 this.emitGameEvent(GameEvent.ENTITY_DAMAGE, source.getAttacker());
                                 this.lastHitTime = l;
                             } else {
-                                this.breakAndDropItem(source);
+                                this.breakAndDropItem(world, source);
                                 this.spawnBreakParticles();
                                 this.kill();
                             }

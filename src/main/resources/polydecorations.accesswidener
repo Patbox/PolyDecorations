@@ -1,7 +1,8 @@
 accessWidener	v1	named
-extendable	method	net/minecraft/entity/decoration/ArmorStandEntity breakAndDropItem (Lnet/minecraft/entity/damage/DamageSource;)V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity onBreak (Lnet/minecraft/entity/damage/DamageSource;)V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity updateHealth (Lnet/minecraft/entity/damage/DamageSource;F)V
+
+extendable method net/minecraft/entity/decoration/ArmorStandEntity breakAndDropItem (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;)V
+extendable method net/minecraft/entity/decoration/ArmorStandEntity onBreak (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;)V
+extendable method net/minecraft/entity/decoration/ArmorStandEntity updateHealth (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)V
 extendable method net/minecraft/entity/decoration/ArmorStandEntity playBreakSound ()V
 extendable method net/minecraft/entity/decoration/ArmorStandEntity spawnBreakParticles ()V
 extendable method net/minecraft/entity/decoration/ArmorStandEntity setSmall (Z)V

@@ -16,7 +16,7 @@ import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.loot.LootTable;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
@@ -52,10 +52,10 @@ public class DecorationsBlocks {
     public static final GlobeBlock GLOBE = register("globe", new GlobeBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).nonOpaque()));
     public static final DisplayCaseBlock DISPLAY_CASE = register("display_case", new DisplayCaseBlock(AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque()));
     public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", new LargeFlowerPotBlock(
-            AbstractBlock.Settings.create().mapColor(MapColor.ORANGE).instrument(Instrument.BASEDRUM).strength(1.25F).nonOpaque()));
+            AbstractBlock.Settings.create().mapColor(MapColor.ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).nonOpaque()));
 
     public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x) -> {
-        var planks = new Identifier(x.name() + "_planks");
+        var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new ShelfBlock(
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
@@ -67,7 +67,7 @@ public class DecorationsBlocks {
     });
 
     public static final Map<WoodType, BenchBlock> BENCH = registerWood("bench", (x) -> {
-        var planks = new Identifier(x.name() + "_planks");
+        var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new BenchBlock(id(x.name() + "_bench"),
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
@@ -79,7 +79,7 @@ public class DecorationsBlocks {
     });
 
     public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = registerWood("sign_post", (x) -> {
-        var planks = new Identifier(x.name() + "_fence");
+        var planks = Identifier.of(x.name() + "_fence");
         var block = Registries.BLOCK.get(planks);
         if (block instanceof FenceBlock) {
             return new AttachedSignPostBlock(block, 4);
@@ -106,7 +106,7 @@ public class DecorationsBlocks {
     public static final AttachedSignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", new AttachedSignPostBlock(Blocks.NETHER_BRICK_FENCE, 4));
 
     public static final Map<WoodType, MailboxBlock> WOODEN_MAILBOX = registerWood("mailbox", (x) -> {
-        var planks = new Identifier(x.name() + "_planks");
+        var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new MailboxBlock(Registries.BLOCK.get(planks));
         }
@@ -172,6 +172,6 @@ public class DecorationsBlocks {
 
     public static <T extends Block> T register(String path, T item) {
         BLOCKS.add(item);
-        return Registry.register(Registries.BLOCK, new Identifier(ModInit.ID, path), item);
+        return Registry.register(Registries.BLOCK, Identifier.of(ModInit.ID, path), item);
     }
 }

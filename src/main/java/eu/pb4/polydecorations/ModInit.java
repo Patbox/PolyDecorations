@@ -32,7 +32,7 @@ public class ModInit implements ModInitializer {
 	public static final boolean DYNAMIC_ASSETS = true && DEV_ENV;
 
     public static Identifier id(String path) {
-		return new Identifier(ID, path);
+		return Identifier.of(ID, path);
 	}
 
 	@Override

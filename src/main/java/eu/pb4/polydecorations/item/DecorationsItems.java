@@ -36,7 +36,7 @@ public class DecorationsItems {
     public static final Map<WoodType, Item> WOODEN_MAILBOX = register(DecorationsBlocks.WOODEN_MAILBOX);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> new SignPostItem(new Item.Settings()));
     public static final Map<WoodType, StatueItem> WOODEN_STATUE = registerWood("statue", (x) -> {
-        var planks = Registries.BLOCK.get(new Identifier(x.name() + "_planks"));
+        var planks = Registries.BLOCK.get(Identifier.of(x.name() + "_planks"));
         return new StatueItem(StatueEntity.Type.of(x.name(), planks, false), new Item.Settings().maxCount(16));
     });
     //public static final Map<DyeColor, Item> BANNER_BED = register(DecorationsBlocks.BANNER_BED);
@@ -61,9 +61,9 @@ public class DecorationsItems {
     }
 
     public static void register() {
-        Registry.register(Registries.DATA_COMPONENT_TYPE, new Identifier(ModInit.ID, "canvas_data"), CanvasItem.DATA_TYPE);
+        Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(ModInit.ID, "canvas_data"), CanvasItem.DATA_TYPE);
         PolymerItemUtils.markAsPolymer(CanvasItem.DATA_TYPE);
-        PolymerItemGroupUtils.registerPolymerItemGroup(new Identifier(ModInit.ID, "a_group"), ItemGroup.create(ItemGroup.Row.BOTTOM, -1)
+        PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ModInit.ID, "a_group"), ItemGroup.create(ItemGroup.Row.BOTTOM, -1)
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultStack())
                 .displayName(Text.translatable("itemgroup." + ModInit.ID))
                 .entries(((context, entries) -> {
@@ -113,7 +113,7 @@ public class DecorationsItems {
     }
 
     public static <T extends Item> T register(String path, T item) {
-        Registry.register(Registries.ITEM, new Identifier(ModInit.ID, path), item);
+        Registry.register(Registries.ITEM, Identifier.of(ModInit.ID, path), item);
         return item;
     }
 

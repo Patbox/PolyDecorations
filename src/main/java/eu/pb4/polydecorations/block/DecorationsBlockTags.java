@@ -14,7 +14,7 @@ public class DecorationsBlockTags {
     public static final TagKey<Block> BRAZIERS = of("braziers");
     public static final TagKey<Block> SIGN_POSTS = of("sign_posts");
 
-    public static final TagKey<Block> ALLOWED_INTERACTIONS_BLOCKS = TagKey.of(RegistryKeys.BLOCK, new Identifier("goml", "allowed_interactions"));
+    public static final TagKey<Block> ALLOWED_INTERACTIONS_BLOCKS = TagKey.of(RegistryKeys.BLOCK, Identifier.of("goml", "allowed_interactions"));
 
     private static TagKey<Block> of(String path) {
         return TagKey.of(RegistryKeys.BLOCK, ModInit.id(path));

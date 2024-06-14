@@ -11,6 +11,7 @@ import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
@@ -35,11 +36,11 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
     }
 
     @Override
-    public boolean matches(RecipeInputInventory inventory, World world) {
+    public boolean matches(CraftingRecipeInput inventory, World world) {
         boolean hasNbt = false;
         int count = 0;
 
-        for (var stack : inventory.getHeldStacks()) {
+        for (var stack : inventory.getStacks()) {
             if (stack.isOf(this.input)) {
                 if (hasNbt && stack.contains(CanvasItem.DATA_TYPE)) {
                     return false;
@@ -52,10 +53,10 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
     }
 
     @Override
-    public ItemStack craft(RecipeInputInventory inventory, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public ItemStack craft(CraftingRecipeInput inventory, RegistryWrapper.WrapperLookup wrapperLookup) {
         CanvasItem.Data nbt = null;
         int count = 0;
-        for (var stack : inventory.getHeldStacks()) {
+        for (var stack : inventory.getStacks()) {
             if (stack.isOf(this.input)) {
                 if (stack.contains(CanvasItem.DATA_TYPE)) {
                     nbt = stack.get(CanvasItem.DATA_TYPE);

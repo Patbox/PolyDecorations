@@ -15,6 +15,7 @@ import net.minecraft.block.MapColor;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DyeItem;
@@ -30,7 +31,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,9 +59,19 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         CanvasUtils.clear(this.canvas, CanvasColor.OFF_WHITE_NORMAL);
     }
 
+    @Override
+    protected Box calculateBoundingBox(BlockPos pos, Direction side) {
+        Vec3d vec3d = Vec3d.ofCenter(pos).offset(side, -0.46875);
+        Direction.Axis axis = side.getAxis();
+        double d = axis == Direction.Axis.X ? 0.0625 : 1;
+        double e = axis == Direction.Axis.Y ? 0.0625 : 1;
+        double g = axis == Direction.Axis.Z ? 0.0625 : 1;
+        return Box.of(vec3d, d, e, g);
+    }
+
     public static CanvasEntity create(World world, Direction side, BlockPos pos) {
         var entity = new CanvasEntity(DecorationsEntities.CANVAS, world);
-        entity.attachmentPos = pos;
+        entity.attachedBlockPos = pos;
         entity.setFacing(side);
         return entity;
     }
@@ -66,7 +79,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     @Override
     public void onStartedTrackingBy(ServerPlayerEntity player) {
         if (this.display == null) {
-            this.display = VirtualDisplay.builder(this.canvas, this.attachmentPos, this.getHorizontalFacing())
+            this.display = VirtualDisplay.builder(this.canvas, this.attachedBlockPos, this.getHorizontalFacing())
                     .glowing(this.glowing)
                     .callback(this::onUsed)
                     .build();
@@ -186,6 +199,11 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     }
 
     @Override
+    protected void initDataTracker(DataTracker.Builder builder) {
+
+    }
+
+    @Override
     public void onRemoved() {
         if (this.display != null) {
             this.display.destroy();
@@ -231,16 +249,6 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         if (this.name != null) {
             nbt.putString("name", Text.Serialization.toJsonString(this.name, this.getRegistryManager()));
         }
-    }
-
-    @Override
-    public int getWidthPixels() {
-        return 16;
-    }
-
-    @Override
-    public int getHeightPixels() {
-        return 16;
     }
 
     @Override
