@@ -1,8 +1,15 @@
 package eu.pb4.polydecorations.datagen;
 
 import com.google.common.hash.HashCode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import eu.pb4.polydecorations.block.DecorationsBlocks;
+import eu.pb4.polydecorations.block.furniture.BenchBlock;
+import eu.pb4.polydecorations.block.furniture.TableBlock;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.ui.UiResourceCreator;
+import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -11,6 +18,9 @@ import net.minecraft.block.WoodType;
 import net.minecraft.data.DataOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
 import javax.imageio.ImageIO;
@@ -21,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -183,6 +194,30 @@ class CustomAssetProvider implements DataProvider {
             );
         });
 
+
+        DecorationsItems.TABLE.forEach((type, block) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_table" + ".json", BASE_WOOD_MODEL_JSON
+                    .replace("|TYPE|", "table")
+                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            for (int i = 1; i < TableBlock.TableModel.COUNT; i++) {
+                writer.accept("assets/polydecorations/models/block/" + type.name() + "_table_" + i + ".json", BASE_WOOD_MODEL_JSON
+                        .replace("|TYPE|", "table_" + i)
+                        .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                        .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                        .getBytes(StandardCharsets.UTF_8)
+                );
+            }
+
+            writer.accept("assets/polydecorations/models/item/" + type.name() + "_table.json", ITEM_MODEL_JSON
+                    .replace("|I|", type.name() + "_table")
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+        });
+
         DecorationsItems.WOODEN_STATUE.forEach((type, item) -> {
             writer.accept("assets/polydecorations/models/block/" + type.name() + "_sign_post.json", BASE_WOOD_MODEL_JSON
                     .replace("|TYPE|", "sign_post")
@@ -215,6 +250,23 @@ class CustomAssetProvider implements DataProvider {
             );
         });
 
+        DecorationsItems.TOOL_RACK.forEach((type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_tool_rack.json",
+                    BASE_WOOD_MODEL_JSON
+                            .replace("|TYPE|", "tool_rack")
+                            .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
+                            .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                            .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/item/" + type.name() + "_tool_rack.json", ITEM_MODEL_JSON
+                    .replace("|I|", type.name() + "_tool_rack")
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+        });
+
+        writeBaseTable(writer);
+
 
         writeStatue("deepslate", "block/deepslate_top", writer);
         writeStatue("blackstone", "block/blackstone", writer);
@@ -222,6 +274,44 @@ class CustomAssetProvider implements DataProvider {
         writeStatue("sandstone", "block/sandstone_top", writer);
         writeStatue("red_sandstone", "block/red_sandstone_top", writer);
         writeStatue("quartz", "block/quartz_block_bottom", writer);
+        writeStatue("tuff", "block/tuff", writer);
+        writeStatue("stone_bricks", "block/stone_bricks", writer);
+        writeStatue("tuff_bricks", "block/tuff_bricks", writer);
+        writeStatue("packed_mud", "block/packed_mud", writer);
+        writeStatue("granite", "block/granite", writer);
+        writeStatue("andesite", "block/andesite", writer);
+        writeStatue("diorite", "block/diorite", writer);
+        writeStatue("terracotta", "block/terracotta", writer);
+
+        //var b = new StringBuilder();
+
+        for (var color : DyeColor.values()) {
+            writeStatue(color.getName() + "_terracotta", "block/" + color.getName() + "_terracotta", writer);
+
+            //b.append('"').append("item.polydecorations.").append(color.getName()).append("_terracotta_statue\": \"")
+            //        .append(Character.toUpperCase(color.getName().charAt(0))).append(color.getName().substring(1)).append(" Terracotta Statue\",\n");
+        }
+
+        //System.out.println(b);
+    }
+
+    private void writeBaseTable(BiConsumer<String,byte[]> writer) {
+        var json = JsonParser.parseString(new String(Objects.requireNonNull(ResourceUtils.getJarData("assets/polydecorations/models/block/base_table.json"))));
+
+        for (int i = 1; i < TableBlock.TableModel.COUNT; i++) {
+            var corners = TableBlock.TableModel.toCornerNames(i);
+            var obj = json.deepCopy().getAsJsonObject();
+            var newElements = new JsonArray();
+            var elements = obj.getAsJsonArray("elements");
+            for (var el : elements) {
+                if (!el.getAsJsonObject().has("name") || corners.contains(el.getAsJsonObject().get("name").getAsString())) {
+                    newElements.add(el);
+                }
+            }
+            obj.add("elements", newElements);
+
+            writer.accept("assets/polydecorations/models/block/base_table_" + i + ".json", obj.toString().getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     private void writeBench(WoodType name, BiConsumer<String, byte[]> writer) {

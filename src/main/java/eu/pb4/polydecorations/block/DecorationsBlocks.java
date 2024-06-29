@@ -3,11 +3,9 @@ package eu.pb4.polydecorations.block;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.furniture.BenchBlock;
 import eu.pb4.polydecorations.block.furniture.LargeFlowerPotBlock;
-import eu.pb4.polydecorations.block.item.MailboxBlock;
-import eu.pb4.polydecorations.block.item.DisplayCaseBlock;
-import eu.pb4.polydecorations.block.item.ShelfBlock;
+import eu.pb4.polydecorations.block.furniture.TableBlock;
+import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.furniture.BrazierBlock;
-import eu.pb4.polydecorations.block.item.GlobeBlock;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
@@ -27,6 +25,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -54,7 +53,7 @@ public class DecorationsBlocks {
     public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", new LargeFlowerPotBlock(
             AbstractBlock.Settings.create().mapColor(MapColor.ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).nonOpaque()));
 
-    public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x) -> {
+    public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x, id) -> {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new ShelfBlock(
@@ -66,10 +65,10 @@ public class DecorationsBlocks {
         return null;
     });
 
-    public static final Map<WoodType, BenchBlock> BENCH = registerWood("bench", (x) -> {
+    public static final Map<WoodType, BenchBlock> BENCH = registerWood("bench", (x, id) -> {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
-            return new BenchBlock(id(x.name() + "_bench"),
+            return new BenchBlock(id,
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
                     Registries.BLOCK.get(planks)
             );
@@ -78,7 +77,31 @@ public class DecorationsBlocks {
         return null;
     });
 
-    public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = registerWood("sign_post", (x) -> {
+    public static final Map<WoodType, ToolRackBlock> TOOL_RACK = registerWood("tool_rack", (x, id) -> {
+        var planks = Identifier.of(x.name() + "_planks");
+        if (Registries.BLOCK.containsId(planks)) {
+            return new ToolRackBlock(
+                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
+                    Registries.BLOCK.get(planks)
+            );
+        }
+
+        return null;
+    });
+
+    public static final Map<WoodType, TableBlock> TABLE = registerWood("table", (x, id) -> {
+        var planks = Identifier.of(x.name() + "_planks");
+        if (Registries.BLOCK.containsId(planks)) {
+            return new TableBlock(id,
+                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
+                    Registries.BLOCK.get(planks)
+            );
+        }
+
+        return null;
+    });
+
+    public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = registerWood("sign_post", (x, id) -> {
         var planks = Identifier.of(x.name() + "_fence");
         var block = Registries.BLOCK.get(planks);
         if (block instanceof FenceBlock) {
@@ -105,7 +128,7 @@ public class DecorationsBlocks {
 
     public static final AttachedSignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", new AttachedSignPostBlock(Blocks.NETHER_BRICK_FENCE, 4));
 
-    public static final Map<WoodType, MailboxBlock> WOODEN_MAILBOX = registerWood("mailbox", (x) -> {
+    public static final Map<WoodType, MailboxBlock> WOODEN_MAILBOX = registerWood("mailbox", (x, id) -> {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new MailboxBlock(Registries.BLOCK.get(planks));
@@ -119,11 +142,11 @@ public class DecorationsBlocks {
 
 
 
-    private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, Function<WoodType, T> object) {
+    private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, BiFunction<WoodType, Identifier, T> object) {
         var map = new HashMap<WoodType, T>();
 
         WoodUtil.VANILLA.forEach(x -> {
-            var y = object.apply(x);
+            var y = object.apply(x, id(x.name() + "_" + id));
             if (y != null) {
                 map.put(x, register(x.name() + "_" + id, y));
             }

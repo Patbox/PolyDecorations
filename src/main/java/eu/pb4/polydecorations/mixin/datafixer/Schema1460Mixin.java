@@ -42,6 +42,7 @@ public abstract class Schema1460Mixin extends Schema {
         var map = cir.getReturnValue();
 
         method_5273(schema, map, mod("shelf"));
+        method_5273(schema, map, mod("tool_rack"));
 
 
         schema.register(map, mod("sign_post"), (n) -> DSL.optionalFields("upper", DSL.optionalFields("item", TypeReferences.ITEM_NAME.in(schema)),

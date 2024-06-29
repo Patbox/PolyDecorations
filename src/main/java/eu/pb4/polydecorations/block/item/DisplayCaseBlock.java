@@ -31,7 +31,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.ItemScatterer;
@@ -158,11 +157,16 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
                 var state = this.blockState();
                 var direction = state.get(FACING).asRotation();
                 this.item.setYaw(direction);
+                this.tick();
             }
         }
         @Override
         public void setItem(ItemStack stack) {
             this.item.setItem(stack.copy());
+            this.item.setModelTransformation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ModelTransformationMode.FIXED : ModelTransformationMode.NONE);
+            this.item.setLeftRotation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL)
+                    ? Direction.UP.getRotationQuaternion()
+                    : RotationAxis.NEGATIVE_Y.rotationDegrees(180));
             if (stack.isIn(DecorationsItemTags.UNSCALED_DISPLAY_CASE)) {
                 this.setUnScaled();
             } else {

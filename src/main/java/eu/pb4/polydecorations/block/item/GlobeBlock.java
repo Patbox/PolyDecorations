@@ -222,7 +222,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
                 this.offset = 0;
                 this.scale = 1;
             } else {
-                if (item.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof SkullBlock) {
+                if (item.isIn(DecorationsItemTags.UNSCALED_DISPLAY_CASE)) {
                     this.scale = 1f;
                     this.offset = 0.5f;
                 } else {
@@ -233,6 +233,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
             }
             updateAngle();
             this.rotating.setItem(model);
+            this.rotating.setModelTransformation(item.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ModelTransformationMode.FIXED : ModelTransformationMode.NONE);
             this.velocity = 0;
         }
     }

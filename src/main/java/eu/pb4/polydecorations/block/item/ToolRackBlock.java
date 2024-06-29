@@ -3,7 +3,6 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
@@ -15,7 +14,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
@@ -26,34 +24,27 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public class ShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
-    public static final EnumProperty<SlabType> TYPE = Properties.SLAB_TYPE;
     private final Block base;
-    private final ItemStack topModel;
-    private final ItemStack doubleModel;
 
-    public ShelfBlock(Settings settings, Block base, Identifier identifier) {
+    public ToolRackBlock(Settings settings, Block base) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(TYPE, SlabType.BOTTOM));
+        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
         this.base = base;
-        this.topModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_top"));
-        this.doubleModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_double"));
     }
 
     @Override
@@ -63,50 +54,51 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, TYPE, WATERLOGGED);
+        builder.add(FACING, WATERLOGGED);
     }
 
     @Nullable
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockPos blockPos = ctx.getBlockPos();
-        BlockState blockState = ctx.getWorld().getBlockState(blockPos);
-        if (blockState.isOf(this)) {
-            return blockState.with(TYPE, SlabType.DOUBLE);
-        } else {
-            BlockState blockState2 = waterLog(ctx, this.getDefaultState().with(FACING,
-                    ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite()));
-            Direction direction = ctx.getSide();
-            return direction != Direction.DOWN && (direction == Direction.UP || !(ctx.getHitPos().y - (double) blockPos.getY() > 0.5)) ? blockState2 : blockState2.with(TYPE, SlabType.TOP);
-        }
+        return waterLog(ctx, this.getDefaultState().with(FACING,
+                ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite()));
     }
-
-    @Override
-    public boolean canReplace(BlockState state, ItemPlacementContext context) {
-        ItemStack itemStack = context.getStack();
-        SlabType slabType = state.get(TYPE);
-        if (slabType != SlabType.DOUBLE && itemStack.isOf(this.asItem())) {
-            if (context.canReplaceExisting()) {
-                boolean bl = context.getHitPos().y - (double) context.getBlockPos().getY() > 0.5;
-                Direction direction = context.getSide();
-                if (slabType == SlabType.BOTTOM) {
-                    return direction == Direction.UP || bl && direction.getAxis().isHorizontal();
-                } else {
-                    return direction == Direction.DOWN || !bl && direction.getAxis().isHorizontal();
-                }
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
-            be.openGui((ServerPlayerEntity) player);
-            return ActionResult.SUCCESS;
+        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof ToolRackBlockEntity be) {
+            if (be.checkUnlocked(player)) {
+                var dir = state.get(FACING);
+                var center = Vec3d.ofCenter(pos);
+                var neg = new Vec3d(-0.5, -0.5, -0.5).rotateY(-dir.asRotation() * MathHelper.RADIANS_PER_DEGREE);
+                var posi = new Vec3d(0.5, 0.5, -0.25).rotateY(-dir.asRotation() * MathHelper.RADIANS_PER_DEGREE);
+                var eye = player.getEyePos().subtract(center);
+                var off = eye.add(player.getRotationVector().multiply(player.getBlockInteractionRange()));
+
+                var res = new Box(neg, posi).raycast(eye, off);
+
+                if (res.isEmpty()) {
+                    return ActionResult.PASS;
+                }
+                var target = res.get().rotateY(dir.asRotation() * MathHelper.RADIANS_PER_DEGREE);
+                var slot = (target.x < 0 ? 0 : 1) + (target.y < 0 ? 0 : 2);
+
+                var currentStack = be.getStack(slot);
+                var playerStack = player.getMainHandStack();
+                if (currentStack.isEmpty() && !playerStack.isEmpty() && playerStack.isIn(DecorationsItemTags.TOOL_RACK_ACCEPTABLE)) {
+                    be.setStack(slot, playerStack.copyWithCount(1));
+                    playerStack.decrement(1);
+                    be.markDirty();
+                    return ActionResult.SUCCESS;
+                } else if (!currentStack.isEmpty() && playerStack.isEmpty()) {
+                    be.setStack(slot, ItemStack.EMPTY);
+                    player.setStackInHand(Hand.MAIN_HAND, currentStack);
+                    be.markDirty();
+                    return ActionResult.SUCCESS;
+                }
+
+            }
+
+            return ActionResult.FAIL;
         }
 
         return super.onUse(state, world, pos, player, hit);
@@ -136,7 +128,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new ShelfBlockEntity(pos, state);
+        return new ToolRackBlockEntity(pos, state);
     }
 
     @Override
@@ -144,42 +136,34 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
         return new Model(initialBlockState);
     }
 
-    public final class Model extends BlockModel {
+    public static final class Model extends BlockModel {
         private final ItemDisplayElement main;
-        private final ItemDisplayElement[] items = new ItemDisplayElement[6];
+        private final ItemDisplayElement[] items = new ItemDisplayElement[4];
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(this.getModel(state));
-            this.main.setScale(new Vector3f(2));
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main.setModelTransformation(ModelTransformationMode.NONE);
             this.main.setDisplaySize(1, 1);
 
             var yaw = state.get(FACING).asRotation();
             this.main.setYaw(yaw);
             this.addElement(this.main);
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 4; i++) {
                 var item = ItemDisplayElementUtil.createSimple();
 
-                var x = i % 3;
-                var y = i / 3;
+                var x = i % 2;
+                var y = i / 2;
 
                 item.setViewRange(0.6f);
                 item.setDisplaySize(1, 1);
                 item.setModelTransformation(ModelTransformationMode.NONE);
-                item.setTranslation(new Vector3f(-5 / 16f + x * (5 / 16f), -4f / 16f + y * 8 / 16f, -2 / 16f));
-                item.setScale(new Vector3f(4.5f / 16f));
+                item.setTranslation(new Vector3f(-3.5f / 16f + x * 7 / 16f, -3.5f / 16f + y * 7 / 16f, -4.5f / 16f));
+                item.setScale(new Vector3f(7 / 16f));
                 item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
                 item.setYaw(yaw);
                 items[i] = item;
                 this.addElement(item);
             }
-        }
-
-        private ItemStack getModel(BlockState state) {
-            return switch (state.get(TYPE)) {
-                case BOTTOM -> ItemDisplayElementUtil.getModel(state.getBlock().asItem());
-                case DOUBLE -> doubleModel;
-                case TOP -> topModel;
-            };
         }
 
         @Override
@@ -188,8 +172,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
                 var state = this.blockState();
                 var yaw = state.get(FACING).asRotation();
                 this.main.setYaw(yaw);
-                this.main.setItem(getModel(state));
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < 4; i++) {
                     this.items[i].setYaw(yaw);
                 }
                 this.tick();
@@ -206,7 +189,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
         }
 
         public void updateItems(DefaultedList<ItemStack> stacks) {
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 4; i++) {
                 setItem(i, stacks.get(i));
             }
         }

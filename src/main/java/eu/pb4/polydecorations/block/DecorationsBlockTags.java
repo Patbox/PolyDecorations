@@ -11,9 +11,10 @@ public class DecorationsBlockTags {
     public static final TagKey<Block> MAILBOXES = of("mailboxes");
     public static final TagKey<Block> SHELVES = of("shelves");
     public static final TagKey<Block> BENCHES = of("benches");
+    public static final TagKey<Block> TOOL_RACKS = of("tool_racks");
+    public static final TagKey<Block> TABLES = of("tables");
     public static final TagKey<Block> BRAZIERS = of("braziers");
     public static final TagKey<Block> SIGN_POSTS = of("sign_posts");
-
     public static final TagKey<Block> ALLOWED_INTERACTIONS_BLOCKS = TagKey.of(RegistryKeys.BLOCK, Identifier.of("goml", "allowed_interactions"));
 
     private static TagKey<Block> of(String path) {

@@ -21,7 +21,9 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]));
+                .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]))
+                .add(DecorationsBlocks.TABLE.values().toArray(new Block[0]))
+                .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]));
 
         this.getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]))
@@ -39,6 +41,12 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
         this.getOrCreateTagBuilder(DecorationsBlockTags.SHELVES)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]));
 
+        this.getOrCreateTagBuilder(DecorationsBlockTags.TOOL_RACKS)
+                .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]));
+
+        this.getOrCreateTagBuilder(DecorationsBlockTags.TABLES)
+                .add(DecorationsBlocks.TABLE.values().toArray(new Block[0]));
+
         this.getOrCreateTagBuilder(DecorationsBlockTags.MAILBOXES)
                 .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
 
@@ -51,6 +59,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
 
         this.getOrCreateTagBuilder(DecorationsBlockTags.UNCONNECTABLE)
                 .addOptionalTag(DecorationsBlockTags.BENCHES)
+                .addOptionalTag(DecorationsBlockTags.TABLES)
                 .addOptionalTag(DecorationsBlockTags.SHELVES)
                 .addOptionalTag(DecorationsBlockTags.BRAZIERS)
                 .addOptionalTag(DecorationsBlockTags.MAILBOXES)

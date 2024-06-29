@@ -26,6 +26,8 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -34,6 +36,9 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.EulerAngle;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -44,8 +49,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static eu.pb4.polydecorations.ModInit.id;
@@ -65,7 +69,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     public StatueEntity(EntityType<? extends ArmorStandEntity> entityType, World world) {
         super(entityType, world);
         this.model = new Model(this);
-        this.setStack(DecorationsItems.STONE_STATUE.getDefaultStack());
+        this.setStack(DecorationsItems.OTHER_STATUE.get(Type.STONE).getDefaultStack());
         EntityAttachment.of(this.model, this);
         this.setShowArms(true);
         this.setNoGravity(true);
@@ -295,22 +299,42 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
     }
 
-    public record Type(ItemStack head, ItemStack body, ItemStack leftArm, ItemStack rightArm, ItemStack leftLeg, ItemStack rightLeg, Block block, boolean fireproof) {
-        public static final Type STONE = of("stone", Blocks.STONE, true);
-        public static final Type DEEPSLATE = of("deepslate", Blocks.DEEPSLATE, true);
-        public static final Type BLACKSTONE = of("blackstone", Blocks.BLACKSTONE, true);
-        public static final Type PRISMARINE = of("prismarine", Blocks.PRISMARINE, true);
-        public static final Type SANDSTONE = of("sandstone", Blocks.SANDSTONE, true);
-        public static final Type RED_SANDSTONE = of("red_sandstone", Blocks.RED_SANDSTONE, true);
-        public static final Type QUARTZ = of("quartz", Blocks.QUARTZ_BLOCK, true);
+    public record Type(String type, ItemStack head, ItemStack body, ItemStack leftArm, ItemStack rightArm, ItemStack leftLeg, ItemStack rightLeg, Block block, boolean fireproof) {
+        public static final List<Type> NON_WOOD = new ArrayList<>();
+        public static final Type STONE = nonWood("stone", Blocks.STONE);
+        public static final Type DEEPSLATE = nonWood("deepslate", Blocks.DEEPSLATE);
+        public static final Type BLACKSTONE = nonWood("blackstone", Blocks.BLACKSTONE);
+        public static final Type PRISMARINE = nonWood("prismarine", Blocks.PRISMARINE);
+        public static final Type SANDSTONE = nonWood("sandstone", Blocks.SANDSTONE);
+        public static final Type RED_SANDSTONE = nonWood("red_sandstone", Blocks.RED_SANDSTONE);
+        public static final Type QUARTZ = nonWood("quartz", Blocks.QUARTZ_BLOCK);
+        public static final Type ANDESITE = nonWood("andesite", Blocks.ANDESITE);
+        public static final Type DIORITE = nonWood("diorite", Blocks.DIORITE);
+        public static final Type GRANITE = nonWood("granite", Blocks.GRANITE);
+        public static final Type TUFF = nonWood("tuff", Blocks.TUFF);
+        public static final Type PACKED_MUD = nonWood("packed_mud", Blocks.TUFF);
+        public static final Type STONE_BRICKS = nonWood("stone_bricks", Blocks.STONE_BRICKS);
+        public static final Type TUFF_BRICKS = nonWood("tuff_bricks", Blocks.TUFF);
+        public static final Type TERRACOTTA = nonWood("terracotta", Blocks.TERRACOTTA);
+        public static final Map<DyeColor, Type> COLORED_TERRACOTTA = Util.make(new HashMap<>(), (x) -> {
+            for (var color : DyeColor.values()) {
+                x.put(color, nonWood(color.getName() + "_terracotta", Registries.BLOCK.get(Identifier.ofVanilla(color.getName() + "_terracotta"))));
+            }
+        });
+
+        public static Type nonWood(String name, Block block) {
+            var x = of(name, block, true);
+            NON_WOOD.add(x);
+            return x;
+        }
 
         public static Type of(String type, Block block, boolean fireproof) {
-            return new Type(requestModel(type, "head"), requestModel(type, "body"), requestModel(type, "left_arm"),
+            return new Type(type, requestModel(type, "head"), requestModel(type, "body"), requestModel(type, "left_arm"),
                     requestModel(type, "right_arm"), requestModel(type, "left_leg"), requestModel(type, "right_leg"), block, fireproof);
         }
 
         private static ItemStack requestModel(String type, String head) {
-            return BaseItemProvider.requestModel(id("block/statue/" + type + "/" + head));
+            return BaseItemProvider.requestModel(BaseItemProvider.requestModel(), id("block/statue/" + type + "/" + head));
         }
 
         public BlockSoundGroup soundGroup() {

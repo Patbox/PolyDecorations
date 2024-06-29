@@ -4,10 +4,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.entity.CanvasEntity;
 import eu.pb4.polydecorations.item.CanvasItem;
 import eu.pb4.polymer.core.api.item.PolymerRecipe;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
@@ -16,8 +21,12 @@ import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 public class CanvasTransformRecipe extends ShapelessRecipe implements PolymerRecipe {
     private final ItemStack result;
@@ -71,19 +80,85 @@ public class CanvasTransformRecipe extends ShapelessRecipe implements PolymerRec
     @Override
     public ItemStack craft(CraftingRecipeInput recipeInputInventory, RegistryWrapper.WrapperLookup wrapperLookup) {
         var stack = super.craft(recipeInputInventory, wrapperLookup);
+        ItemStack dye = recipeInputInventory.getStacks().stream().filter(tmp -> tmp.isIn(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY);
         for (var tmp : recipeInputInventory.getStacks()) {
             if (this.source.test(tmp)) {
                 stack.applyComponentsFrom(tmp.getComponents());
                 stack.apply(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
-                    case "wax" -> new CanvasItem.Data(x.image(), x.glowing(), true);
-                    case "glow" -> new CanvasItem.Data(x.image(), true, x.waxed());
-                    case "unglow" -> new CanvasItem.Data(x.image(), false, x.waxed());
+                    case "wax" -> new CanvasItem.Data(x.image(), x.background(), x.glowing(), true, x.cut());
+                    case "glow" -> new CanvasItem.Data(x.image(), x.background(),true, x.waxed(), x.cut());
+                    case "unglow" -> new CanvasItem.Data(x.image(), x.background(),false, x.waxed(), x.cut());
+                    case "dye" -> new CanvasItem.Data(x.image(), CanvasEntity.getColor(dye),x.glowing(), x.waxed(), x.cut());
+                    case "cut" -> {
+                        byte[] image;
+                        if (x.image().isPresent()) {
+                            var source = x.image().get();
+                            image = new byte[source.length];
+                            for (var i = 0; i < source.length; i++) {
+                                var c = source[i];
+                                if (c == 0) {
+                                    c = 1;
+                                }
+                                image[i] = c;
+                            }
+                        } else {
+                            image = new byte[16 * 16];
+                            Arrays.fill(image, (byte) 1);
+                        }
+                        yield new CanvasItem.Data(Optional.ofNullable(image), x.background(), x.glowing(), x.waxed(), true);
+                    }
+                    case "uncut" ->{
+                        byte[] image;
+                        if (x.image().isPresent()) {
+                            boolean isEmpty = true;
+                            var source = x.image().get();
+                            image = new byte[source.length];
+                            for (var i = 0; i < source.length; i++) {
+                                var c = source[i];
+                                if (c == 1) {
+                                    c = 0;
+                                } else if (c != 0) {
+                                    isEmpty = false;
+                                }
+                                image[i] = c;
+                            }
+
+                            if (isEmpty) {
+                                image = null;
+                            }
+                        } else {
+                            image = null;
+                        }
+                        yield new CanvasItem.Data(Optional.ofNullable(image), x.background(), x.glowing(), x.waxed(), false);
+                    }
                     default -> x;
                 });
                 break;
             }
         }
         return stack;
+    }
+
+    @Override
+    public DefaultedList<ItemStack> getRemainder(CraftingRecipeInput input) {
+        DefaultedList<ItemStack> defaultedList = DefaultedList.ofSize(input.getSize(), ItemStack.EMPTY);
+
+        for(int i = 0; i < defaultedList.size(); ++i) {
+            var stack = input.getStackInSlot(i);
+            var remainer = stack.getRecipeRemainder();
+            if (remainer.isEmpty() && stack.isDamageable()) {
+                remainer = stack.copy();
+                remainer.setDamage(remainer.getDamage() + 1);
+                if (remainer.getDamage() >= remainer.getMaxDamage()) {
+                    remainer = ItemStack.EMPTY;
+                }
+            } else if (stack.isOf(Items.WATER_BUCKET)) {
+                remainer = stack.copy();
+            }
+            defaultedList.set(i, remainer);
+        }
+
+        return defaultedList;
     }
 
     @Override

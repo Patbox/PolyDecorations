@@ -13,6 +13,11 @@ import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.WoodType;
+import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -20,43 +25,57 @@ import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+
+import static eu.pb4.polydecorations.ModInit.id;
 
 public class DecorationsItems {
     public static final Item MOD_ICON = register("mod_icon", new ModeledItem(new Item.Settings()));
 
+    public static final Item TROWEL = register("trowel", new TrowelItem(new Item.Settings()
+            .attributeModifiers(AttributeModifiersComponent.builder()
+                    .add(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE, new EntityAttributeModifier(id("trowel_bonus"), 1, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.MAINHAND).build())
+            .maxCount(1)));
+
+    public static final Item HAMMER = register("hammer", new HammerItem(new Item.Settings().maxCount(1)));
     public static final Item BRAZIER = register(DecorationsBlocks.BRAZIER);
     public static final Item SOUL_BRAZIER = register(DecorationsBlocks.SOUL_BRAZIER);
     public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
-    public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF);
-    public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH);
-    public static final Map<WoodType, Item> WOODEN_MAILBOX = register(DecorationsBlocks.WOODEN_MAILBOX);
+    public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF, WoodType::name);
+    public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH, WoodType::name);
+    public static final Map<WoodType, Item> TABLE = register(DecorationsBlocks.TABLE, WoodType::name);
+    public static final Map<WoodType, Item> TOOL_RACK = register(DecorationsBlocks.TOOL_RACK, WoodType::name);
+    public static final Map<WoodType, Item> WOODEN_MAILBOX = register(DecorationsBlocks.WOODEN_MAILBOX, WoodType::name);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> new SignPostItem(new Item.Settings()));
     public static final Map<WoodType, StatueItem> WOODEN_STATUE = registerWood("statue", (x) -> {
         var planks = Registries.BLOCK.get(Identifier.of(x.name() + "_planks"));
         return new StatueItem(StatueEntity.Type.of(x.name(), planks, false), new Item.Settings().maxCount(16));
     });
     //public static final Map<DyeColor, Item> BANNER_BED = register(DecorationsBlocks.BANNER_BED);
-
+    public static final Item GHOST_LIGHT = register(DecorationsBlocks.GHOST_LIGHT);
     public static final Item DISPLAY_CASE = register(DecorationsBlocks.DISPLAY_CASE);
     public static final Item LARGE_FLOWER_POT = register(DecorationsBlocks.LARGE_FLOWER_POT);
     public static final Item CANVAS = register("canvas", new CanvasItem(new Item.Settings().maxCount(16)));
-    public static final StatueItem STONE_STATUE = register("stone_statue", new StatueItem(StatueEntity.Type.STONE, new Item.Settings().maxCount(16)));
-    public static final StatueItem DEEPSLATE_STATUE = register("deepslate_statue", new StatueItem(StatueEntity.Type.DEEPSLATE, new Item.Settings().maxCount(16)));
-    public static final StatueItem BLACKSTONE_STATUE = register("blackstone_statue", new StatueItem(StatueEntity.Type.BLACKSTONE, new Item.Settings().maxCount(16)));
-    public static final StatueItem PRISMARINE_STATUE = register("prismarine_statue", new StatueItem(StatueEntity.Type.PRISMARINE, new Item.Settings().maxCount(16)));
-    public static final StatueItem SANDSTONE_STATUE = register("sandstone_statue", new StatueItem(StatueEntity.Type.SANDSTONE, new Item.Settings().maxCount(16)));
-    public static final StatueItem RED_SANDSTONE_STATUE = register("red_sandstone_statue", new StatueItem(StatueEntity.Type.RED_SANDSTONE, new Item.Settings().maxCount(16)));
-    public static final StatueItem QUARTZ_STATUE = register("quartz_statue", new StatueItem(StatueEntity.Type.QUARTZ, new Item.Settings().maxCount(16)));
+    public static final Map<StatueEntity.Type, StatueItem> OTHER_STATUE = registerList(StatueEntity.Type.NON_WOOD,
+            (t) -> t.type() + "_statue",
+            (t) -> new StatueItem(t, new Item.Settings().maxCount(16)));
 
+    private static <T extends Block & PolymerBlock, B, U extends Comparable<? super U>> Map<B, Item> register(Map<B, T> blockMap, Function<B, U> toComparable) {
+        var map = new LinkedHashMap<B, Item>();
+        var keys = new ArrayList<>(blockMap.keySet());
+        keys.sort(Comparator.comparing(toComparable));
+        for (var key : keys) {
+            map.put(key, register(blockMap.get(key)));
+        }
+        return map;
+    }
 
-    public static final Item GHOST_LIGHT = register(DecorationsBlocks.GHOST_LIGHT);
-    private static <T extends Block & PolymerBlock, B> Map<B, Item> register(Map<B, T> blockMap) {
-        var map = new HashMap<B, Item>();
-        blockMap.forEach((a, b) -> map.put(a, register(b)));
+    private static <T, I extends Item> Map<T, I> registerList(List<T> list, Function<T, String> statue, Function<T, I> item) {
+        var map = new LinkedHashMap<T, I>();
+        for (var key : list) {
+            map.putLast(key, register(statue.apply(key), item.apply(key)));
+        }
         return map;
     }
 
@@ -67,6 +86,8 @@ public class DecorationsItems {
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultStack())
                 .displayName(Text.translatable("itemgroup." + ModInit.ID))
                 .entries(((context, entries) -> {
+                    entries.add(TROWEL);
+                    entries.add(HAMMER);
                     entries.add(BRAZIER);
                     entries.add(SOUL_BRAZIER);
                     entries.add(GHOST_LIGHT);
@@ -74,14 +95,8 @@ public class DecorationsItems {
                     entries.add(DISPLAY_CASE);
                     entries.add(GLOBE);
                     entries.add(CANVAS);
-                    WoodUtil.<Item>forEach(List.of(BENCH, SHELF, SIGN_POST, WOODEN_MAILBOX, WOODEN_STATUE), entries::add);
-                    entries.add(STONE_STATUE);
-                    entries.add(DEEPSLATE_STATUE);
-                    entries.add(BLACKSTONE_STATUE);
-                    entries.add(SANDSTONE_STATUE);
-                    entries.add(RED_SANDSTONE_STATUE);
-                    entries.add(QUARTZ_STATUE);
-                    entries.add(PRISMARINE_STATUE);
+                    WoodUtil.<Item>forEach(List.of(BENCH, TABLE, SHELF, TOOL_RACK, SIGN_POST, WOODEN_MAILBOX, WOODEN_STATUE), entries::add);
+                    OTHER_STATUE.forEach((a, b) -> entries.add(b));
                 })).build()
         );
     }
@@ -100,7 +115,7 @@ public class DecorationsItems {
     }
 
     private static <T extends Item> Map<DyeColor, T> registerDye(String id, Function<DyeColor, T> object) {
-        var map = new HashMap<DyeColor, T>();
+        var map = new LinkedHashMap<DyeColor, T>();
 
         for (var x : DyeColor.values()) {
             var y = object.apply(x);

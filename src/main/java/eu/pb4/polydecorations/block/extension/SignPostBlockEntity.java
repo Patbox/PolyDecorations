@@ -190,7 +190,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             return new Sign(text, item, yaw, waxed, flip);
         }
 
-        public Sign withYaw(Item item) {
+        public Sign withYaw(float yaw) {
             return new Sign(text, item, yaw, waxed, flip);
         }
 
@@ -208,6 +208,14 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
 
         public Sign withFlip() {
             return new Sign(text, item, yaw, waxed, !flip);
+        }
+
+        public boolean isEmpty() {
+            return this.item == Items.AIR;
+        }
+
+        public Sign withYawAdded(float yawAdded) {
+            return new Sign(text, item, yaw + yawAdded, waxed, flip);
         }
     }
 

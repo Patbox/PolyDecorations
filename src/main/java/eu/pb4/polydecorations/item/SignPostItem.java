@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 
 public class SignPostItem extends Item implements AutoModeledPolymerItem {
     private final Item item = BaseItemProvider.requestItem();
@@ -39,7 +40,7 @@ public class SignPostItem extends Item implements AutoModeledPolymerItem {
         if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof SignPostBlockEntity be) {
             var text = be.getText(upper);
             if (text.item() == Items.AIR) {
-                be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), 180 + context.getPlayerYaw()));
+                be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), roundAngle(180 + context.getPlayerYaw())));
                         //.withFlip(context.getPlayerYaw() > 90 || context.getPlayerYaw() < -90));
                 if (context.getPlayer() instanceof ServerPlayerEntity player) {
                     be.openText(upper, player);
@@ -48,6 +49,10 @@ public class SignPostItem extends Item implements AutoModeledPolymerItem {
             }
         }
         return super.useOnBlock(context);
+    }
+
+    public static float roundAngle(float v) {
+        return Math.round(v / 15) * 15;
     }
 
     @Override

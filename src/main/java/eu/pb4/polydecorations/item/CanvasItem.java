@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.polydecorations.entity.CanvasEntity;
+import net.minecraft.block.MapColor;
 import net.minecraft.component.ComponentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -21,6 +22,7 @@ import net.minecraft.world.event.GameEvent;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
@@ -64,7 +66,9 @@ public class CanvasItem extends ModeledItem {
         if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isPresent()) {
             return super.getTranslationKey(stack) +
                     (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).glowing() ? ".glowing" : "") +
-                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).waxed() ? ".waxed" : "");
+                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).waxed() ? ".waxed" : "") +
+                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).cut() ? ".cut" : "")
+                    ;
         }
         return super.getTranslationKey(stack) + ".empty";
     }
@@ -94,6 +98,7 @@ public class CanvasItem extends ModeledItem {
                             .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             return;
         }
+        var background = stack.getOrDefault(DATA_TYPE, Data.DEFAULT).background().orElse(CanvasColor.OFF_WHITE_NORMAL);
         var datac = stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image();
         if (datac.isPresent() && datac.get().length != 16 * 16) {
             return;
@@ -102,7 +107,7 @@ public class CanvasItem extends ModeledItem {
         var data = datac.get();
 
 
-        for (var y = 0; y < 16*16; y += 32) {
+        for (var y = 0; y < 16 * 16; y += 32) {
             var text = Text.empty().setStyle(Style.EMPTY.withFont(id("canvas")));
             var builder = new StringBuilder();
             var color = CanvasColor.CLEAR;
@@ -112,28 +117,27 @@ public class CanvasItem extends ModeledItem {
                     builder.append("c");
                 }
                 var cColor = CanvasColor.getFromRaw(data[x + y]);
-                if (cColor == CanvasColor.CLEAR) {
-                    cColor = CanvasColor.OFF_WHITE_NORMAL;
-                }
                 if (cColor != color) {
-                    text.append(Text.literal(builder.toString()).withColor(color == CanvasColor.CLEAR ? 0xffffff : color.getRgbColor()));
+                    text.append(Text.literal(builder.toString()).withColor(color == CanvasColor.CLEAR ? background.getRgbColor() : color.getRgbColor()));
                     builder = new StringBuilder();
                     color = cColor;
                 }
-                builder.append(cColor == CanvasColor.CLEAR ? "a" : x >= 16 ? "_b" : "-b");
+                builder.append(cColor == CanvasColor.CLEAR_FORCE ? "a" : x >= 16 ? "_b" : "-b");
             }
-            text.append(Text.literal(builder.toString()).withColor(color == CanvasColor.CLEAR ? 0xffffff : color.getRgbColor()));
+            text.append(Text.literal(builder.toString()).withColor(color.getColor() == MapColor.CLEAR ? background.getRgbColor() : color.getRgbColor()));
             tooltip.add(text);
         }
         tooltip.add(Text.empty());
     }
     public static final ComponentType<Data> DATA_TYPE = ComponentType.<Data>builder().codec(Data.CODEC).cache().build();
-    public record Data(Optional<byte[]> image, boolean glowing, boolean waxed) {
+    public record Data(Optional<byte[]> image, Optional<CanvasColor> background, boolean glowing, boolean waxed, boolean cut) {
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.BYTE_BUFFER.xmap(ByteBuffer::array, ByteBuffer::wrap).optionalFieldOf("image").forGetter(Data::image),
+                Codec.BYTE.xmap(CanvasColor::getFromRaw, CanvasColor::getRenderColor).optionalFieldOf("background").forGetter(Data::background),
                 Codec.BOOL.optionalFieldOf("glowing", false).forGetter(Data::glowing),
-                Codec.BOOL.optionalFieldOf("waxed", false).forGetter(Data::waxed)
+                Codec.BOOL.optionalFieldOf("waxed", false).forGetter(Data::waxed),
+                Codec.BOOL.optionalFieldOf("cut", false).forGetter(Data::cut)
         ).apply(instance, Data::new));
-        public static final Data DEFAULT = new Data(Optional.empty(), false, false);
+        public static final Data DEFAULT = new Data(Optional.empty(),  Optional.empty(), false, false, false);
     }
 }

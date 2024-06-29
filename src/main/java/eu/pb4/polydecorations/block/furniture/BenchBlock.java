@@ -44,7 +44,7 @@ import org.joml.Vector3f;
 import java.util.Locale;
 
 public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
-    public static final DirectionProperty FACING = Properties.FACING;
+    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<Type> TYPE = EnumProperty.of("type", Type.class);
     public static final BooleanProperty HAS_REST = BooleanProperty.of("has_rest");
     private final ItemStack leftModel;
@@ -59,13 +59,13 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
     public BenchBlock(Identifier identifier, Settings settings, Block planks) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
-        this.leftModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
-        this.rightModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
-        this.middleModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
-        this.noRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest"));
-        this.leftNoRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_left"));
-        this.rightNoRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
-        this.middleNoRestModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
+        this.leftModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
+        this.rightModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
+        this.middleModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
+        this.noRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest"));
+        this.leftNoRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest_left"));
+        this.rightNoRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
+        this.middleNoRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
         this.base = planks;
     }
 
@@ -143,7 +143,7 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
         var rest = state.get(HAS_REST);
 
         if (facing.rotateYClockwise() == direction) {
-            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && state.get(FACING) == facing) {
+            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && neighborState.get(FACING) == facing) {
                 state = state.with(TYPE, switch (type) {
                     case MIDDLE, LEFT -> Type.MIDDLE;
                     case RIGHT, BOTH -> Type.RIGHT;
@@ -155,7 +155,7 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
                 });
             }
         } else if (facing.rotateYCounterclockwise() == direction) {
-            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && state.get(FACING) == facing) {
+            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && neighborState.get(FACING) == facing) {
                 state = state.with(TYPE, switch (type) {
                     case MIDDLE, RIGHT -> Type.MIDDLE;
                     case LEFT, BOTH -> Type.LEFT;

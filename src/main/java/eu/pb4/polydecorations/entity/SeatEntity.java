@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.entity;
 
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
@@ -67,7 +68,16 @@ public class SeatEntity extends Entity implements PolymerEntity {
 
     @Override
     public Vec3d updatePassengerForDismount(LivingEntity passenger) {
-        return Vec3d.ofBottomCenter(this.getBlockPos()).offset(this.direction, 1);
+        var box = passenger.getBoundingBox(EntityPose.STANDING);
+        var curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(this.direction, 1);
+        if (this.getWorld().isSpaceEmpty(box.offset(curr))) {
+           return curr;
+        }
+        curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(Direction.UP, 1);
+        if (this.getWorld().isSpaceEmpty(box.offset(curr))) {
+            return curr;
+        }
+        return Vec3d.ofBottomCenter(this.getBlockPos());
     }
 
     @Override

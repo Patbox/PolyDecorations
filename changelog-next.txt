@@ -1,0 +1,26 @@
+- Added Trowel!
+ - Adds +1 block reach when held in main hand.
+ - Automatically place random blocks from your hotbar!
+ - If you hold a block in offhand, you will place it instead of a random one, but you still hain reach bonus!
+- Added Hammer!
+ - Use it to rotate / change state of vanilla and PolyDecorations blocks!
+- Added Tool Racks!
+ - Based on ones from BiblioCraft (remember that mod?)
+ - Allows you to put up to 4 tools on it.
+ - No uis, just click to place/take the items.
+- Added Wooden Tables!
+ - Multiple tables will connect with each other, if placed alongside each.
+ - Purely decorative.
+- You can now remove background from canvas!
+  - Craft it with shears to remove the background.
+  - You can still paint on it, through only on visible part.
+  - Craft it with paper to add background again.
+- Added Statues from new materials!
+ - Andesite, Diorite, Granite, Tuff, Stone Bricks, Tuff Bricks, regular and colored Terracota.
+ - To allow for this, texture position on the model were changed.
+- Sign Post's rotation is now rounded to 15 degrees. Already placed ones are unchanged through.
+- Polydex: Display Cases now show name of held item aside of its own in hovers.
+- Bug Fixes!
+ - Fixed models of tridents/spyglass when placed on display/shelf/etc.
+ - Fixed model desync when ran on the client in modpack scenario.
+ - Placing lanterns on walls now plays sound and animation.

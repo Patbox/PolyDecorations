@@ -10,8 +10,9 @@ import eu.pb4.mapcanvas.api.utils.VirtualDisplay;
 import eu.pb4.polydecorations.item.CanvasItem;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.block.MapColor;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -22,14 +23,13 @@ import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -38,7 +38,9 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
@@ -48,6 +50,13 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     private VirtualDisplay display;
     private boolean glowing;
     private boolean waxed;
+    private boolean cut;
+    private Optional<CanvasColor> background = Optional.empty();
+    private final Set<ServerPlayerEntity> players = new HashSet<>();
+
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType"})
+    @Nullable
+    private static Optional<ComponentType<Integer>> POLYFACTORY_COLOR = null;
 
     @Nullable
     private Text name;
@@ -57,6 +66,21 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         this.canvas = DrawableCanvas.create();
 
         CanvasUtils.clear(this.canvas, CanvasColor.OFF_WHITE_NORMAL);
+    }
+
+    public static Optional<CanvasColor> getColor(ItemStack stack) {
+        //noinspection OptionalAssignedToNull
+        if (POLYFACTORY_COLOR == null) {
+            //noinspection unchecked
+            POLYFACTORY_COLOR = Optional.ofNullable((ComponentType<Integer>) Registries.DATA_COMPONENT_TYPE.get(Identifier.of("polyfactory:color")));
+        }
+        if (stack.getItem() instanceof DyeItem dyeItem) {
+            return Optional.ofNullable(CanvasColor.from(dyeItem.getColor().getMapColor(), MapColor.Brightness.NORMAL));
+        } else if (POLYFACTORY_COLOR.isPresent() && stack.contains(POLYFACTORY_COLOR.get())) {
+            //noinspection DataFlowIssue
+            return Optional.ofNullable(CanvasUtils.findClosestColor(stack.get(POLYFACTORY_COLOR.get())));
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -79,13 +103,27 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     @Override
     public void onStartedTrackingBy(ServerPlayerEntity player) {
         if (this.display == null) {
-            this.display = VirtualDisplay.builder(this.canvas, this.attachedBlockPos, this.getHorizontalFacing())
-                    .glowing(this.glowing)
-                    .callback(this::onUsed)
-                    .build();
+            this.setupDisplay();
         }
+        this.players.add(player);
         this.canvas.addPlayer(player);
         this.display.addPlayer(player);
+    }
+
+    private void setupDisplay() {
+        this.display = VirtualDisplay.builder(this.canvas, this.attachedBlockPos, this.getHorizontalFacing())
+                .glowing(this.glowing)
+                .invisible(this.cut)
+                .callback(this::onUsed)
+                .build();
+    }
+
+    private void rebuildDisplay() {
+        if (this.display != null) {
+            this.display.destroy();
+            setupDisplay();
+            this.players.forEach(this.display::addPlayer);
+        }
     }
 
     private void fromByteArray(byte[] data) {
@@ -109,7 +147,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
 
     private CanvasColor getColor(byte color) {
         if (color == 0) {
-            return CanvasColor.OFF_WHITE_NORMAL;
+            return this.background.orElse(CanvasColor.OFF_WHITE_NORMAL);
         }
         return CanvasColor.getFromRaw(color);
     }
@@ -138,16 +176,20 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
             stack = serverPlayerEntity.getOffHandStack();
         }
 
+        var raw = CanvasColor.getFromRaw(this.data[x + y * 16]);
+
+        if (this.cut && raw == CanvasColor.CLEAR_FORCE) {
+            return;
+        }
+
         if (stack.isIn(ConventionalItemTags.DYES)) {
-            if (stack.getItem() instanceof DyeItem dyeItem) {
-                color = CanvasColor.from(dyeItem.getColor().getMapColor(), MapColor.Brightness.NORMAL);
-            } /*else if (stack.hasNbt() && stack.getNbt().contains("color", NbtElement.INT_TYPE)) {
-                color = CanvasUtils.findClosestColor(stack.getNbt().getInt("color"));
-            }*/
+            var a = getColor(stack);
+            if (a.isPresent()) {
+                color = a.get();
+            }
         } else if (stack.isOf(Items.SPONGE)) {
             color = CanvasColor.CLEAR;
-        } else if (stack.isOf(Items.COAL)) {
-            var raw = CanvasColor.getFromRaw(this.data[x + y * 16]);
+        } else if (stack.isOf(Items.COAL) && raw.getColor() != MapColor.CLEAR) {
             if (raw.getBrightness() != MapColor.Brightness.LOWEST) {
                 color = CanvasColor.from(raw.getColor(), switch (raw.getBrightness()) {
                     case HIGH -> MapColor.Brightness.NORMAL;
@@ -155,8 +197,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
                     default -> MapColor.Brightness.LOWEST;
                 });
             }
-        } else if (stack.isOf(Items.BONE_MEAL)) {
-            var raw = CanvasColor.getFromRaw(this.data[x + y * 16]);
+        } else if (stack.isOf(Items.BONE_MEAL) && raw.getColor() != MapColor.CLEAR) {
             if (raw.getBrightness() != MapColor.Brightness.HIGH) {
                 color = CanvasColor.from(raw.getColor(), switch (raw.getBrightness()) {
                     case LOWEST -> MapColor.Brightness.LOW;
@@ -174,6 +215,9 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         for (var xi = x - radius; xi <= x + radius; xi++) {
             for (var yi = y - radius; yi <= y + radius; yi++) {
                 if (xi < 0 || xi >= 16 || yi < 0 || yi >= 16) {
+                    continue;
+                }
+                if (this.data[xi + yi * 16] == 1) {
                     continue;
                 }
 
@@ -196,6 +240,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         if (this.display != null) {
             this.display.removePlayer(player);
         }
+        this.players.remove(player);
     }
 
     @Override
@@ -219,24 +264,42 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         }
         var comp = stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT);
 
-        comp.image().ifPresent(this::fromByteArray);
-
+        this.background = comp.background();
         this.glowing = comp.glowing();
         this.waxed = comp.waxed();
+        this.cut = comp.cut();
+        if (comp.image().isPresent()) {
+            this.fromByteArray(comp.image().get());
+        } else {
+            CanvasUtils.clear(this.canvas, this.background.orElse(CanvasColor.OFF_WHITE_NORMAL));
+        }
+
         this.name = stack.get(DataComponentTypes.CUSTOM_NAME);
+        this.rebuildDisplay();
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         this.facing = Direction.fromHorizontal(nbt.getByte("facing"));
-        fromByteArray(nbt.getByteArray("data"));
         this.glowing = nbt.getBoolean("glowing");
         this.waxed = nbt.getBoolean("waxed");
+        this.cut = nbt.getBoolean("cut");
+        if (nbt.contains("background")) {
+            this.background = Optional.ofNullable(CanvasColor.getFromRaw(nbt.getByte("background")));
+        } else {
+            this.background = Optional.empty();
+        }
+
+        fromByteArray(nbt.getByteArray("data"));
+
         if (nbt.contains("name")) {
             this.name = Text.Serialization.fromLenientJson(nbt.getString("name"), this.getRegistryManager());
         }
+
+
         this.setFacing(this.facing);
+        this.rebuildDisplay();
     }
 
     @Override
@@ -246,6 +309,8 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         nbt.putByteArray("data", Arrays.copyOf(this.data, this.data.length));
         nbt.putBoolean("glowing", this.glowing);
         nbt.putBoolean("waxed", this.waxed);
+        nbt.putBoolean("cut", this.cut);
+        this.background.ifPresent(canvasColor -> nbt.putByte("background", canvasColor.getRenderColor()));
         if (this.name != null) {
             nbt.putString("name", Text.Serialization.toJsonString(this.name, this.getRegistryManager()));
         }
@@ -284,7 +349,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
             }
         }
 
-        stack.set(CanvasItem.DATA_TYPE, new CanvasItem.Data(Optional.ofNullable(data), this.glowing, this.waxed));
+        stack.set(CanvasItem.DATA_TYPE, new CanvasItem.Data(Optional.ofNullable(data), this.background, this.glowing, this.waxed, this.cut));
 
         if (this.name != null) {
             stack.set(DataComponentTypes.CUSTOM_NAME, this.name);
