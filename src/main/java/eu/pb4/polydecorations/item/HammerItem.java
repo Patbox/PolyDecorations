@@ -10,10 +10,8 @@ import eu.pb4.polydecorations.block.item.*;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.registry.Registries;
@@ -22,12 +20,9 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Util;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 
-import javax.tools.Tool;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -102,7 +97,7 @@ public class HammerItem extends ModeledItem {
 
     static {
         ACTIONS_BY_CLASS.add(Pair.of(PillarBlock.class, Action.cycleState(PillarBlock.AXIS)));
-        ACTIONS_BY_CLASS.add(Pair.of(SlabBlock.class, Action.cycleState(SlabBlock.TYPE)));
+        ACTIONS_BY_CLASS.add(Pair.of(SlabBlock.class, Action.cycleLimitedState(SlabBlock.TYPE, List.of(SlabType.TOP, SlabType.BOTTOM))));
         ACTIONS_BY_CLASS.add(Pair.of(TrapdoorBlock.class, Action.cycleState(TrapdoorBlock.FACING)));
         ACTIONS_BY_CLASS.add(Pair.of(FenceGateBlock.class, Action.cycleState(FenceGateBlock.FACING)));
         ACTIONS_BY_CLASS.add(Pair.of(BambooBlock.class, Action.cycleState(BambooBlock.LEAVES)));
@@ -152,6 +147,16 @@ public class HammerItem extends ModeledItem {
                 var curr = state.get(property);
                 var list = List.copyOf(property.getValues());
                 return state.with(property, list.get((list.size() + list.indexOf(curr) + (reverse ? -1 : 1)) % list.size()));
+            };
+        }
+
+        static <T extends Comparable<T>> Action cycleLimitedState(Property<T> property, List<T> available) {
+            return (state, world, pos, hitResult, reverse) -> {
+                var curr = state.get(property);
+                if (!available.contains(curr)) {
+                    return state;
+                }
+                return state.with(property, available.get((available.size() + available.indexOf(curr) + (reverse ? -1 : 1)) % available.size()));
             };
         }
 
