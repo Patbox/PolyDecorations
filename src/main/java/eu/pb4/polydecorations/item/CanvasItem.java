@@ -29,7 +29,7 @@ import static eu.pb4.polydecorations.ModInit.id;
 
 public class CanvasItem extends ModeledItem {
     public CanvasItem(Settings settings) {
-        super(settings);
+        super(settings.component(DATA_TYPE, Data.DEFAULT));
     }
 
     @Override

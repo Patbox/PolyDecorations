@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.ItemUseLimiter;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
@@ -37,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     private final Block base;
 

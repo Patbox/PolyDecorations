@@ -8,7 +8,9 @@ import eu.pb4.mapcanvas.api.font.DefaultFonts;
 import eu.pb4.mapcanvas.api.utils.CanvasUtils;
 import eu.pb4.mapcanvas.api.utils.VirtualDisplay;
 import eu.pb4.polydecorations.item.CanvasItem;
+import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polydecorations.item.DecorationsItems;
+import eu.pb4.polydecorations.util.DecorationSoundEvents;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.block.MapColor;
@@ -25,7 +27,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
@@ -41,8 +42,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
-import static eu.pb4.polydecorations.ModInit.id;
 
 public class CanvasEntity extends AbstractDecorationEntity implements PolymerEntity {
     private byte[] data = new byte[16 * 16];
@@ -187,9 +186,9 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
             if (a.isPresent()) {
                 color = a.get();
             }
-        } else if (stack.isOf(Items.SPONGE)) {
+        } else if (stack.isIn(DecorationsItemTags.CANVAS_CLEAR_PIXELS)) {
             color = CanvasColor.CLEAR;
-        } else if (stack.isOf(Items.COAL) && raw.getColor() != MapColor.CLEAR) {
+        } else if (stack.isIn(DecorationsItemTags.CANVAS_DARKEN_PIXELS) && raw.getColor() != MapColor.CLEAR) {
             if (raw.getBrightness() != MapColor.Brightness.LOWEST) {
                 color = CanvasColor.from(raw.getColor(), switch (raw.getBrightness()) {
                     case HIGH -> MapColor.Brightness.NORMAL;
@@ -197,7 +196,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
                     default -> MapColor.Brightness.LOWEST;
                 });
             }
-        } else if (stack.isOf(Items.BONE_MEAL) && raw.getColor() != MapColor.CLEAR) {
+        } else if (stack.isIn(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS) && raw.getColor() != MapColor.CLEAR) {
             if (raw.getBrightness() != MapColor.Brightness.HIGH) {
                 color = CanvasColor.from(raw.getColor(), switch (raw.getBrightness()) {
                     case LOWEST -> MapColor.Brightness.LOW;
@@ -318,11 +317,11 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
 
     @Override
     public void onPlace() {
-        this.playSound(SoundEvent.of(id("entity.canvas.place")), 1.0F, 1.0F);
+        this.playSound(DecorationSoundEvents.CANVAS_PLACE, 1.0F, 1.0F);
     }
     @Override
     public void onBreak(@Nullable Entity entity) {
-        this.playSound(SoundEvent.of(id("entity.canvas.break")), 1.0F, 1.0F);
+        this.playSound(DecorationSoundEvents.CANVAS_BREAK, 1.0F, 1.0F);
 
         var stack = this.toStack();
         if (entity instanceof PlayerEntity player && player.isCreative()

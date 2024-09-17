@@ -25,6 +25,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.collection.DefaultedList;
@@ -202,6 +203,10 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             return Text.empty().append(this.text.getMessage(0, false)).withColor(text.getColor().getSignColor());
         }
 
+        public Text getUncoloredText() {
+            return this.text.getMessage(0, false);
+        }
+
         public Sign withFlip(boolean flip) {
             return new Sign(text, item, yaw, waxed, flip);
         }
@@ -216,6 +221,14 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
 
         public Sign withYawAdded(float yawAdded) {
             return new Sign(text, item, yaw + yawAdded, waxed, flip);
+        }
+
+        public DyeColor dye() {
+            return this.text.getColor();
+        }
+
+        public boolean glowing() {
+            return this.text.isGlowing();
         }
     }
 

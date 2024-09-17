@@ -1,0 +1,83 @@
+{
+	"credit": "Made with Blockbench by patpuck",
+	"textures": {
+		"2": "polydecorations:block/trashcan/bin_lid",
+		"6": "polydecorations:block/trashcan/bin_rims",
+		"8": "polydecorations:block/trashcan/bin_lid_bottom",
+		"particle": "polydecorations:block/trashcan/bin_side"
+	},
+	"elements": [
+		{
+			"from": [1, 13, 1],
+			"to": [15, 16, 15],
+			"rotation": {"angle": 0, "axis": "y", "origin": [2, 0, 2]},
+			"faces": {
+				"north": {"uv": [0, 0, 14, 3], "texture": "#6"},
+				"east": {"uv": [0, 0, 14, 3], "texture": "#6"},
+				"south": {"uv": [0, 0, 14, 3], "texture": "#6"},
+				"west": {"uv": [0, 0, 14, 3], "texture": "#6"},
+				"up": {"uv": [1, 1, 15, 15], "texture": "#2"},
+				"down": {"uv": [1, 1, 15, 15], "texture": "#8"}
+			}
+		},
+		{
+			"from": [5, 16, 7],
+			"to": [11, 18, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 16, 7]},
+			"faces": {
+				"east": {"uv": [16, 6, 14, 8], "texture": "#6"},
+				"west": {"uv": [14, 6, 16, 8], "texture": "#6"},
+				"up": {"uv": [14, 0, 16, 6], "rotation": 90, "texture": "#6"}
+			}
+		},
+		{
+			"from": [11, 16, 7],
+			"to": [5, 18, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [13, 16, 7]},
+			"faces": {
+				"east": {"uv": [16, 6, 14, 8], "texture": "#6"},
+				"west": {"uv": [14, 6, 16, 8], "texture": "#6"},
+				"up": {"uv": [14, 0, 16, 6], "rotation": 90, "texture": "#6"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [75, 45, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 45, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 225, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 225, 0],
+			"scale": [0.625, 0.625, 0.625]
+		},
+		"fixed": {
+			"scale": [0.5, 0.5, 0.5]
+		}
+	},
+	"groups": [
+		{
+			"name": "lid",
+			"origin": [13, 16, 7],
+			"color": 0,
+			"children": [0, 1, 2]
+		}
+	]
+}

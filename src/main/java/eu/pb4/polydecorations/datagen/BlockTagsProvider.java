@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.datagen;
 
+import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.polydecorations.block.DecorationsBlockTags;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -33,7 +34,10 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.SOUL_BRAZIER)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT)
                 .add(DecorationsBlocks.DISPLAY_CASE)
+                .add(DecorationsBlocks.TRASHCAN)
         ;
+
+        this.getOrCreateTagBuilder(BlockTags.CLIMBABLE).add(DecorationsBlocks.ROPE);
 
         this.getOrCreateTagBuilder(DecorationsBlockTags.BRAZIERS)
                 .add(DecorationsBlocks.BRAZIER, DecorationsBlocks.SOUL_BRAZIER);

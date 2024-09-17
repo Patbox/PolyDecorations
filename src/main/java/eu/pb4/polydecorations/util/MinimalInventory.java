@@ -8,9 +8,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 
 import java.util.Iterator;
+import java.util.List;
 
 public interface MinimalInventory extends Inventory {
-    DefaultedList<ItemStack> getStacks();
+    List<ItemStack> getStacks();
 
     @Override
     default int size() {
@@ -19,18 +20,13 @@ public interface MinimalInventory extends Inventory {
 
     @Override
     default boolean isEmpty() {
-        Iterator var1 = this.getStacks().iterator();
-
-        ItemStack itemStack;
-        do {
-            if (!var1.hasNext()) {
-                return true;
+        for (var stack : this.getStacks()) {
+            if (!stack.isEmpty()) {
+                return false;
             }
+        }
 
-            itemStack = (ItemStack)var1.next();
-        } while(itemStack.isEmpty());
-
-        return false;
+        return true;
     }
 
     @Override
@@ -50,8 +46,11 @@ public interface MinimalInventory extends Inventory {
 
     @Override
     default ItemStack removeStack(int slot) {
-        this.markDirty();
-        return Inventories.removeStack(this.getStacks(), slot);
+        var itemStack = Inventories.removeStack(this.getStacks(), slot);
+        if (!itemStack.isEmpty()) {
+            this.markDirty();
+        }
+        return itemStack;
     }
 
     @Override

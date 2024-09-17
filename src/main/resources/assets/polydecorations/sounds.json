@@ -15,5 +15,85 @@
       "entity/itemframe/place4"
     ],
     "subtitle": "subtitles.polydecorations.entity.canvas.place"
-  }
+  },
+  "block.trashcan.close": {
+    "sounds": [
+      {
+        "name": "block/lantern/place1",
+        "pitch": 0.9
+      },
+      {
+        "name": "block/lantern/place2",
+        "pitch": 0.9
+      },
+      {
+        "name": "block/lantern/place3",
+        "pitch": 0.9
+      },
+      {
+        "name": "block/lantern/place4",
+        "pitch": 0.9
+      },
+      {
+        "name": "block/lantern/place5",
+        "pitch": 0.9
+      },
+      {
+        "name": "block/lantern/place6",
+        "pitch": 0.9
+      }
+    ],
+    "subtitle": "subtitles.polydecorations.block.trashcan.close"
+  },
+
+  "block.trashcan.open": {
+      "sounds": [
+        {
+          "name": "block/lantern/place1",
+          "pitch": 1.2
+        },
+        {
+          "name": "block/lantern/place2",
+          "pitch": 1.2
+        },
+        {
+          "name": "block/lantern/place3",
+          "pitch": 1.2
+        },
+        {
+          "name": "block/lantern/place4",
+          "pitch": 1.2
+        },
+        {
+          "name": "block/lantern/place5",
+          "pitch": 1.2
+        },
+        {
+          "name": "block/lantern/place6",
+          "pitch": 1.2
+        }
+      ],
+      "subtitle": "subtitles.polydecorations.block.trashcan.open"
+    },
+    "block.trashcan.clear": {
+      "sounds": [
+        {
+          "name": "block/sponge/break1",
+          "pitch": 0.9
+        },
+        {
+          "name": "block/sponge/break2",
+          "pitch": 0.9
+        },
+        {
+          "name": "block/sponge/break3",
+          "pitch": 0.9
+        },
+        {
+          "name": "block/sponge/break4",
+          "pitch": 0.9
+        }
+      ],
+      "subtitle": "subtitles.polydecorations.block.trashcan.clear"
+    }
 }

@@ -6,6 +6,7 @@ import eu.pb4.polydecorations.block.furniture.BrazierBlock;
 import eu.pb4.polydecorations.block.item.GlobeBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.entity.DecorationsEntities;
+import eu.pb4.polydecorations.model.DecorationsModels;
 import eu.pb4.polydecorations.polydex.PolydexCompat;
 import eu.pb4.polydecorations.recipe.DecorationsRecipeSerializers;
 import eu.pb4.polydecorations.recipe.DecorationsRecipeTypes;
@@ -47,12 +48,12 @@ public class ModInit implements ModInitializer {
 
 		DecorationsBlocks.register();
 		DecorationsBlockEntities.register();
+		DecorationsModels.register();
 		DecorationsItems.register();
 		DecorationsEntities.register();
 		DecorationsRecipeTypes.register();
 		DecorationsRecipeSerializers.register();
 		DecorationsUtil.register();
-		DebugData.register();
 
 		initModels();
 		UiResourceCreator.setup();

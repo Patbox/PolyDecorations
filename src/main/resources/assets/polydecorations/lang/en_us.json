@@ -76,6 +76,8 @@
   "block.polydecorations.display_case": "Display Case",
   "block.polydecorations.large_flower_pot": "Large Flower Pot",
   "block.polydecorations.ghost_light": "Ghost Light",
+  "block.polydecorations.trashcan": "Trash Can",
+  "block.polydecorations.rope": "Rope",
 
   "item.polydecorations.stone_statue": "Stone Statue",
   "item.polydecorations.deepslate_statue": "Deepslate Statue",
@@ -146,5 +148,9 @@
   "text.polydecorations.tooltip.coal_and_bone_meal": "Coal and Bone Meal",
 
   "subtitles.polydecorations.entity.canvas.break": "Canvas breaks",
-  "subtitles.polydecorations.entity.canvas.place": "Canvas placed"
+  "subtitles.polydecorations.entity.canvas.place": "Canvas placed",
+  "subtitles.polydecorations.block.trashcan.open": "Trash Can opens",
+  "subtitles.polydecorations.block.trashcan.close": "Trash Can closes",
+  "subtitles.polydecorations.block.trashcan.clear": "Trash Can empties"
+
 }

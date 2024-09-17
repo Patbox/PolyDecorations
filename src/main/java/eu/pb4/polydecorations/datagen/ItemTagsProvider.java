@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.ItemTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -59,6 +60,17 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
                 .add(Items.TRIDENT)
                 .add(Items.SHIELD)
         ;
+
+        this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_CLEAR_PIXELS)
+                .add(Items.PAPER)
+                .add(Items.SPONGE)
+                .add(Items.WET_SPONGE);
+
+        this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_DARKEN_PIXELS)
+                .addOptionalTag(ItemTags.COALS);
+
+        this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS)
+                .add(Items.BONE_MEAL);
     }
 
 

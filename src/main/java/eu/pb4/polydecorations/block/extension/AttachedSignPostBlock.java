@@ -5,6 +5,7 @@ import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
+import eu.pb4.polydecorations.model.SignLikeText;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.virtualentity.api.BlockWithElementHolder;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -114,9 +115,9 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
 
     public final class Model extends BlockModel {
         private final ItemDisplayElement upperBack;
-        private final TextDisplayElement upperText;
+        private final SignLikeText upperText;
         private final ItemDisplayElement lowerBack;
-        private final TextDisplayElement lowerText;
+        private final SignLikeText lowerText;
 
 
         public Model() {
@@ -124,20 +125,16 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
             this.upperBack.setScale(new Vector3f(2));
             this.upperBack.setDisplaySize(1, 1);
 
-            this.upperText = new TextDisplayElement();
-            this.upperText.setBackground(0);
+            this.upperText = new SignLikeText();
             this.upperText.setViewRange(0.6f);
             this.upperText.setScale(new Vector3f(0.5f));
             this.upperText.setDisplaySize(1, 1);
-            this.upperText.setInvisible(true);
 
             this.lowerBack = LodItemDisplayElement.createSimple();
             this.lowerBack.setScale(new Vector3f(2));
             this.lowerBack.setDisplaySize(1, 1);
 
-            this.lowerText = new TextDisplayElement();
-            this.lowerText.setInvisible(true);
-            this.lowerText.setBackground(0);
+            this.lowerText = new SignLikeText();
             this.lowerText.setViewRange(0.6f);
             this.lowerText.setScale(new Vector3f(0.5f));
             this.lowerText.setDisplaySize(1, 1);
@@ -163,8 +160,7 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
             var zOffset = (upperText.flip() ? -1 : 1) * (r + 0.5f / 16f);
             var zOffsetText = (r + 1.05f / 16f);
 
-            this.upperText.setText(upperText.getText());
-            this.upperText.setBrightness(upperText.text().isGlowing() ? new Brightness(15, 15) : null);
+            this.upperText.setText(upperText.getUncoloredText(), upperText.dye(), upperText.glowing());
             this.upperText.setTranslation(new Vector3f(0, 3.5f / 16f, zOffsetText));
             this.upperText.setYaw(upperText.yaw());
             this.upperText.tick();
@@ -188,9 +184,8 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
             var zOffset = (lowerText.flip() ? -1 : 1) * (r + 0.5f / 16f);
             var zOffsetText = (r + 1.05f / 16f);
 
-            this.lowerText.setText(lowerText.getText());
+            this.lowerText.setText(lowerText.getUncoloredText(), lowerText.dye(), lowerText.glowing());
             this.lowerText.setYaw(lowerText.yaw());
-            this.lowerText.setBrightness(lowerText.text().isGlowing() ? new Brightness(15, 15) : null);
             this.lowerText.setTranslation(new Vector3f(0, -4.5f / 16f, zOffsetText));
             this.lowerText.tick();
 

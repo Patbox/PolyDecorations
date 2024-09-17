@@ -8,6 +8,7 @@ import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.block.furniture.BenchBlock;
 import eu.pb4.polydecorations.block.furniture.TableBlock;
 import eu.pb4.polydecorations.item.DecorationsItems;
+import eu.pb4.polydecorations.model.DecorationsModels;
 import eu.pb4.polydecorations.ui.UiResourceCreator;
 import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polydecorations.util.WoodUtil;
@@ -265,7 +266,11 @@ class CustomAssetProvider implements DataProvider {
             );
         });
 
-        writeBaseTable(writer);
+        try {
+            writeBaseTable(writer);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
 
 
         writeStatue("deepslate", "block/deepslate_top", writer);
@@ -293,9 +298,11 @@ class CustomAssetProvider implements DataProvider {
         }
 
         //System.out.println(b);
+
+        DecorationsModels.ROPE.generateModels(writer);
     }
 
-    private void writeBaseTable(BiConsumer<String,byte[]> writer) {
+    private void writeBaseTable(BiConsumer<String,byte[]> writer) throws IOException {
         var json = JsonParser.parseString(new String(Objects.requireNonNull(ResourceUtils.getJarData("assets/polydecorations/models/block/base_table.json"))));
 
         for (int i = 1; i < TableBlock.TableModel.COUNT; i++) {

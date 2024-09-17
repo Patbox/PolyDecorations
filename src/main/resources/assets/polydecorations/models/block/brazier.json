@@ -2,7 +2,6 @@
   "parent": "polydecorations:block/unlit_brazier",
   "textures": {
 	"fire": "block/campfire_fire",
-	"base": "block/campfire_log_lit",
-	"particle": "block/campfire_fire"
+	"base": "block/campfire_log_lit"
   }
 }

@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.ItemUseLimiter;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
@@ -43,7 +44,7 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
     public static final DirectionProperty FACING = Properties.FACING;
 
     public DisplayCaseBlock(Settings settings) {
@@ -92,6 +93,11 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
 
     public FluidState getFluidState(BlockState state) {
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public boolean preventUseItemWhileTargetingBlock(ServerPlayerEntity player, BlockState blockState, World world, BlockHitResult result, ItemStack stack, Hand hand) {
+        return world.getBlockEntity(result.getBlockPos()) instanceof GenericSingleItemBlockEntity be && be.isEmpty() && All.super.preventUseItemWhileTargetingBlock(player, blockState, world, result, stack, hand);
     }
 
     @Override

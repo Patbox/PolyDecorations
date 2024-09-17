@@ -3,7 +3,7 @@
 		"2": "polydecorations:block/brazier_side",
 		"3": "polydecorations:block/empty",
 		"4": "polydecorations:block/brazier_base",
-		"particle": "polydecorations:block/empty",
+		"particle": "#2",
 		"fire": "polydecorations:block/empty2",
 		"base": "block/campfire_log"
 	},

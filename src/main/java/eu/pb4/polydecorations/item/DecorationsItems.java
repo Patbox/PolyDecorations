@@ -11,6 +11,7 @@ import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
+import eu.pb4.polymer.core.api.other.PolymerComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.WoodType;
 import net.minecraft.component.type.AttributeModifierSlot;
@@ -42,6 +43,7 @@ public class DecorationsItems {
     public static final Item BRAZIER = register(DecorationsBlocks.BRAZIER);
     public static final Item SOUL_BRAZIER = register(DecorationsBlocks.SOUL_BRAZIER);
     public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
+    public static final Item TRASHCAN = register(DecorationsBlocks.TRASHCAN);
     public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF, WoodType::name);
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH, WoodType::name);
     public static final Map<WoodType, Item> TABLE = register(DecorationsBlocks.TABLE, WoodType::name);
@@ -55,6 +57,7 @@ public class DecorationsItems {
     //public static final Map<DyeColor, Item> BANNER_BED = register(DecorationsBlocks.BANNER_BED);
     public static final Item GHOST_LIGHT = register(DecorationsBlocks.GHOST_LIGHT);
     public static final Item DISPLAY_CASE = register(DecorationsBlocks.DISPLAY_CASE);
+    public static final Item ROPE = register("rope", new RopeItem(DecorationsBlocks.ROPE, new Item.Settings()));
     public static final Item LARGE_FLOWER_POT = register(DecorationsBlocks.LARGE_FLOWER_POT);
     public static final Item CANVAS = register("canvas", new CanvasItem(new Item.Settings().maxCount(16)));
     public static final Map<StatueEntity.Type, StatueItem> OTHER_STATUE = registerList(StatueEntity.Type.NON_WOOD,
@@ -81,8 +84,8 @@ public class DecorationsItems {
 
     public static void register() {
         Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(ModInit.ID, "canvas_data"), CanvasItem.DATA_TYPE);
-        PolymerItemUtils.markAsPolymer(CanvasItem.DATA_TYPE);
-        PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ModInit.ID, "a_group"), ItemGroup.create(ItemGroup.Row.BOTTOM, -1)
+        PolymerComponent.registerDataComponent(CanvasItem.DATA_TYPE);
+        PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ModInit.ID, "a_group"), PolymerItemGroupUtils.builder()
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultStack())
                 .displayName(Text.translatable("itemgroup." + ModInit.ID))
                 .entries(((context, entries) -> {
@@ -94,7 +97,11 @@ public class DecorationsItems {
                     entries.add(LARGE_FLOWER_POT);
                     entries.add(DISPLAY_CASE);
                     entries.add(GLOBE);
+                    entries.add(TRASHCAN);
+                    entries.add(ROPE);
                     entries.add(CANVAS);
+                    entries.add(Items.LANTERN);
+                    entries.add(Items.SOUL_LANTERN);
                     WoodUtil.<Item>forEach(List.of(BENCH, TABLE, SHELF, TOOL_RACK, SIGN_POST, WOODEN_MAILBOX, WOODEN_STATUE), entries::add);
                     OTHER_STATUE.forEach((a, b) -> entries.add(b));
                 })).build()

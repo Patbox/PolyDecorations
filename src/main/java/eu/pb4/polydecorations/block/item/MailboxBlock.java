@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.ItemUseLimiter;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
@@ -13,6 +14,7 @@ import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,13 +42,14 @@ import org.joml.Vector3f;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class MailboxBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class MailboxBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
     public static final ItemStack FLAG = BaseItemProvider.requestModel(id("block/mailbox_flag"));
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     private final Block base;
 
     public MailboxBlock(Block block) {
-        super(Settings.copy(block).nonOpaque().strength(block.getHardness() + 1f, block.getBlastResistance() + 2f));
+        super(Settings.copy(block).nonOpaque().strength(block.getHardness() + 1f, block.getBlastResistance() + 2f)
+                .solidBlock(Blocks::never));
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
         this.base = block;
     }

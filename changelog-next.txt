@@ -1,26 +1,12 @@
-- Added Trowel!
- - Adds +1 block reach when held in main hand.
- - Automatically place random blocks from your hotbar!
- - If you hold a block in offhand, you will place it instead of a random one, but you still hain reach bonus!
-- Added Hammer!
- - Use it to rotate / change state of vanilla and PolyDecorations blocks!
-- Added Tool Racks!
- - Based on ones from BiblioCraft (remember that mod?)
- - Allows you to put up to 4 tools on it.
- - No uis, just click to place/take the items.
-- Added Wooden Tables!
- - Multiple tables will connect with each other, if placed alongside each.
- - Purely decorative.
-- You can now remove background from canvas!
-  - Craft it with shears to remove the background.
-  - You can still paint on it, through only on visible part.
-  - Craft it with paper to add background again.
-- Added Statues from new materials!
- - Andesite, Diorite, Granite, Tuff, Stone Bricks, Tuff Bricks, regular and colored Terracota.
- - To allow for this, texture position on the model were changed.
-- Sign Post's rotation is now rounded to 15 degrees. Already placed ones are unchanged through.
-- Polydex: Display Cases now show name of held item aside of its own in hovers.
-- Bug Fixes!
- - Fixed models of tridents/spyglass when placed on display/shelf/etc.
- - Fixed model desync when ran on the client in modpack scenario.
- - Placing lanterns on walls now plays sound and animation.
+- Added Trash Can - Can store up to 36 stacks, removing first 9 slots once it runs out of free space. Model and texture by patpuck.
+- Added Ropes - Climbable, connectable block. Model and texture by patpuck.
+- Glowing text on Sign Posts now matches with Vanilla signs.
+- Canvas cleaning, color darkening/lightening and size increase is now tag driven.
+  - Cleaning now allows usage of Sponges (like before), Wet Sponges and Paper.
+  - Darkening now allows usage of Coal (like before) and Charcoal.
+- Bunch of fixes:
+  - Fixed Canvas transform recipes running even if Canvas data/state doesn't change.
+  - Fixed Canvas un-glowing recipe not working.
+  - Fixed placed empty Canvas not stacking with not placed ones.
+  - Fixed some items being used when clicking blocks when they shouldn't.
+  - Fixed some blocks preventing opening of chests when they shouldn't.

@@ -9,6 +9,7 @@ import eu.pb4.polydecorations.block.furniture.BrazierBlock;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
+import eu.pb4.polydecorations.block.other.RopeBlock;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -20,9 +21,11 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -47,9 +50,11 @@ public class DecorationsBlocks {
                 return x.get(BrazierBlock.LIT) ? Blocks.SOUL_CAMPFIRE.getDefaultState().getLuminance() : 0;
             }))
     );
-
     public static final GlobeBlock GLOBE = register("globe", new GlobeBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).nonOpaque()));
+    public static final RopeBlock ROPE = register("rope", new RopeBlock(AbstractBlock.Settings.create().strength(1f).sounds(BlockSoundGroup.COBWEB).breakInstantly().nonOpaque()));
     public static final DisplayCaseBlock DISPLAY_CASE = register("display_case", new DisplayCaseBlock(AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque()));
+    public static final TrashCanBlock TRASHCAN = register("trashcan", new TrashCanBlock(AbstractBlock.Settings.create()
+            .mapColor(MapColor.IRON_GRAY).strength(3.5F).sounds(BlockSoundGroup.LANTERN).nonOpaque()));
     public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", new LargeFlowerPotBlock(
             AbstractBlock.Settings.create().mapColor(MapColor.ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).nonOpaque()));
 
@@ -69,7 +74,8 @@ public class DecorationsBlocks {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new BenchBlock(id,
-                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
+                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
+                            .solidBlock(Blocks::never),
                     Registries.BLOCK.get(planks)
             );
         }
@@ -81,7 +87,8 @@ public class DecorationsBlocks {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new ToolRackBlock(
-                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
+                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
+                            .solidBlock(Blocks::never),
                     Registries.BLOCK.get(planks)
             );
         }
@@ -93,7 +100,8 @@ public class DecorationsBlocks {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
             return new TableBlock(id,
-                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque(),
+                    AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).nonOpaque()
+                            .solidBlock(Blocks::never),
                     Registries.BLOCK.get(planks)
             );
         }
@@ -189,6 +197,10 @@ public class DecorationsBlocks {
             var lt = server.getReloadableRegistries().getLootTable(block.getLootTableKey());
             if (lt == LootTable.EMPTY) {
                 ModInit.LOGGER.warn("Missing loot table? " + block.getLootTableKey().getValue());
+            }
+            if (block instanceof BlockEntityProvider provider) {
+                var be = provider.createBlockEntity(BlockPos.ORIGIN, block.getDefaultState());
+                assert be == null || be.getType().supports(block.getDefaultState());
             }
         }
     }

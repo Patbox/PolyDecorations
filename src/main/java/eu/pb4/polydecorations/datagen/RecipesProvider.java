@@ -177,6 +177,22 @@ class RecipesProvider extends FabricRecipeProvider {
                 .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
                 .offerTo(exporter);
 
+        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.TRASHCAN, 1)
+                .pattern("i i")
+                .pattern("ici")
+                .pattern("iii")
+                .input('c', Items.CACTUS)
+                .input('i', Items.IRON_INGOT)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                .offerTo(exporter);
+
+        new ShapelessRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.ROPE, 4)
+                .input(Items.WHEAT)
+                .input(Items.STRING, 4)
+                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.STRING))
+                .offerTo(exporter);
+
+
         new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.GLOBE, 1)
                 .pattern(" s")
                 .pattern("sw")
@@ -227,7 +243,7 @@ class RecipesProvider extends FabricRecipeProvider {
                     new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
 
             exporter.accept(id("canvas_unglowing"), new CanvasTransformRecipe("", "unglow", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
+                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.INK_SAC))), null);
 
             exporter.accept(id("canvas_cut"), new CanvasTransformRecipe("", "cut", CraftingRecipeCategory.MISC,
                     new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.SHEARS))), null);

@@ -19,8 +19,6 @@ import java.util.ArrayList;
 
 public class DecorationsBlockEntities {
     public static final BlockEntityType<?> SHELF = register("shelf", ShelfBlockEntity::new, DecorationsBlocks.SHELF.values().toArray(new ShelfBlock[0]));
-            ;
-
     public static final BlockEntityType<?> SIGN_POST = register("sign_post", SignPostBlockEntity::new,
             Util.make(new ArrayList<Block>(), (l) -> {
                 l.addAll(DecorationsBlocks.WOOD_SIGN_POST.values());
@@ -32,6 +30,7 @@ public class DecorationsBlockEntities {
     public static final BlockEntityType<?> MAILBOX = register("mailbox", MailboxBlockEntity::new,
             DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
     public static final BlockEntityType<?> GLOBE = register("globe", GenericSingleItemBlockEntity::globe, DecorationsBlocks.GLOBE);
+    public static final BlockEntityType<?> TRASHCAN = register("trashcan", TrashCanBlockEntity::new, DecorationsBlocks.TRASHCAN);
 
     public static final BlockEntityType<?> DISPLAY_CASE = register("display_case",
             GenericSingleItemBlockEntity::displayCase,

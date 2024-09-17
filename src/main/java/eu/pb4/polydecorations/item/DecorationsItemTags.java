@@ -10,6 +10,9 @@ public class DecorationsItemTags {
     public static final TagKey<Item> UNSCALED_DISPLAY_CASE = of("unscaled_display_case");
     public static final TagKey<Item> FORCE_FIXED_MODEL = of("force_fixed_model");
     public static final TagKey<Item> TOOL_RACK_ACCEPTABLE = of("tool_rack_acceptable");
+    public static final TagKey<Item> CANVAS_CLEAR_PIXELS = of("canvas/clear_pixels");
+    public static final TagKey<Item> CANVAS_DARKEN_PIXELS = of("canvas/darken_pixels");
+    public static final TagKey<Item> CANVAS_LIGHTEN_PIXELS = of("canvas/lighten_pixels");
 
     private static TagKey<Item> of(String path) {
         return TagKey.of(RegistryKeys.ITEM, ModInit.id(path));

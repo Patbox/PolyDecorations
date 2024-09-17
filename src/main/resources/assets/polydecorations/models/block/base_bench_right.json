@@ -1,7 +1,7 @@
 {
 	"textures": {
 		"logs": "block/oak_log",
-		"particle": "block/oak_planks",
+		"particle": "#planks",
 		"planks": "block/oak_planks"
 	},
 	"elements": [

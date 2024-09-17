@@ -107,6 +107,7 @@ public class HammerItem extends ModeledItem {
         ACTIONS_BY_CLASS.add(Pair.of(DisplayCaseBlock.class, Action.cycleState(DisplayCaseBlock.FACING)));
         ACTIONS_BY_CLASS.add(Pair.of(GlobeBlock.class, Action.cycleState(GlobeBlock.FACING)));
         ACTIONS_BY_CLASS.add(Pair.of(ShelfBlock.class, Action.cycleState(ShelfBlock.FACING)));
+        ACTIONS_BY_CLASS.add(Pair.of(TrashCanBlock.class, Action.cycleState(TrashCanBlock.FACING)));
         ACTIONS_BY_CLASS.add(Pair.of(AttachedSignPostBlock.class, (state, world, pos, hitResult, reverse) -> {
             if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be) {
                 var up = hitResult.subtract(Vec3d.ofCenter(pos)).y > 0;

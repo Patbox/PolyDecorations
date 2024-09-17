@@ -23,6 +23,7 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -78,6 +79,32 @@ public class CanvasTransformRecipe extends ShapelessRecipe implements PolymerRec
     }
 
     @Override
+    public boolean matches(CraftingRecipeInput craftingRecipeInput, World world) {
+        for (var tmp : craftingRecipeInput.getStacks()) {
+            if (this.source.test(tmp)) {
+                var data = tmp.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT);
+
+                if (switch (this.action) {
+                    case "wax" -> data.waxed();
+                    case "glow" -> data.glowing();
+                    case "unglow" -> !data.glowing();
+                    case "dye" -> {
+                        var x = CanvasEntity.getColor(craftingRecipeInput.getStacks().stream().filter(tmp2 -> tmp2.isIn(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY));
+                        yield x.isEmpty() && data.background().isEmpty() || x.isPresent() && data.background().orElse(null) == x.get();
+                    }
+                    case "cut" -> data.cut();
+                    case "uncut" -> !data.cut();
+                    default -> false;
+                }) {
+                    return false;
+                }
+            }
+        }
+
+        return super.matches(craftingRecipeInput, world);
+    }
+
+    @Override
     public ItemStack craft(CraftingRecipeInput recipeInputInventory, RegistryWrapper.WrapperLookup wrapperLookup) {
         var stack = super.craft(recipeInputInventory, wrapperLookup);
         ItemStack dye = recipeInputInventory.getStacks().stream().filter(tmp -> tmp.isIn(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY);
@@ -88,7 +115,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe implements PolymerRec
                     case "wax" -> new CanvasItem.Data(x.image(), x.background(), x.glowing(), true, x.cut());
                     case "glow" -> new CanvasItem.Data(x.image(), x.background(),true, x.waxed(), x.cut());
                     case "unglow" -> new CanvasItem.Data(x.image(), x.background(),false, x.waxed(), x.cut());
-                    case "dye" -> new CanvasItem.Data(x.image(), CanvasEntity.getColor(dye),x.glowing(), x.waxed(), x.cut());
+                    case "dye" -> new CanvasItem.Data(x.image(), CanvasEntity.getColor(dye), x.glowing(), x.waxed(), x.cut());
                     case "cut" -> {
                         byte[] image;
                         if (x.image().isPresent()) {

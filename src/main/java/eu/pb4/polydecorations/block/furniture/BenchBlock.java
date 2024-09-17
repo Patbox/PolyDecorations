@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.ItemUseLimiter;
 import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
@@ -43,7 +44,7 @@ import org.joml.Vector3f;
 
 import java.util.Locale;
 
-public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
+public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<Type> TYPE = EnumProperty.of("type", Type.class);
     public static final BooleanProperty HAS_REST = BooleanProperty.of("has_rest");

@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"2": "block/stone",
-		"particle": "block/oak_planks",
+		"particle": "#planks",
 		"planks": "block/oak_planks",
 		"logs": "block/oak_log"
 	},
