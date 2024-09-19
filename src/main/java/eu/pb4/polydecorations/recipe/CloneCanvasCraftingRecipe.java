@@ -42,10 +42,10 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
 
         for (var stack : inventory.getStacks()) {
             if (stack.isOf(this.input)) {
-                if (hasNbt && stack.contains(CanvasItem.DATA_TYPE)) {
+                if (hasNbt && stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent()) {
                     return false;
                 }
-                hasNbt |= stack.contains(CanvasItem.DATA_TYPE);
+                hasNbt |= stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent();
                 count++;
             }
         }
@@ -58,7 +58,7 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
         int count = 0;
         for (var stack : inventory.getStacks()) {
             if (stack.isOf(this.input)) {
-                if (stack.contains(CanvasItem.DATA_TYPE)) {
+                if (stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent()) {
                     nbt = stack.get(CanvasItem.DATA_TYPE);
                 }
                 count++;

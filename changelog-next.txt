@@ -1,12 +1,1 @@
-- Added Trash Can - Can store up to 36 stacks, removing first 9 slots once it runs out of free space. Model and texture by patpuck.
-- Added Ropes - Climbable, connectable block. Model and texture by patpuck.
-- Glowing text on Sign Posts now matches with Vanilla signs.
-- Canvas cleaning, color darkening/lightening and size increase is now tag driven.
-  - Cleaning now allows usage of Sponges (like before), Wet Sponges and Paper.
-  - Darkening now allows usage of Coal (like before) and Charcoal.
-- Bunch of fixes:
-  - Fixed Canvas transform recipes running even if Canvas data/state doesn't change.
-  - Fixed Canvas un-glowing recipe not working.
-  - Fixed placed empty Canvas not stacking with not placed ones.
-  - Fixed some items being used when clicking blocks when they shouldn't.
-  - Fixed some blocks preventing opening of chests when they shouldn't.
+Fix canvas copying recipe
