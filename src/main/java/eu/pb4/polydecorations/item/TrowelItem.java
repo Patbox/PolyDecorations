@@ -1,7 +1,7 @@
 package eu.pb4.polydecorations.item;
 
-import eu.pb4.factorytools.api.item.ModeledItem;
 
+import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
@@ -17,7 +17,7 @@ import net.minecraft.util.hit.BlockHitResult;
 
 import java.util.ArrayList;
 
-public class TrowelItem extends ModeledItem {
+public class TrowelItem extends SimplePolymerItem {
     public TrowelItem(Settings settings) {
         super(settings);
     }

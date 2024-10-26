@@ -2,7 +2,7 @@ package eu.pb4.polydecorations.model;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
 import net.minecraft.block.BlockState;
@@ -23,7 +23,7 @@ public class DirectionConnectingModel {
         this.baseModel = baseModel;
 
         for (var i = 0; i < SIZE; i++) {
-            this.models[i] = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), baseModel.withSuffixedPath("/" + i));
+            this.models[i] = ItemDisplayElementUtil.getModel(baseModel.withSuffixedPath("/" + i));
         }
     }
 

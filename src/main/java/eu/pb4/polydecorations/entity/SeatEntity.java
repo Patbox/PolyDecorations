@@ -5,12 +5,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Set;
 
@@ -62,7 +65,12 @@ public class SeatEntity extends Entity implements PolymerEntity {
     }
 
     @Override
-    public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
+    public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityType.BLOCK_DISPLAY;
     }
 

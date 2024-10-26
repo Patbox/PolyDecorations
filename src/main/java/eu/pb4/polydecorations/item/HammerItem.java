@@ -2,11 +2,11 @@ package eu.pb4.polydecorations.item;
 
 import com.mojang.datafixers.util.Pair;
 import eu.pb4.common.protection.api.CommonProtection;
-import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
 import eu.pb4.polydecorations.block.furniture.BenchBlock;
 import eu.pb4.polydecorations.block.item.*;
+import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class HammerItem extends ModeledItem {
+public class HammerItem extends SimplePolymerItem {
     public static List<Pair<Class<? extends Block>, Action>> ACTIONS_BY_CLASS = new ArrayList<>();
     public static List<Pair<Block, Action>> ACTIONS_BY_TYPE = new ArrayList<>();
     public HammerItem(Settings settings) {
@@ -165,7 +165,7 @@ public class HammerItem extends ModeledItem {
             return cycleState(property).then((state, world, pos, hitResult, reverse) -> {
                 for (var dir : Direction.values()) {
                     var offPos = pos.offset(dir);
-                    state = state.getStateForNeighborUpdate(dir, world.getBlockState(offPos), world, pos, offPos);
+                    state = state.getStateForNeighborUpdate(world, world, pos, dir, offPos, world.getBlockState(offPos), world.random);
                 }
                 return state;
             });

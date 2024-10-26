@@ -45,10 +45,10 @@ public class DecorationsBlockEntities {
     //                .addBlocks(DecorationsBlocks.BANNER_BED.values().toArray(new BedWithBannerBlock[0])));
     ;
 
-    public static <T extends BlockEntity> BlockEntityType<T> register(String path, BlockEntityType.BlockEntityFactory<? extends T> factory, Block... blocks) {
-        return register(path, BlockEntityType.Builder.create(factory, blocks));
+    public static <T extends BlockEntity> BlockEntityType<T> register(String path, FabricBlockEntityTypeBuilder.Factory<? extends T> factory, Block... blocks) {
+        return register(path, FabricBlockEntityTypeBuilder.create(factory, blocks));
     }
-    public static <T extends BlockEntity> BlockEntityType<T> register(String path, BlockEntityType.Builder<T> item) {
+    public static <T extends BlockEntity> BlockEntityType<T> register(String path, FabricBlockEntityTypeBuilder<T> item) {
         var x = Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(ModInit.ID, path), item.build());
         PolymerBlockUtils.registerBlockEntity(x);
         return x;

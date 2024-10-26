@@ -4,11 +4,8 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.block.ItemUseLimiter;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
-import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polydecorations.entity.SeatEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
@@ -24,28 +21,30 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Locale;
 
-public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<Type> TYPE = EnumProperty.of("type", Type.class);
     public static final BooleanProperty HAS_REST = BooleanProperty.of("has_rest");
     private final ItemStack leftModel;
@@ -57,21 +56,21 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
     private final ItemStack rightNoRestModel;
     private final ItemStack middleNoRestModel;
 
-    public BenchBlock(Identifier identifier, Settings settings, Block planks) {
+    public BenchBlock(Settings settings, Identifier identifier, Block planks) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
-        this.leftModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
-        this.rightModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
-        this.middleModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
-        this.noRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest"));
-        this.leftNoRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest_left"));
-        this.rightNoRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
-        this.middleNoRestModel = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
+        this.leftModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
+        this.rightModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
+        this.middleModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
+        this.noRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest"));
+        this.leftNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_left"));
+        this.rightNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
+        this.middleNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
         this.base = planks;
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext player) {
         return this.base.getDefaultState();
     }
 
@@ -127,9 +126,9 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
             world.setBlockState(pos, state.with(HAS_REST, false));
             player.getMainHandStack().damage(1, player, EquipmentSlot.MAINHAND);
             world.playSound(null, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            return ActionResult.SUCCESS;
+            return ActionResult.SUCCESS_SERVER;
         } else if (!player.isSneaking() && SeatEntity.create(world, pos, 1 / 16f, state.get(FACING), player)) {
-            return ActionResult.SUCCESS;
+            return ActionResult.SUCCESS_SERVER;
         }
 
         return super.onUse(state, world, pos, player, hit);
@@ -137,8 +136,8 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
 
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
         var facing = state.get(FACING);
         var type = state.get(TYPE);
         var rest = state.get(HAS_REST);

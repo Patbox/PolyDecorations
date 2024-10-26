@@ -19,22 +19,29 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Map;
 
@@ -44,8 +51,8 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
     private final Block baseBlock;
     private final float radius;
 
-    public AttachedSignPostBlock(Block block, int pixelSideLength) {
-        super(AbstractBlock.Settings.copy(block).nonOpaque().dropsLike(block));
+    public AttachedSignPostBlock(AbstractBlock.Settings settings, Block block, int pixelSideLength) {
+        super(settings.nonOpaque().lootTable(block.getLootTableKey()));
         this.baseBlock = block;
         this.radius = pixelSideLength / 16f / 2f;
         MAP.put(block, this);
@@ -62,7 +69,7 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
         builder.add(WATERLOGGED);
     }
     @Override
-    public BlockState getPolymerBlockState(BlockState state) {
+    public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
         return this.baseBlock.getDefaultState().withIfExists(WATERLOGGED, state.get(WATERLOGGED));
     }
 
@@ -81,9 +88,9 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override

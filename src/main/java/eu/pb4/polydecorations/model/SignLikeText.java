@@ -70,10 +70,10 @@ public class SignLikeText extends AbstractElement {
             return -988212;
         } else {
             int i = color.getSignColor();
-            int j = (int)((double) ColorHelper.Argb.getRed(i) * 0.4);
-            int k = (int)((double)ColorHelper.Argb.getGreen(i) * 0.4);
-            int l = (int)((double)ColorHelper.Argb.getBlue(i) * 0.4);
-            return ColorHelper.Argb.getArgb(0, j, k, l);
+            int j = (int)((double) ColorHelper.getRed(i) * 0.4);
+            int k = (int)((double)ColorHelper.getGreen(i) * 0.4);
+            int l = (int)((double)ColorHelper.getBlue(i) * 0.4);
+            return ColorHelper.getArgb(0, j, k, l);
         }
     }
 

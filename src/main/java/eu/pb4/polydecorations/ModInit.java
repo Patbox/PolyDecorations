@@ -1,6 +1,5 @@
 package eu.pb4.polydecorations;
 
-import eu.pb4.factorytools.impl.DebugData;
 
 import eu.pb4.polydecorations.block.furniture.BrazierBlock;
 import eu.pb4.polydecorations.block.item.GlobeBlock;
@@ -55,19 +54,11 @@ public class ModInit implements ModInitializer {
 		DecorationsRecipeSerializers.register();
 		DecorationsUtil.register();
 
-		initModels();
 		UiResourceCreator.setup();
 		GuiTextures.register();
 		PolydexCompat.register();
 		PolymerResourcePackUtils.addModAssets(ID);
 		PolymerResourcePackUtils.markAsRequired();
-
-	}
-
-	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private void initModels() {
-		WallAttachedLanternBlock.Model.MODEL.isEmpty();
-		BrazierBlock.Model.UNLIT.isEmpty();
-		GlobeBlock.Model.GLOBE_BASE.isEmpty();
+		PolymerResourcePackUtils.addBridgedModelsFolder(id("block"), id("sgui"));
 	}
 }

@@ -1,6 +1,6 @@
 package eu.pb4.polydecorations.entity;
 
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.StatueItem;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
@@ -11,7 +11,6 @@ import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -20,6 +19,7 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -48,6 +48,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -106,7 +107,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.put("stack", this.stack.encodeAllowEmpty(this.getRegistryManager()));
+        nbt.put("stack", this.stack.toNbtAllowEmpty(this.getRegistryManager()));
     }
 
     @Override
@@ -138,15 +139,15 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
     }
 
-    public boolean damage(DamageSource source, float amount) {
-        if (this.getWorld() instanceof ServerWorld world && !this.isRemoved()) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        if (!this.isRemoved()) {
             if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-                this.kill();
+                this.kill(world);
                 return false;
-            } else if (!this.isInvulnerableTo(source) && !this.isInvisible() && !this.isMarker()) {
+            } else if (!this.isInvulnerableTo(world, source) && !this.isInvisible() && !this.isMarker()) {
                 if (source.isIn(DamageTypeTags.IS_EXPLOSION)) {
                     this.onBreak(world, source);
-                    this.kill();
+                    this.kill(world);
                     return false;
                 } else if (source.isIn(DamageTypeTags.IGNITES_ARMOR_STANDS) && !this.item.getType().fireproof()) {
                     if (this.isOnFire()) {
@@ -176,7 +177,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
                         if (source.isSourceCreativePlayer()) {
                             this.playBreakSound();
                             this.spawnBreakParticles();
-                            this.kill();
+                            this.kill(world);
                             return true;
                         } else {
                             long l = this.getWorld().getTime();
@@ -187,7 +188,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
                             } else {
                                 this.breakAndDropItem(world, source);
                                 this.spawnBreakParticles();
-                                this.kill();
+                                this.kill(world);
                             }
 
                             return true;
@@ -208,7 +209,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
+    public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityType.ARMOR_STAND;
     }
 
@@ -334,7 +335,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
 
         private static ItemStack requestModel(String type, String head) {
-            return BaseItemProvider.requestModel(BaseItemProvider.requestModel(), id("block/statue/" + type + "/" + head));
+            return ItemDisplayElementUtil.getModel(id("block/statue/" + type + "/" + head));
         }
 
         public BlockSoundGroup soundGroup() {

@@ -15,10 +15,13 @@ import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.book.RecipeCategory;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Identifier;
@@ -37,241 +40,246 @@ class RecipesProvider extends FabricRecipeProvider {
     }
 
     @Override
-    public void generate(RecipeExporter exporter) {
-        //noinspection unchecked
-        var dyes = (List<DyeItem>) (Object) List.of(Items.BLACK_DYE, Items.BLUE_DYE, Items.BROWN_DYE, Items.CYAN_DYE, Items.GRAY_DYE, Items.GREEN_DYE, Items.LIGHT_BLUE_DYE, Items.LIGHT_GRAY_DYE, Items.LIME_DYE, Items.MAGENTA_DYE, Items.ORANGE_DYE, Items.PINK_DYE, Items.PURPLE_DYE, Items.RED_DYE, Items.YELLOW_DYE, Items.WHITE_DYE);
+    protected RecipeGenerator getRecipeGenerator(RegistryWrapper.WrapperLookup registryLookup, RecipeExporter exporter) {
+        return new RecipeGenerator(registryLookup, exporter) {
+            @Override
+            public void generate() {
+                var itemWrap = registryLookup.getOrThrow(RegistryKeys.ITEM);
 
-        DecorationsItems.SHELF.forEach(((woodType, item) -> {
-            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
-            if (slab == Items.AIR) {
-                return;
-            }
-            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 2)
-                    .group("polydecorations:shelf")
-                    .pattern("-s-")
-                    .input('-', Items.STICK)
-                    .input('s', slab)
-                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
-                    .offerTo(exporter);
-        }));
+                //noinspection unchecked
+                var dyes = (List<DyeItem>) (Object) List.of(Items.BLACK_DYE, Items.BLUE_DYE, Items.BROWN_DYE, Items.CYAN_DYE, Items.GRAY_DYE, Items.GREEN_DYE, Items.LIGHT_BLUE_DYE, Items.LIGHT_GRAY_DYE, Items.LIME_DYE, Items.MAGENTA_DYE, Items.ORANGE_DYE, Items.PINK_DYE, Items.PURPLE_DYE, Items.RED_DYE, Items.YELLOW_DYE, Items.WHITE_DYE);
 
-        DecorationsItems.BENCH.forEach(((woodType, item) -> {
-            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
-            if (slab == Items.AIR) {
-                return;
-            }
-            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 2)
-                    .group("polydecorations:bench")
-                    .pattern("sss")
-                    .pattern("- -")
-                    .input('-', Items.STICK)
-                    .input('s', slab)
-                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
-                    .offerTo(exporter);
-        }));
+                DecorationsItems.SHELF.forEach(((woodType, item) -> {
+                    var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+                    var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:shelf")
+                            .pattern("-s-")
+                            .input('-', Items.STICK)
+                            .input('s', slab)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                            .offerTo(exporter);
+                }));
 
-        DecorationsItems.TABLE.forEach(((woodType, item) -> {
-            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
-            if (slab == Items.AIR) {
-                return;
-            }
-            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 1)
-                    .group("polydecorations:table")
-                    .pattern("sss")
-                    .pattern("- -")
-                    .pattern("- -")
-                    .input('-', Items.STICK)
-                    .input('s', slab)
-                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
-                    .offerTo(exporter);
-        }));
+                DecorationsItems.BENCH.forEach(((woodType, item) -> {
+                    var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+                    var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:bench")
+                            .pattern("sss")
+                            .pattern("- -")
+                            .input('-', Items.STICK)
+                            .input('s', slab)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                            .offerTo(exporter);
+                }));
 
-        DecorationsItems.TOOL_RACK.forEach(((woodType, item) -> {
-            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
-            if (slab == Items.AIR) {
-                return;
-            }
-            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 1)
-                    .group("polydecorations:toolrack")
-                    .pattern("s-s")
-                    .pattern("-i-")
-                    .pattern("s-s")
-                    .input('-', Items.STICK)
-                    .input('i', Items.IRON_INGOT)
-                    .input('s', slab)
-                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
-                    .offerTo(exporter);
-        }));
+                DecorationsItems.TABLE.forEach(((woodType, item) -> {
+                    var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+                    var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 1)
+                            .group("polydecorations:table")
+                            .pattern("sss")
+                            .pattern("- -")
+                            .pattern("- -")
+                            .input('-', Items.STICK)
+                            .input('s', slab)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                            .offerTo(exporter);
+                }));
 
-        DecorationsItems.WOODEN_MAILBOX.forEach(((woodType, item) -> {
-            var log = Registries.ITEM.get(Identifier.ofVanilla(WoodUtil.getLogName(woodType)));
-            var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
-            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
-            if (slab == Items.AIR) {
-                return;
-            }
-            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 2)
-                    .group("polydecorations:mailbox")
-                    .pattern(" lc")
-                    .pattern("sps")
-                    .input('p', Items.PAPER)
-                    .input('c', Items.COPPER_INGOT)
-                    .input('l', log)
-                    .input('s', slab)
-                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
-                    .offerTo(exporter);
-        }));
+                DecorationsItems.TOOL_RACK.forEach(((woodType, item) -> {
+                    var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+                    var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 1)
+                            .group("polydecorations:toolrack")
+                            .pattern("s-s")
+                            .pattern("-i-")
+                            .pattern("s-s")
+                            .input('-', Items.STICK)
+                            .input('i', Items.IRON_INGOT)
+                            .input('s', slab)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                            .offerTo(exporter);
+                }));
 
-        DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
-            var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
-            if (planks == null) {
-                return;
-            }
-            new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 2)
-                    .group("polydecorations:sign_post")
-                    .pattern("ss-")
-                    .input('-', Items.STICK)
-                    .input('s', planks)
-                    .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
-                    .offerTo(exporter);
-        }));
+                DecorationsItems.WOODEN_MAILBOX.forEach(((woodType, item) -> {
+                    var log = Registries.ITEM.get(Identifier.ofVanilla(WoodUtil.getLogName(woodType)));
+                    var slab = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_slab"));
+                    var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:mailbox")
+                            .pattern(" lc")
+                            .pattern("sps")
+                            .input('p', Items.PAPER)
+                            .input('c', Items.COPPER_INGOT)
+                            .input('l', log)
+                            .input('s', slab)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                            .offerTo(exporter);
+                }));
 
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.HAMMER, 1)
-                .pattern("nI ")
-                .pattern(" s ")
-                .input('n', Items.IRON_NUGGET)
-                .input('I', Items.IRON_INGOT)
-                .input('s', Items.STICK)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
-                .offerTo(exporter);
+                DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
+                    var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
+                    if (planks == null) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:sign_post")
+                            .pattern("ss-")
+                            .input('-', Items.STICK)
+                            .input('s', planks)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(planks))
+                            .offerTo(exporter);
+                }));
 
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.TROWEL, 1)
-                .pattern("nI")
-                .pattern("sn")
-                .input('n', Items.IRON_NUGGET)
-                .input('I', Items.IRON_INGOT)
-                .input('s', Items.STICK)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
-                .offerTo(exporter);
-
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.BRAZIER, 1)
-                .group("polydecorations:brazier")
-                .pattern("ici")
-                .pattern(" i ")
-                .input('c', Items.CAMPFIRE)
-                .input('i', Items.IRON_INGOT)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
-                .offerTo(exporter);
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.SOUL_BRAZIER, 1)
-                .group("polydecorations:brazier")
-                .pattern("ici")
-                .pattern(" i ")
-                .input('c', Items.SOUL_CAMPFIRE)
-                .input('i', Items.IRON_INGOT)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
-                .offerTo(exporter);
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.TRASHCAN, 1)
-                .pattern("i i")
-                .pattern("ici")
-                .pattern("iii")
-                .input('c', Items.CACTUS)
-                .input('i', Items.IRON_INGOT)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
-                .offerTo(exporter);
-
-        new ShapelessRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.ROPE, 4)
-                .input(Items.WHEAT)
-                .input(Items.STRING, 4)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.STRING))
-                .offerTo(exporter);
-
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsBlocks.GLOBE, 1)
-                .pattern(" s")
-                .pattern("sw")
-                .pattern(" b")
-                .input('s', Items.STICK)
-                .input('b', Items.POLISHED_DEEPSLATE_SLAB)
-                .input('w', ItemTags.WOOL)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
-                .offerTo(exporter);
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.CANVAS, 1)
-                .pattern("sss")
-                .pattern("sxs")
-                .pattern("sss")
-                .input('s', Items.STICK)
-                .input('x', Items.PAPER)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.PAPER))
-                .offerTo(exporter);
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.DISPLAY_CASE, 1)
-                .pattern("g")
-                .pattern("s")
-                .input('g', Items.GLASS)
-                .input('s', Items.SMOOTH_STONE_SLAB)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.GLASS))
-                .offerTo(exporter);
-
-        new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.LARGE_FLOWER_POT, 1)
-                .pattern("b b")
-                .pattern("bdb")
-                .pattern("bbb")
-                .input('b', Items.BRICK)
-                .input('d', Items.DIRT)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
-                .offerTo(exporter);
-
-        new ShapelessRecipeJsonBuilder(RecipeCategory.DECORATIONS, DecorationsItems.GHOST_LIGHT, 1)
-                .input(Items.FIRE_CHARGE)
-                .input(ItemTags.SOUL_FIRE_BASE_BLOCKS)
-                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
-                .offerTo(exporter);
-
-        {
-            exporter.accept(id("canvas_waxing"), new CanvasTransformRecipe("", "wax", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.HONEYCOMB))), null);
-
-            exporter.accept(id("canvas_glowing"), new CanvasTransformRecipe("", "glow", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
-
-            exporter.accept(id("canvas_unglowing"), new CanvasTransformRecipe("", "unglow", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.INK_SAC))), null);
-
-            exporter.accept(id("canvas_cut"), new CanvasTransformRecipe("", "cut", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.SHEARS))), null);
-
-            exporter.accept(id("canvas_uncut"), new CanvasTransformRecipe("", "uncut", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.PAPER))), null);
-
-            exporter.accept(id("canvas_dye"), new CanvasTransformRecipe("", "dye", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.fromTag(ConventionalItemTags.DYES))), null);
-            exporter.accept(id("canvas_undye"), new CanvasTransformRecipe("", "dye", CraftingRecipeCategory.MISC,
-                    new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), DefaultedList.copyOf(Ingredient.EMPTY, Ingredient.ofItems(Items.WATER_BUCKET))), null);
-
-
-            exporter.accept(id("canvas_clone"), new CloneCanvasCraftingRecipe("", DecorationsItems.CANVAS), null);
-        }
-
-        for (var x : Registries.ITEM) {
-            if (x instanceof StatueItem item) {
-                new ShapedRecipeJsonBuilder(RecipeCategory.DECORATIONS, item, 1)
-                        .pattern(" x ")
-                        .pattern("x#x")
-                        .pattern(" x ")
-                        .input('#', Items.ARMOR_STAND)
-                        .input('x', item.getType().block())
-                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.ARMOR_STAND))
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.HAMMER, 1)
+                        .pattern("nI ")
+                        .pattern(" s ")
+                        .input('n', Items.IRON_NUGGET)
+                        .input('I', Items.IRON_INGOT)
+                        .input('s', Items.STICK)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
                         .offerTo(exporter);
-            }
-        }
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.TROWEL, 1)
+                        .pattern("nI")
+                        .pattern("sn")
+                        .input('n', Items.IRON_NUGGET)
+                        .input('I', Items.IRON_INGOT)
+                        .input('s', Items.STICK)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.BRAZIER, 1)
+                        .group("polydecorations:brazier")
+                        .pattern("ici")
+                        .pattern(" i ")
+                        .input('c', Items.CAMPFIRE)
+                        .input('i', Items.IRON_INGOT)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.SOUL_BRAZIER, 1)
+                        .group("polydecorations:brazier")
+                        .pattern("ici")
+                        .pattern(" i ")
+                        .input('c', Items.SOUL_CAMPFIRE)
+                        .input('i', Items.IRON_INGOT)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.TRASHCAN, 1)
+                        .pattern("i i")
+                        .pattern("ici")
+                        .pattern("iii")
+                        .input('c', Items.CACTUS)
+                        .input('i', Items.IRON_INGOT)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+                ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.ROPE, 4)
+                        .input(Items.WHEAT)
+                        .input(Items.STRING, 4)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.STRING))
+                        .offerTo(exporter);
+
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.GLOBE, 1)
+                        .pattern(" s")
+                        .pattern("sw")
+                        .pattern(" b")
+                        .input('s', Items.STICK)
+                        .input('b', Items.POLISHED_DEEPSLATE_SLAB)
+                        .input('w', ItemTags.WOOL)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.CANVAS, 1)
+                        .pattern("sss")
+                        .pattern("sxs")
+                        .pattern("sss")
+                        .input('s', Items.STICK)
+                        .input('x', Items.PAPER)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.PAPER))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.DISPLAY_CASE, 1)
+                        .pattern("g")
+                        .pattern("s")
+                        .input('g', Items.GLASS)
+                        .input('s', Items.SMOOTH_STONE_SLAB)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.GLASS))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.LARGE_FLOWER_POT, 1)
+                        .pattern("b b")
+                        .pattern("bdb")
+                        .pattern("bbb")
+                        .input('b', Items.BRICK)
+                        .input('d', Items.DIRT)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
+                        .offerTo(exporter);
+
+                ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.GHOST_LIGHT, 1)
+                        .input(Items.FIRE_CHARGE)
+                        .input(ItemTags.SOUL_FIRE_BASE_BLOCKS)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
+                        .offerTo(exporter);
+
+                {
+                    exporter.accept(key("canvas_waxing"), new CanvasTransformRecipe("", "wax", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.HONEYCOMB))), null);
+
+                    exporter.accept(key("canvas_glowing"), new CanvasTransformRecipe("", "glow", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.GLOW_INK_SAC))), null);
+
+                    exporter.accept(key("canvas_unglowing"), new CanvasTransformRecipe("", "unglow", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.INK_SAC))), null);
+
+                    exporter.accept(key("canvas_cut"), new CanvasTransformRecipe("", "cut", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.SHEARS))), null);
+
+                    exporter.accept(key("canvas_uncut"), new CanvasTransformRecipe("", "uncut", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.PAPER))), null);
+
+                    exporter.accept(key("canvas_dye"), new CanvasTransformRecipe("", "dye", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.fromTag(itemWrap.getOrThrow(ConventionalItemTags.DYES)))), null);
+                    exporter.accept(key("canvas_undye"), new CanvasTransformRecipe("", "dye", CraftingRecipeCategory.MISC,
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.WATER_BUCKET))), null);
+
+
+                    exporter.accept(key("canvas_clone"), new CloneCanvasCraftingRecipe("", DecorationsItems.CANVAS), null);
+                }
+
+                for (var x : Registries.ITEM) {
+                    if (x instanceof StatueItem item) {
+                        ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 1)
+                                .pattern(" x ")
+                                .pattern("x#x")
+                                .pattern(" x ")
+                                .input('#', Items.ARMOR_STAND)
+                                .input('x', item.getType().block())
+                                .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.ARMOR_STAND))
+                                .offerTo(exporter);
+                    }
+                }
 
         /*DecorationsBlocks.BANNER_BED.forEach(((dye, item) -> {
             exporter.accept(
@@ -280,10 +288,22 @@ class RecipesProvider extends FabricRecipeProvider {
                     null
             );
         }));*/
+            }
+
+            public RegistryKey<Recipe<?>> key(String path) {
+                return RegistryKey.of(RegistryKeys.RECIPE, id(path));
+            }
+
+            public void of(RecipeExporter exporter, RecipeEntry<?>... recipes) {
+                for (var recipe : recipes) {
+                    exporter.accept(recipe.id(), recipe.value(), null);
+                }
+            }
+        };
     }
-    public void of(RecipeExporter exporter, RecipeEntry<?>... recipes) {
-        for (var recipe : recipes) {
-            exporter.accept(recipe.id(), recipe.value(), null);
-        }
+
+    @Override
+    public String getName() {
+        return "recipes";
     }
 }

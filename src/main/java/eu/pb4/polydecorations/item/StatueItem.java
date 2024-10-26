@@ -1,8 +1,8 @@
 package eu.pb4.polydecorations.item;
 
-import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.polydecorations.entity.DecorationsEntities;
 import eu.pb4.polydecorations.entity.StatueEntity;
+import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
@@ -19,7 +19,7 @@ import net.minecraft.world.event.GameEvent;
 
 import java.util.function.Consumer;
 
-public class StatueItem extends ModeledItem {
+public class StatueItem extends SimplePolymerItem {
     private final StatueEntity.Type type;
 
     public StatueItem(StatueEntity.Type type, Item.Settings settings) {
@@ -42,7 +42,7 @@ public class StatueItem extends ModeledItem {
             if (world.isSpaceEmpty(null, box) && world.getOtherEntities(null, box).isEmpty()) {
                 if (world instanceof ServerWorld serverWorld) {
                     Consumer<StatueEntity> consumer = EntityType.copier(serverWorld, itemStack, context.getPlayer());
-                    var statueEntity = DecorationsEntities.STATUE.create(serverWorld, consumer, blockPos, SpawnReason.SPAWN_EGG, true, true);
+                    var statueEntity = DecorationsEntities.STATUE.create(serverWorld, consumer, blockPos, SpawnReason.MOB_SUMMONED, true, true);
                     if (statueEntity == null) {
                         return ActionResult.FAIL;
                     }

@@ -3,7 +3,6 @@ package eu.pb4.polydecorations.block.furniture;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -29,15 +28,18 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
@@ -50,7 +52,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return Blocks.IRON_BARS.getDefaultState();
     }
 
@@ -59,9 +61,10 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
         builder.add(WATERLOGGED, LIT);
     }
 
+    @Override
     public void onProjectileHit(World world, BlockState state, BlockHitResult hit, ProjectileEntity projectile) {
         BlockPos blockPos = hit.getBlockPos();
-        if (!world.isClient && projectile.isOnFire() && projectile.canModifyAt(world, blockPos) && !state.get(LIT) && !state.get(WATERLOGGED)) {
+        if (world instanceof ServerWorld serverWorld && projectile.isOnFire() && projectile.canModifyAt(serverWorld, blockPos) && !state.get(LIT) && !state.get(WATERLOGGED)) {
             world.setBlockState(blockPos, state.with(Properties.LIT, true), 11);
         }
     }
@@ -75,7 +78,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
     }
 
     @Override
-    public ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockState newState = null;
 
         if (stack.isIn(ItemTags.SHOVELS) && state.get(LIT)) {
@@ -93,17 +96,17 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
             world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(player, newState));
             stack.damage(1, player, hand == Hand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
 
-            return ItemActionResult.success(true);
+            return ActionResult.SUCCESS_SERVER;
         } else {
-            return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
         }
     }
 
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return state;
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {
@@ -140,7 +143,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
     }
 
     public static final class Model extends BlockModel {
-        public static final ItemStack UNLIT = BaseItemProvider.requestModel(id("block/unlit_brazier"));
+        public static final ItemStack UNLIT = ItemDisplayElementUtil.getModel(id("block/unlit_brazier"));
         private final ItemDisplayElement main;
 
         public Model(BlockState state) {

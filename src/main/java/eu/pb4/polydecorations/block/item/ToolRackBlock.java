@@ -3,7 +3,6 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.block.ItemUseLimiter;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
@@ -15,16 +14,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -32,14 +31,16 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
-public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     private final Block base;
 
     public ToolRackBlock(Settings settings, Block base) {
@@ -49,7 +50,7 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return this.base.getDefaultState();
     }
 
@@ -64,6 +65,7 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
         return waterLog(ctx, this.getDefaultState().with(FACING,
                 ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite()));
     }
+
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!player.isSneaking() && world.getBlockEntity(pos) instanceof ToolRackBlockEntity be) {
@@ -89,12 +91,12 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
                     be.setStack(slot, playerStack.copyWithCount(1));
                     playerStack.decrement(1);
                     be.markDirty();
-                    return ActionResult.SUCCESS;
+                    return ActionResult.SUCCESS_SERVER;
                 } else if (!currentStack.isEmpty() && playerStack.isEmpty()) {
                     be.setStack(slot, ItemStack.EMPTY);
                     player.setStackInHand(Hand.MAIN_HAND, currentStack);
                     be.markDirty();
-                    return ActionResult.SUCCESS;
+                    return ActionResult.SUCCESS_SERVER;
                 }
 
             }
@@ -112,9 +114,9 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {

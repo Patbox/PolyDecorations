@@ -11,6 +11,7 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 public class GhostLightBlock extends Block implements FactoryBlock {
     private final ParticleEffect effect;
@@ -27,7 +28,7 @@ public class GhostLightBlock extends Block implements FactoryBlock {
     }
 
     @Override
-    public BlockState getPolymerBlockState(BlockState state) {
+    public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
         return Blocks.STRUCTURE_VOID.getDefaultState();
     }
 

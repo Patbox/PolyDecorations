@@ -1,9 +1,9 @@
 package eu.pb4.polydecorations.item;
 
-import eu.pb4.factorytools.api.item.AutoModeledPolymerItem;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
+import eu.pb4.factorytools.api.item.DefinedPolymerItem;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
+import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
@@ -14,8 +14,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 
-public class SignPostItem extends Item implements AutoModeledPolymerItem {
-    private final Item item = BaseItemProvider.requestItem();
+public class SignPostItem extends SimplePolymerItem {
     private String translationKey;
 
     public SignPostItem(Settings settings) {
@@ -53,10 +52,5 @@ public class SignPostItem extends Item implements AutoModeledPolymerItem {
 
     public static float roundAngle(float v) {
         return Math.round(v / 15) * 15;
-    }
-
-    @Override
-    public Item getPolymerItem() {
-        return this.item;
     }
 }

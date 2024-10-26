@@ -3,42 +3,29 @@ package eu.pb4.polydecorations.block.furniture;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
-import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
-import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
-import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.*;
-import net.minecraft.entity.decoration.Brightness;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.Blocks;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import static eu.pb4.polydecorations.util.DecorationsUtil.id;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
     public LargeFlowerPotBlock(Settings settings) {
@@ -47,7 +34,7 @@ public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierB
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return Blocks.TERRACOTTA.getDefaultState();
     }
 
@@ -62,10 +49,11 @@ public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierB
         return waterLog(ctx, this.getDefaultState());
     }
 
+
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return state;
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {

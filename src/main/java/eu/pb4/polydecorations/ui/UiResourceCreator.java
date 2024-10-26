@@ -2,10 +2,10 @@ package eu.pb4.polydecorations.ui;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
-import eu.pb4.polymer.resourcepack.api.PolymerModelData;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import it.unimi.dsi.fastutil.chars.*;
@@ -14,8 +14,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -35,6 +35,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
+import static eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils.bridgeModel;
 
 public class UiResourceCreator {
     public static final String BASE_MODEL = "minecraft:item/generated";
@@ -53,7 +54,7 @@ public class UiResourceCreator {
 
     private static final List<SlicedTexture> VERTICAL_PROGRESS = new ArrayList<>();
     private static final List<SlicedTexture> HORIZONTAL_PROGRESS = new ArrayList<>();
-    private static final List<Pair<PolymerModelData, String>> SIMPLE_MODEL = new ArrayList<>();
+    private static final List<Pair<Identifier, String>> SIMPLE_MODEL = new ArrayList<>();
     private static final Char2IntMap SPACES = new Char2IntOpenHashMap();
     private static final Char2ObjectMap<Identifier> TEXTURES = new Char2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<Pair<Character, Character>, Identifier> TEXTURES_POLYDEX = new Object2ObjectOpenHashMap<>();
@@ -65,30 +66,30 @@ public class UiResourceCreator {
 
     public static Supplier<GuiElementBuilder> icon16(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, BASE_MODEL);
-        return () -> new GuiElementBuilder(model.item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(model.value());
+        return () -> GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
     }
 
     public static Supplier<GuiElementBuilder> icon32(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, X32_MODEL);
-        return () -> new GuiElementBuilder(model.item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(model.value());
+        return () -> GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
     }
 
     public static IntFunction<GuiElementBuilder> icon32Color(String path) {
         var model = genericIconRaw(Items.LEATHER_LEGGINGS, path, X32_MODEL);
         return (i) -> {
-            var b = new GuiElementBuilder(model.item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(model.value());
+            var b = GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
             b.setComponent(DataComponentTypes.DYED_COLOR, new DyedColorComponent(i, false));
             return b;
         };
     }
 
     public static IntFunction<GuiElementBuilder> icon16(String path, int size) {
-        var models = new PolymerModelData[size];
+        var models = new ItemStack[size];
 
         for (var i = 0; i < size; i++) {
             models[i] = genericIconRaw(Items.ALLIUM, path + "_" + i, BASE_MODEL);
         }
-        return (i) -> new GuiElementBuilder(models[i].item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(models[i].value());
+        return (i) -> GuiElementBuilder.from(models[i]).setName(Text.empty()).hideDefaultTooltip();
     }
 
     public static IntFunction<GuiElementBuilder> horizontalProgress16(String path, int start, int stop, boolean reverse) {
@@ -117,20 +118,22 @@ public class UiResourceCreator {
 
     public static IntFunction<GuiElementBuilder> genericProgress(String path, int start, int stop, boolean reverse, String base, List<SlicedTexture> progressType) {
 
-        var models = new PolymerModelData[stop - start];
+        var models = new ItemStack[stop - start];
 
         progressType.add(new SlicedTexture(path, start, stop, reverse));
 
         for (var i = start; i < stop; i++) {
             models[i - start] = genericIconRaw(Items.ALLIUM,  "gen/" + path + "_" + i, base);
         }
-        return (i) -> new GuiElementBuilder(models[i].item()).setName(Text.empty()).hideDefaultTooltip().setCustomModelData(models[i].value());
+        return (i) -> GuiElementBuilder.from(models[i]).setName(Text.empty()).hideDefaultTooltip();
     }
 
-    public static PolymerModelData genericIconRaw(Item item, String path, String base) {
-        var model = PolymerResourcePackUtils.requestModel(item, elementPath(path));
-        SIMPLE_MODEL.add(new Pair<>(model, base));
-        return model;
+    public static ItemStack genericIconRaw(Item item, String path, String base) {
+        var id = elementPath(path);
+        var stack = item.getDefaultStack();
+        stack.set(DataComponentTypes.ITEM_MODEL, bridgeModel(id));
+        SIMPLE_MODEL.add(new Pair<>(id, base));
+        return stack;
     }
 
     private static Identifier elementPath(String path) {
@@ -204,8 +207,8 @@ public class UiResourceCreator {
 
     public static void generateAssets(BiConsumer<String, byte[]> assetWriter) {
         for (var texture : SIMPLE_MODEL) {
-            assetWriter.accept("assets/" + texture.getLeft().modelPath().getNamespace() + "/models/" + texture.getLeft().modelPath().getPath() + ".json",
-                    ITEM_TEMPLATE.replace("|ID|", texture.getLeft().modelPath().toString()).replace("|BASE|", texture.getRight()).getBytes(StandardCharsets.UTF_8));
+            assetWriter.accept("assets/" + texture.getLeft().getNamespace() + "/models/" + texture.getLeft().getPath() + ".json",
+                    ITEM_TEMPLATE.replace("|ID|", texture.getLeft().toString()).replace("|BASE|", texture.getRight()).getBytes(StandardCharsets.UTF_8));
         }
 
         generateProgress(assetWriter, VERTICAL_PROGRESS, false);

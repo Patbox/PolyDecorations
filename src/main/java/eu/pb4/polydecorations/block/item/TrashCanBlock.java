@@ -3,8 +3,6 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.block.ItemUseLimiter;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.util.DecorationSoundEvents;
@@ -22,14 +20,11 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
@@ -40,25 +35,25 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = Properties.OPEN;
     public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.of("force_open", OpenState.class);
 
     public TrashCanBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(OPEN, false).with(FORCE_OPEN, OpenState.FALSE));
-        Model.BIN.isEmpty();
     }
 
     @Override
@@ -74,7 +69,7 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
 
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return Blocks.IRON_BLOCK.getDefaultState();
     }
 
@@ -82,7 +77,7 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!player.isSneaking() && world.getBlockEntity(pos) instanceof TrashCanBlockEntity be) {
             be.openGui((ServerPlayerEntity) player);
-            return ActionResult.SUCCESS;
+            return ActionResult.SUCCESS_SERVER;
         }
 
         if (player.isSneaking() && player.getStackInHand(Hand.MAIN_HAND).isEmpty()) {
@@ -96,7 +91,7 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
             }
 
             world.setBlockState(pos, state.cycle(FORCE_OPEN));
-            return ActionResult.SUCCESS;
+            return ActionResult.SUCCESS_SERVER;
         }
 
         return super.onUse(state, world, pos, player, hit);
@@ -116,9 +111,9 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {
@@ -141,11 +136,35 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
         return new Model(initialBlockState);
     }
 
+    public enum OpenState implements StringIdentifiable {
+        FALSE("false", true),
+        TRUE("true", false),
+        LIDLESS("lidless", false);
+
+        private final boolean playSound;
+        private final String id;
+
+        OpenState(String id, boolean playSound) {
+            this.id = id;
+            this.playSound = playSound;
+        }
+
+        @Override
+        public String asString() {
+            return this.id;
+        }
+
+        public boolean playSound() {
+            return this.playSound;
+        }
+    }
+
     public static final class Model extends BlockModel {
-        private static final ItemStack BIN = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), id("block/trashcan_bin"));
-        private static final ItemStack LID = BaseItemProvider.requestModel(BaseItemProvider.requestModel(), id("block/trashcan_lid"));
+        private static final ItemStack BIN = ItemDisplayElementUtil.getModel(id("block/trashcan_bin"));
+        private static final ItemStack LID = ItemDisplayElementUtil.getModel(id("block/trashcan_lid"));
         private final ItemDisplayElement main;
         private final ItemDisplayElement lid;
+
         public Model(BlockState state) {
             this.main = ItemDisplayElementUtil.createSimple(BIN);
             this.main.setScale(new Vector3f(2));
@@ -181,29 +200,6 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
                 updateState(this.blockState());
                 this.tick();
             }
-        }
-    }
-
-    public enum OpenState implements StringIdentifiable {
-        FALSE("false", true),
-        TRUE("true", false),
-        LIDLESS("lidless", false);
-
-        private final boolean playSound;
-        private final String id;
-
-        OpenState(String id, boolean playSound) {
-            this.id = id;
-            this.playSound = playSound;
-        }
-
-        @Override
-        public String asString() {
-            return this.id;
-        }
-
-        public boolean playSound() {
-            return this.playSound;
         }
     }
 }

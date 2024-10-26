@@ -9,6 +9,8 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 
 public class DecorationsEntities {
@@ -19,7 +21,7 @@ public class DecorationsEntities {
             .create().dimensions(EntityType.ARMOR_STAND.getDimensions()).entityFactory(StatueEntity::new));
 
     public static final EntityType<SeatEntity> SEAT = register("seat", FabricEntityTypeBuilder
-            .create().fireImmune().dimensions(EntityDimensions.fixed(0f, 0f)).entityFactory(SeatEntity::new).disableSaving().disableSummon());
+            .create().fireImmune().dimensions(EntityDimensions.fixed(0f, 0f)).entityFactory(SeatEntity::new).disableSummon());
 
     public static void register() {
         StatueEntity.Type.STONE.fireproof();
@@ -27,7 +29,8 @@ public class DecorationsEntities {
     }
 
     public static <T extends Entity> EntityType<T> register(String path, FabricEntityTypeBuilder<T> item) {
-        var x = Registry.register(Registries.ENTITY_TYPE, Identifier.of(ModInit.ID, path), item.build());
+        var id = Identifier.of(ModInit.ID, path);
+        var x = Registry.register(Registries.ENTITY_TYPE, id, item.build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, id)));
         PolymerEntityUtils.registerType(x);
         return x;
     }

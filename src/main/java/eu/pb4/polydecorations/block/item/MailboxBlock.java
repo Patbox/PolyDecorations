@@ -3,8 +3,6 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.block.ItemUseLimiter;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -25,30 +23,33 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class MailboxBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
-    public static final ItemStack FLAG = BaseItemProvider.requestModel(id("block/mailbox_flag"));
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+public class MailboxBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+    public static final ItemStack FLAG = ItemDisplayElementUtil.getModel(id("block/mailbox_flag"));
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     private final Block base;
 
-    public MailboxBlock(Block block) {
-        super(Settings.copy(block).nonOpaque().strength(block.getHardness() + 1f, block.getBlastResistance() + 2f)
+    public MailboxBlock(Settings settings, Block block) {
+        super(settings.nonOpaque().strength(block.getHardness() + 1f, block.getBlastResistance() + 2f)
                 .solidBlock(Blocks::never));
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
         this.base = block;
@@ -89,9 +90,9 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
@@ -116,7 +117,7 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return this.base.getDefaultState();
     }
 

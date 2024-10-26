@@ -27,6 +27,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
@@ -37,6 +38,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -320,7 +322,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         this.playSound(DecorationSoundEvents.CANVAS_PLACE, 1.0F, 1.0F);
     }
     @Override
-    public void onBreak(@Nullable Entity entity) {
+    public void onBreak(ServerWorld serverWorld, @Nullable Entity entity) {
         this.playSound(DecorationSoundEvents.CANVAS_BREAK, 1.0F, 1.0F);
 
         var stack = this.toStack();
@@ -329,7 +331,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
             return;
         }
 
-        this.dropStack(stack);
+        this.dropStack(serverWorld, stack);
     }
 
     @Nullable
@@ -359,7 +361,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
 
 
     @Override
-    public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
+    public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityType.MARKER;
     }
 }

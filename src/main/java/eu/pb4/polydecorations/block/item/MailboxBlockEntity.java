@@ -120,7 +120,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             }
         }
 
-        return ActionResult.SUCCESS;
+        return ActionResult.SUCCESS_SERVER;
     }
 
     @Override

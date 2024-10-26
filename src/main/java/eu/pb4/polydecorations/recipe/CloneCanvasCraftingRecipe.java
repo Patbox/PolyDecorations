@@ -8,11 +8,14 @@ import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.IngredientPlacement;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 
@@ -27,7 +30,7 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
 
 
     public static RecipeEntry<CloneCanvasCraftingRecipe> of(String id, Item item) {
-        return new RecipeEntry<>(id(id), new CloneCanvasCraftingRecipe("", item));
+        return new RecipeEntry<>(RegistryKey.of(RegistryKeys.RECIPE, id(id)), new CloneCanvasCraftingRecipe("", item));
     }
 
     @Override
@@ -69,19 +72,14 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
         return stack;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public boolean fits(int width, int height) {
-        return width * height > 1;
-    }
-
-    @Override
-    public ItemStack getResult(RegistryWrapper.WrapperLookup registryManager) {
-        return input.getDefaultStack();
-    }
-
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer getSerializer() {
         return DecorationsRecipeSerializers.CANVAS_CLONE;
+    }
+
+    @Override
+    public IngredientPlacement getIngredientPlacement() {
+        return IngredientPlacement.NONE;
     }
 }

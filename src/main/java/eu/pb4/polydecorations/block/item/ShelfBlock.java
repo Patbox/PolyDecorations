@@ -3,8 +3,6 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.block.ItemUseLimiter;
-import eu.pb4.factorytools.api.resourcepack.BaseItemProvider;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
@@ -17,16 +15,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
@@ -37,13 +34,16 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import xyz.nucleoid.packettweaker.PacketContext;
 
-public class ShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, ItemUseLimiter.All {
-    public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+public class ShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<SlabType> TYPE = Properties.SLAB_TYPE;
     private final Block base;
     private final ItemStack topModel;
@@ -53,12 +53,12 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(TYPE, SlabType.BOTTOM));
         this.base = base;
-        this.topModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_top"));
-        this.doubleModel = BaseItemProvider.requestModel(identifier.withPrefixedPath("block/").withSuffixedPath("_double"));
+        this.topModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_top"));
+        this.doubleModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_double"));
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return this.base.getDefaultState();
     }
 
@@ -107,7 +107,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!player.isSneaking() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
             be.openGui((ServerPlayerEntity) player);
-            return ActionResult.SUCCESS;
+            return ActionResult.SUCCESS_SERVER;
         }
 
         return super.onUse(state, world, pos, player, hit);
@@ -120,9 +120,9 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        tickWater(state, world, pos);
-        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickWater(state, world, tickView, pos);
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {

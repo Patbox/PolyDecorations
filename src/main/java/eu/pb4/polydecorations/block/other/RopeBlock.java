@@ -28,7 +28,9 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Map;
 
@@ -81,7 +83,7 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
         return state.with(DISTANCE, distance);
     }
 
-    private boolean canConnect(WorldAccess world, BlockPos neighborPos, BlockState neighbor, Direction opposite) {
+    private boolean canConnect(WorldView world, BlockPos neighborPos, BlockState neighbor, Direction opposite) {
         if (neighbor.isOf(this)) {
             return true;
         } else if (opposite == Direction.UP && neighbor.getBlock() instanceof LanternBlock) {
@@ -115,8 +117,8 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
     }
 
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        world.scheduleBlockTick(pos, state.getBlock(), 1);
+    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+        tickView.scheduleBlockTick(pos, state.getBlock(), 1);
         return state.with(FACING_PROPERTIES.get(direction), canConnect(world, neighborPos, neighborState, direction.getOpposite()) || canSupport(world, neighborPos, neighborState, direction.getOpposite()));
     }
 
@@ -135,12 +137,12 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
     }
 
     @Override
-    public BlockState getPolymerBlockState(BlockState state) {
+    public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
         return STATE;
     }
 
     @Override
-    public BlockState getPolymerBreakEventBlockState(BlockState state, ServerPlayerEntity player) {
+    public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
         return Blocks.OAK_FENCE.getDefaultState();
     }
 

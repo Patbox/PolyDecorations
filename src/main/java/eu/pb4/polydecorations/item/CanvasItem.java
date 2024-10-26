@@ -2,9 +2,9 @@ package eu.pb4.polydecorations.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import eu.pb4.factorytools.api.item.ModeledItem;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.polydecorations.entity.CanvasEntity;
+import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.minecraft.block.MapColor;
 import net.minecraft.component.ComponentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,7 +27,7 @@ import java.util.OptionalInt;
 import static eu.pb4.polydecorations.ModInit.id;
 
 
-public class CanvasItem extends ModeledItem {
+public class CanvasItem extends SimplePolymerItem {
     public CanvasItem(Settings settings) {
         super(settings.component(DATA_TYPE, Data.DEFAULT));
     }
@@ -61,16 +61,21 @@ public class CanvasItem extends ModeledItem {
         }
     }
 
-    @Override
     public String getTranslationKey(ItemStack stack) {
+
         if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isPresent()) {
-            return super.getTranslationKey(stack) +
+            return super.translationKey +
                     (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).glowing() ? ".glowing" : "") +
                     (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).waxed() ? ".waxed" : "") +
                     (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).cut() ? ".cut" : "")
                     ;
         }
-        return super.getTranslationKey(stack) + ".empty";
+        return super.translationKey + ".empty";
+    }
+
+    @Override
+    public Text getName(ItemStack stack) {
+        return Text.translatable(getTranslationKey(stack));
     }
 
     protected boolean canPlaceOn(PlayerEntity player, Direction side, ItemStack stack, BlockPos pos) {
@@ -78,7 +83,7 @@ public class CanvasItem extends ModeledItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
         if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isEmpty()) {
                 tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
                         .append(Text.translatable(super.getTranslationKey() + ".tooltip.1",

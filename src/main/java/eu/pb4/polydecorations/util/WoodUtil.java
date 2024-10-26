@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 public class WoodUtil {
     public static List<WoodType> VANILLA = List.of(
             WoodType.OAK, WoodType.SPRUCE, WoodType.BIRCH, WoodType.ACACIA,
-            WoodType.CHERRY, WoodType.JUNGLE, WoodType.DARK_OAK,
+            WoodType.CHERRY, WoodType.JUNGLE, WoodType.DARK_OAK, WoodType.PALE_OAK,
             WoodType.CRIMSON, WoodType.WARPED, WoodType.MANGROVE,
             WoodType.BAMBOO);
 
