@@ -35,7 +35,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
-import static eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils.bridgeModel;
+import static eu.pb4.polymer.resourcepack.extras.api.ResourcePackExtras.bridgeModel;
 
 public class UiResourceCreator {
     public static final String BASE_MODEL = "minecraft:item/generated";

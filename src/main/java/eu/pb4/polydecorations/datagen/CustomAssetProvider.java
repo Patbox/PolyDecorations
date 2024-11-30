@@ -13,6 +13,9 @@ import eu.pb4.polydecorations.ui.UiResourceCreator;
 import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.common.api.PolymerCommonUtils;
+import eu.pb4.polymer.resourcepack.api.AssetPaths;
+import eu.pb4.polymer.resourcepack.extras.api.format.item.ItemAsset;
+import eu.pb4.polymer.resourcepack.extras.api.format.item.model.BasicItemModel;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.block.WoodType;
@@ -35,6 +38,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+
+import static eu.pb4.polydecorations.ModInit.id;
 
 class CustomAssetProvider implements DataProvider {
     private final DataOutput output;
@@ -150,12 +155,6 @@ class CustomAssetProvider implements DataProvider {
             }
             """;
 
-    private static final String ITEM_MODEL_JSON = """
-            {
-              "parent": "polydecorations:block/|I|"
-            }
-            """;
-
     private void writeBlocksAndItems(BiConsumer<String, byte[]> writer) {
         var t = new StringBuilder();
         DecorationsItems.SHELF.forEach((type, item) -> {
@@ -180,19 +179,16 @@ class CustomAssetProvider implements DataProvider {
                     .getBytes(StandardCharsets.UTF_8)
             );
 
-            writer.accept("assets/polydecorations/models/item/" + type.name() + "_shelf.json", ITEM_MODEL_JSON
-                    .replace("|I|", type.name() + "_shelf")
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_shelf")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_shelf")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
         });
-
         DecorationsItems.BENCH.forEach((type, item) -> {
             writeBench(type, writer);
 
-            writer.accept("assets/polydecorations/models/item/" + type.name() + "_bench.json", ITEM_MODEL_JSON
-                    .replace("|I|", type.name() + "_bench")
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_bench")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_bench")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
 
@@ -213,10 +209,9 @@ class CustomAssetProvider implements DataProvider {
                 );
             }
 
-            writer.accept("assets/polydecorations/models/item/" + type.name() + "_table.json", ITEM_MODEL_JSON
-                    .replace("|I|", type.name() + "_table")
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_table")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_table")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
         DecorationsItems.WOODEN_STATUE.forEach((type, item) -> {
@@ -227,10 +222,9 @@ class CustomAssetProvider implements DataProvider {
                     .getBytes(StandardCharsets.UTF_8)
             );
 
-            writer.accept("assets/polydecorations/models/item/" + type.name() + "_sign_post.json", ITEM_MODEL_JSON
-                    .replace("|I|", type.name() + "_sign_post")
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_sign_post")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_sign_post")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
 
             writeStatue(type.name(), "block/" + type.name() + "_planks", writer);
         });
@@ -245,10 +239,9 @@ class CustomAssetProvider implements DataProvider {
                     .getBytes(StandardCharsets.UTF_8)
             );
 
-            writer.accept("assets/polydecorations/models/item/" + type.name() + "_mailbox.json", ITEM_MODEL_JSON
-                    .replace("|I|", type.name() + "_mailbox")
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_mailbox")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_mailbox")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
         DecorationsItems.TOOL_RACK.forEach((type, item) -> {
@@ -260,10 +253,9 @@ class CustomAssetProvider implements DataProvider {
                             .getBytes(StandardCharsets.UTF_8)
             );
 
-            writer.accept("assets/polydecorations/models/item/" + type.name() + "_tool_rack.json", ITEM_MODEL_JSON
-                    .replace("|I|", type.name() + "_tool_rack")
-                    .getBytes(StandardCharsets.UTF_8)
-            );
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_tool_rack")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_tool_rack")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
         try {
@@ -271,6 +263,10 @@ class CustomAssetProvider implements DataProvider {
         } catch (Throwable e) {
             e.printStackTrace();
         }
+
+        writer.accept(AssetPaths.itemAsset(id("stone_statue")),
+                new ItemAsset(new BasicItemModel(id("item/stone_statue")), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
 
 
         writeStatue("deepslate", "block/deepslate_top", writer);
@@ -300,6 +296,20 @@ class CustomAssetProvider implements DataProvider {
         //System.out.println(b);
 
         DecorationsModels.ROPE.generateModels(writer);
+
+        for (var item : List.of(DecorationsItems.CANVAS, DecorationsItems.ROPE, DecorationsItems.GLOBE, DecorationsItems.GHOST_LIGHT,
+                DecorationsItems.TRASHCAN, DecorationsItems.HAMMER, DecorationsItems.TROWEL)) {
+            var id = Registries.ITEM.getId(item);
+            writer.accept(AssetPaths.itemAsset(id),
+                    new ItemAsset(new BasicItemModel(id.withPrefixedPath("item/")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        }
+        for (var item : List.of(DecorationsItems.DISPLAY_CASE, DecorationsItems.BRAZIER, DecorationsItems.SOUL_BRAZIER, DecorationsItems.LARGE_FLOWER_POT)) {
+            var id = Registries.ITEM.getId(item);
+            writer.accept(AssetPaths.itemAsset(id),
+                    new ItemAsset(new BasicItemModel(id.withPrefixedPath("block/")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     private void writeBaseTable(BiConsumer<String,byte[]> writer) throws IOException {
@@ -366,6 +376,10 @@ class CustomAssetProvider implements DataProvider {
                 .replace("|TXT|", texture)
                 .getBytes(StandardCharsets.UTF_8)
         );
+
+        writer.accept(AssetPaths.itemAsset(id(type + "_statue")),
+                new ItemAsset(new BasicItemModel(id("item/" + type + "_statue")), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

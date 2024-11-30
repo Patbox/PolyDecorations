@@ -57,7 +57,7 @@ public class StatueItem extends SimplePolymerItem {
                 }
 
                 itemStack.decrement(1);
-                return ActionResult.SUCCESS;
+                return ActionResult.SUCCESS_SERVER;
             } else {
                 return ActionResult.FAIL;
             }

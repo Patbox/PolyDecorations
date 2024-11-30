@@ -154,7 +154,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
-            var yaw = state.get(FACING).asRotation();
+            var yaw = state.get(FACING).getPositiveHorizontalDegrees();
             this.main.setYaw(yaw);
             this.addElement(this.main);
             for (int i = 0; i < 6; i++) {
@@ -187,7 +187,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var yaw = state.get(FACING).asRotation();
+                var yaw = state.get(FACING).getPositiveHorizontalDegrees();
                 this.main.setYaw(yaw);
                 this.main.setItem(getModel(state));
                 for (int i = 0; i < 6; i++) {

@@ -180,7 +180,7 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
         }
 
         private void updateState(BlockState state) {
-            var direction = state.get(FACING).asRotation();
+            var direction = state.get(FACING).getPositiveHorizontalDegrees();
             this.main.setYaw(direction);
             this.lid.setYaw(direction);
             this.lid.setItem(state.get(FORCE_OPEN) == OpenState.LIDLESS ? ItemStack.EMPTY : LID);

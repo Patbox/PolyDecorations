@@ -115,12 +115,7 @@ public class DecorationsItems {
         WoodUtil.VANILLA.forEach(x -> {
             var y = object.apply(x);
             if (y != null) {
-                map.put(x, register(x.name() + "_" + id, (settings) -> {
-                    if (x == WoodType.PALE_OAK) {
-                        settings.requires(FeatureFlags.WINTER_DROP);
-                    }
-                    return y.apply(settings);
-                }));
+                map.put(x, register(x.name() + "_" + id, y));
             }
         });
 

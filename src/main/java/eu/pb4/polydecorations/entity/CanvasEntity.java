@@ -282,7 +282,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        this.facing = Direction.fromHorizontal(nbt.getByte("facing"));
+        this.facing = Direction.fromHorizontalQuarterTurns(nbt.getByte("facing"));
         this.glowing = nbt.getBoolean("glowing");
         this.waxed = nbt.getBoolean("waxed");
         this.cut = nbt.getBoolean("cut");
@@ -306,7 +306,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putByte("facing", (byte)this.facing.getHorizontal());
+        nbt.putByte("facing", (byte)this.facing.getHorizontalQuarterTurns());
         nbt.putByteArray("data", Arrays.copyOf(this.data, this.data.length));
         nbt.putBoolean("glowing", this.glowing);
         nbt.putBoolean("waxed", this.waxed);

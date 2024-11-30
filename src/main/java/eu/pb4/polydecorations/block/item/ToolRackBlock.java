@@ -72,8 +72,8 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
             if (be.checkUnlocked(player)) {
                 var dir = state.get(FACING);
                 var center = Vec3d.ofCenter(pos);
-                var neg = new Vec3d(-0.5, -0.5, -0.5).rotateY(-dir.asRotation() * MathHelper.RADIANS_PER_DEGREE);
-                var posi = new Vec3d(0.5, 0.5, -0.25).rotateY(-dir.asRotation() * MathHelper.RADIANS_PER_DEGREE);
+                var neg = new Vec3d(-0.5, -0.5, -0.5).rotateY(-dir.getPositiveHorizontalDegrees() * MathHelper.RADIANS_PER_DEGREE);
+                var posi = new Vec3d(0.5, 0.5, -0.25).rotateY(-dir.getPositiveHorizontalDegrees() * MathHelper.RADIANS_PER_DEGREE);
                 var eye = player.getEyePos().subtract(center);
                 var off = eye.add(player.getRotationVector().multiply(player.getBlockInteractionRange()));
 
@@ -82,7 +82,7 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
                 if (res.isEmpty()) {
                     return ActionResult.PASS;
                 }
-                var target = res.get().rotateY(dir.asRotation() * MathHelper.RADIANS_PER_DEGREE);
+                var target = res.get().rotateY(dir.getPositiveHorizontalDegrees() * MathHelper.RADIANS_PER_DEGREE);
                 var slot = (target.x < 0 ? 0 : 1) + (target.y < 0 ? 0 : 2);
 
                 var currentStack = be.getStack(slot);
@@ -148,7 +148,7 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
             this.main.setModelTransformation(ModelTransformationMode.NONE);
             this.main.setDisplaySize(1, 1);
 
-            var yaw = state.get(FACING).asRotation();
+            var yaw = state.get(FACING).getPositiveHorizontalDegrees();
             this.main.setYaw(yaw);
             this.addElement(this.main);
             for (int i = 0; i < 4; i++) {
@@ -173,7 +173,7 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var yaw = state.get(FACING).asRotation();
+                var yaw = state.get(FACING).getPositiveHorizontalDegrees();
                 this.main.setYaw(yaw);
                 for (int i = 0; i < 4; i++) {
                     this.items[i].setYaw(yaw);

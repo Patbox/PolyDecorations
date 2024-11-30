@@ -123,7 +123,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
-            var yaw = state.get(FACING).asRotation();
+            var yaw = state.get(FACING).getPositiveHorizontalDegrees();
             this.main.setYaw(yaw);
             this.addElement(this.main);
 
@@ -158,7 +158,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var direction = state.get(FACING).asRotation();
+                var direction = state.get(FACING).getPositiveHorizontalDegrees();
                 this.item.setYaw(direction);
                 this.tick();
             }

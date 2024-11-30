@@ -37,7 +37,7 @@ public class HammerItem extends SimplePolymerItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        return apply(context.getPlayer(), context.getWorld(), context.getBlockPos(), context.getHitPos(), false) ? ActionResult.SUCCESS : ActionResult.FAIL;
+        return apply(context.getPlayer(), context.getWorld(), context.getBlockPos(), context.getHitPos(), false) ? ActionResult.SUCCESS_SERVER : ActionResult.FAIL;
     }
 
     private boolean apply(PlayerEntity player, World world, BlockPos blockPos, Vec3d hitPos, boolean reverse) {
@@ -90,7 +90,7 @@ public class HammerItem extends SimplePolymerItem {
     private ActionResult onBlockAttacked(PlayerEntity player, World world, Hand hand, BlockPos pos, Direction direction) {
         if (player.getStackInHand(hand).isOf(this)) {
             var cast = player.raycast(player.getBlockInteractionRange(), 0, false);
-            return apply(player, world, pos, cast.getPos(), false) ? ActionResult.SUCCESS : ActionResult.FAIL;
+            return apply(player, world, pos, cast.getPos(), false) ? ActionResult.SUCCESS_SERVER : ActionResult.FAIL;
         }
         return ActionResult.PASS;
     }

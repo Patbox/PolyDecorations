@@ -152,7 +152,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
         public Model(ServerWorld world, BlockState state) {
             this.worldBound = state.get(WORLD_BOUND);
             this.world = world;
-            var direction = state.get(FACING).asRotation();
+            var direction = state.get(FACING).getPositiveHorizontalDegrees();
 
             this.main = ItemDisplayElementUtil.createSimple(GLOBE_BASE);
             this.main.setScale(new Vector3f(2));
@@ -206,7 +206,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
                 this.worldBound = state.get(WORLD_BOUND);
-                var direction = state.get(FACING).asRotation();
+                var direction = state.get(FACING).getPositiveHorizontalDegrees();
                 this.main.setYaw(direction);
                 this.rotating.setYaw(direction);
             }

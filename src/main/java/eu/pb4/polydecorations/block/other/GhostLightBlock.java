@@ -47,7 +47,7 @@ public class GhostLightBlock extends Block implements FactoryBlock {
         public void tick() {
             super.tick();
             if (this.getTick() % rate == 0) {
-                this.sendPacket(new ParticleS2CPacket(effect, false, this.getPos().x, this.getPos().y, this.getPos().z,
+                this.sendPacket(new ParticleS2CPacket(effect, false, false, this.getPos().x, this.getPos().y, this.getPos().z,
                         2 / 16f, 2 / 16f, 2 / 16f, speed, count));
             }
         }

@@ -28,10 +28,10 @@ public class SeatEntity extends Entity implements PolymerEntity {
         var entity = new SeatEntity(DecorationsEntities.SEAT, world);
         entity.direction = direction;
         entity.setPosition(pos.getX() + 0.5, pos.getY() + 0.5 + yOffset, pos.getZ() + 0.5);
-        entity.setYaw(direction.asRotation());
+        entity.setYaw(direction.getPositiveHorizontalDegrees());
         world.spawnEntity(entity);
         player.startRiding(entity);
-        /*if (MathHelper.angleBetween(direction.asRotation(), player.getYaw()) > 90) {
+        /*if (MathHelper.angleBetween(direction.getPositiveHorizontalDegrees(), player.getYaw()) > 90) {
             if (player instanceof ServerPlayerEntity serverPlayer) {
                 serverPlayer.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw() - 180, 0,
                         Set.of(PositionFlag.X, PositionFlag.Y, PositionFlag.Z, PositionFlag.X_ROT));

@@ -27,7 +27,7 @@ public class TrowelItem extends SimplePolymerItem {
             return ActionResult.FAIL;
         }
         if (context.getPlayer().getStackInHand(Hand.OFF_HAND).getItem() instanceof BlockItem) {
-            return ActionResult.SUCCESS;
+            return ActionResult.SUCCESS_SERVER;
         }
 
         var stacks = new ArrayList<ItemStack>(9);
@@ -57,7 +57,7 @@ public class TrowelItem extends SimplePolymerItem {
                         SoundCategory.BLOCKS, ctx.getBlockPos().getX() + 0.5, ctx.getBlockPos().getY() + 0.5, ctx.getBlockPos().getZ() + 0.5,
                         (group.getVolume() + 1.0F) / 2.0F, group.getPitch() * 0.8F, player.getRandom().nextLong()));
 
-                return ActionResult.SUCCESS;
+                return ActionResult.SUCCESS_SERVER;
             }
         }
 

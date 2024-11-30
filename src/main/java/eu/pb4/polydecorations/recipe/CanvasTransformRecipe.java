@@ -161,7 +161,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
 
         for (int i = 0; i < defaultedList.size(); ++i) {
             var stack = input.getStackInSlot(i);
-            var remainer = stack.getRecipeRemainder();
+            var remainer = stack.getItem().getRecipeRemainder();
             if (remainer.isEmpty() && stack.isDamageable()) {
                 remainer = stack.copy();
                 remainer.setDamage(remainer.getDamage() + 1);

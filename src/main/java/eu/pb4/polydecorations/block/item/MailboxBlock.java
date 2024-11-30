@@ -134,7 +134,7 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
             this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
-            var yaw = state.get(FACING).asRotation();
+            var yaw = state.get(FACING).getPositiveHorizontalDegrees();
             this.main.setYaw(yaw);
 
             this.flag = ItemDisplayElementUtil.createSimple(FLAG);
@@ -152,7 +152,7 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var yaw = state.get(FACING).asRotation();
+                var yaw = state.get(FACING).getPositiveHorizontalDegrees();
                 this.main.setYaw(yaw);
                 this.tick();
             }

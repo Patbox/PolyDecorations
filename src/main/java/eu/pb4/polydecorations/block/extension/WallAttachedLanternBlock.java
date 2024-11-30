@@ -56,8 +56,8 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
     }
 
     @Override
-    public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state) {
-        return this.lantern.getPickStack(world, pos, this.lantern.getDefaultState());
+    public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state, boolean includeData) {
+        return this.lantern.getDefaultState().getPickStack(world, pos, includeData);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
 
         private Model(BlockState state) {
             this.main = ItemDisplayElementUtil.createSimple(model(state));
-            this.main.setYaw(state.get(FACING).getOpposite().asRotation());
+            this.main.setYaw(state.get(FACING).getOpposite().getPositiveHorizontalDegrees());
             this.addElement(main);
         }
 
@@ -142,7 +142,7 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
                 this.main.setItem(model(state));
-                this.main.setYaw(state.get(FACING).getOpposite().asRotation());
+                this.main.setYaw(state.get(FACING).getOpposite().getPositiveHorizontalDegrees());
                 this.tick();
             }
         }

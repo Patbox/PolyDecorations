@@ -16,6 +16,7 @@ import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsItems;
+import eu.pb4.polymer.resourcepack.extras.api.ResourcePackExtras;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
@@ -59,6 +60,6 @@ public class ModInit implements ModInitializer {
 		PolydexCompat.register();
 		PolymerResourcePackUtils.addModAssets(ID);
 		PolymerResourcePackUtils.markAsRequired();
-		PolymerResourcePackUtils.addBridgedModelsFolder(id("block"), id("sgui"));
+		ResourcePackExtras.forDefault().addBridgedModelsFolder(id("block"), id("sgui"));
 	}
 }
