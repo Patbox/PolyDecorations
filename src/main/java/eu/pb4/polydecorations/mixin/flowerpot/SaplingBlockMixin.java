@@ -1,4 +1,4 @@
-package eu.pb4.polydecorations.mixin;
+package eu.pb4.polydecorations.mixin.flowerpot;
 
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import net.minecraft.block.BlockState;

@@ -45,13 +45,15 @@ public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEn
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         super.writeNbt(nbt, lookup);
-        nbt.put("item", this.item.toNbtAllowEmpty(lookup));
+        if (!this.item.isEmpty()) {
+            nbt.put("item", this.item.toNbt(lookup));
+        }
     }
 
     @Override
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         super.readNbt(nbt, lookup);
-        setItem(ItemStack.fromNbtOrEmpty(lookup, nbt.getCompound("item")));
+        setItem(ItemStack.fromNbt(lookup, nbt.getCompoundOrEmpty("item")).orElse(ItemStack.EMPTY));
     }
 
     @Override

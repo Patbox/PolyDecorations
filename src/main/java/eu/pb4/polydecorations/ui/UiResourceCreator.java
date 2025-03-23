@@ -78,7 +78,7 @@ public class UiResourceCreator {
         var model = genericIconRaw(Items.LEATHER_LEGGINGS, path, X32_MODEL);
         return (i) -> {
             var b = GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
-            b.setComponent(DataComponentTypes.DYED_COLOR, new DyedColorComponent(i, false));
+            b.setComponent(DataComponentTypes.DYED_COLOR, new DyedColorComponent(i));
             return b;
         };
     }

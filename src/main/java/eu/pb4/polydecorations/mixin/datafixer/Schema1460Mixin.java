@@ -25,25 +25,19 @@ import java.util.function.Supplier;
 
 @Mixin(Schema1460.class)
 public abstract class Schema1460Mixin extends Schema {
+    @Shadow protected static void registerInventory(Schema schema, Map<String, Supplier<TypeTemplate>> map, String name) {};
+
     public Schema1460Mixin(int versionKey, Schema parent) {
         super(versionKey, parent);
-    }
-
-    @Shadow
-    protected static void method_5273(Schema schema, Map<String, Supplier<TypeTemplate>> map, String name) {
-    }
-
-    @Shadow
-    protected static void targetEntityItems(Schema schema, Map<String, Supplier<TypeTemplate>> map, String entityId) {
     }
 
     @Inject(method = "registerBlockEntities", at = @At("RETURN"))
     private void registerBlockEntities(Schema schema, CallbackInfoReturnable<Map<String, Supplier<TypeTemplate>>> cir) {
         var map = cir.getReturnValue();
 
-        method_5273(schema, map, mod("shelf"));
-        method_5273(schema, map, mod("tool_rack"));
-        method_5273(schema, map, mod("trashcan"));
+        registerInventory(schema, map, mod("shelf"));
+        registerInventory(schema, map, mod("tool_rack"));
+        registerInventory(schema, map, mod("trashcan"));
 
 
         schema.register(map, mod("sign_post"), (n) -> DSL.optionalFields("upper", DSL.optionalFields("item", TypeReferences.ITEM_NAME.in(schema)),
@@ -58,7 +52,7 @@ public abstract class Schema1460Mixin extends Schema {
     private void registerEntities(Schema schema, CallbackInfoReturnable<Map<String, Supplier<TypeTemplate>>> cir) {
         var map = cir.getReturnValue();
         schema.register(map, mod("statue"), () -> DSL.allWithRemainder(
-                Schema100Accessor.callTargetItems(schema),
+                TypeReferences.ENTITY_EQUIPMENT.in(schema),
                 DSL.optionalFields("stack", TypeReferences.ITEM_STACK.in(schema))));
     }
 

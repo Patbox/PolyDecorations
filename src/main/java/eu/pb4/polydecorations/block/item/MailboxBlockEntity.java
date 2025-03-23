@@ -30,10 +30,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
@@ -62,7 +59,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
         for (var x : inventories.entrySet()) {
             var cpd = new NbtCompound();
             Inventories.writeNbt(cpd, x.getValue().heldStacks, lookup);
-            cpd.put("uuid", NbtHelper.fromUuid(x.getKey()));
+            cpd.put("uuid", Uuids.CODEC, x.getKey());
             inv.add(cpd);
         }
         nbt.put("inventory", inv);
@@ -72,7 +69,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         super.readNbt(nbt, lookup);
         if (nbt.contains("owner")) {
-            this.owner = LegacyNbtHelper.toGameProfile(nbt.getCompound("owner"));
+            this.owner = LegacyNbtHelper.toGameProfile(nbt.getCompoundOrEmpty("owner"));
         } else {
             this.owner = null;
         }
@@ -80,12 +77,13 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             x.clear();
         }
         this.inventories.clear();
-        for (var x : nbt.getList("inventory", NbtElement.COMPOUND_TYPE)) {
-            var cpd = (NbtCompound) x;
-            var uuid = NbtHelper.toUuid(Objects.requireNonNull(cpd.get("uuid")));
-            var inv = createInventory();
-            Inventories.readNbt(cpd, inv.heldStacks, lookup);
-            this.inventories.put(uuid, inv);
+        for (var x : nbt.getListOrEmpty("inventory")) {
+            if (x instanceof NbtCompound cpd) {
+                var uuid = cpd.get("uuid", Uuids.CODEC).orElse(Util.NIL_UUID);
+                var inv = createInventory();
+                Inventories.readNbt(cpd, inv.heldStacks, lookup);
+                this.inventories.put(uuid, inv);
+            }
         }
         if (model != null) {
             model.setHasMail(!inventories.isEmpty());

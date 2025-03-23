@@ -24,6 +24,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtByteArray;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -281,21 +282,26 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
+        if (nbt.get("data") instanceof NbtByteArray) {
+            nbt.put("image", nbt.get("data"));
+            nbt.remove("data");
+        }
+
         super.readCustomDataFromNbt(nbt);
-        this.facing = Direction.fromHorizontalQuarterTurns(nbt.getByte("facing"));
-        this.glowing = nbt.getBoolean("glowing");
-        this.waxed = nbt.getBoolean("waxed");
-        this.cut = nbt.getBoolean("cut");
+        this.facing = Direction.fromHorizontalQuarterTurns(nbt.getByte("facing", (byte) 0));
+        this.glowing = nbt.getBoolean("glowing", false);
+        this.waxed = nbt.getBoolean("waxed", false);
+        this.cut = nbt.getBoolean("cut", false);
         if (nbt.contains("background")) {
-            this.background = Optional.ofNullable(CanvasColor.getFromRaw(nbt.getByte("background")));
+            this.background = Optional.ofNullable(CanvasColor.getFromRaw(nbt.getByte("background", (byte) 0)));
         } else {
             this.background = Optional.empty();
         }
 
-        fromByteArray(nbt.getByteArray("data"));
+        fromByteArray(nbt.getByteArray("image").orElse(new byte[0]));
 
         if (nbt.contains("name")) {
-            this.name = Text.Serialization.fromLenientJson(nbt.getString("name"), this.getRegistryManager());
+            this.name = Text.Serialization.fromLenientJson(nbt.getString("name", ""), this.getRegistryManager());
         }
 
 
@@ -307,7 +313,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putByte("facing", (byte)this.facing.getHorizontalQuarterTurns());
-        nbt.putByteArray("data", Arrays.copyOf(this.data, this.data.length));
+        nbt.putByteArray("image", Arrays.copyOf(this.data, this.data.length));
         nbt.putBoolean("glowing", this.glowing);
         nbt.putBoolean("waxed", this.waxed);
         nbt.putBoolean("cut", this.cut);

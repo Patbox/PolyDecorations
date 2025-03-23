@@ -20,7 +20,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -114,9 +114,9 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        ItemScatterer.onStateReplaced(state, newState, world, pos);
-        super.onStateReplaced(state, world, pos, newState, moved);
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        ItemScatterer.onStateReplaced(state, world, pos);
+        super.onStateReplaced(state, world, pos, moved);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
                 item.setViewRange(0.6f);
                 item.setDisplaySize(1, 1);
-                item.setModelTransformation(ModelTransformationMode.NONE);
+                item.setItemDisplayContext(ItemDisplayContext.NONE);
                 item.setTranslation(new Vector3f(-5 / 16f + x * (5 / 16f), -4f / 16f + y * 8 / 16f, -2 / 16f));
                 item.setScale(new Vector3f(4.5f / 16f));
                 item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
@@ -199,7 +199,7 @@ public class ShelfBlock extends BlockWithEntity implements FactoryBlock, Barrier
 
         public void setItem(int i, ItemStack stack) {
             this.items[i].setItem(stack.copy());
-            this.items[i].setModelTransformation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ModelTransformationMode.FIXED : ModelTransformationMode.NONE);
+            this.items[i].setItemDisplayContext(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ItemDisplayContext.FIXED : ItemDisplayContext.NONE);
             this.items[i].setLeftRotation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL)
                     ? Direction.UP.getRotationQuaternion()
                     : RotationAxis.NEGATIVE_Y.rotationDegrees(180));

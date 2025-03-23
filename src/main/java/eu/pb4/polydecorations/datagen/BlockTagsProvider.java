@@ -73,5 +73,14 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
 
         this.getOrCreateTagBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)
                 .addOptionalTag(DecorationsBlockTags.MAILBOXES);
+
+        this.getOrCreateTagBuilder(BlockTags.BAMBOO_PLANTABLE_ON)
+                .add(DecorationsBlocks.LARGE_FLOWER_POT);
+        this.getOrCreateTagBuilder(BlockTags.DRY_VEGETATION_MAY_PLACE_ON)
+                .add(DecorationsBlocks.LARGE_FLOWER_POT);
+        this.getOrCreateTagBuilder(BlockTags.BIG_DRIPLEAF_PLACEABLE)
+                .add(DecorationsBlocks.LARGE_FLOWER_POT);
+        this.getOrCreateTagBuilder(BlockTags.SMALL_DRIPLEAF_PLACEABLE)
+                .add(DecorationsBlocks.LARGE_FLOWER_POT);
     }
 }

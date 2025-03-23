@@ -7,6 +7,7 @@ import eu.pb4.polydecorations.entity.CanvasEntity;
 import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.minecraft.block.MapColor;
 import net.minecraft.component.ComponentType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.tooltip.TooltipType;
@@ -23,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Consumer;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
@@ -83,21 +85,21 @@ public class CanvasItem extends SimplePolymerItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> tooltip, TooltipType type) {
         if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isEmpty()) {
-                tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+                tooltip.accept(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
                         .append(Text.translatable(super.getTranslationKey() + ".tooltip.1",
                                         Text.translatable("text.polydecorations.tooltip.any_dye").formatted(Formatting.WHITE))
                                 .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
-            tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+            tooltip.accept(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
                     .append(Text.translatable(super.getTranslationKey() + ".tooltip.2",
                                     Text.translatable("text.polydecorations.tooltip.coal_and_bone_meal").formatted(Formatting.WHITE))
                             .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
-            tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+            tooltip.accept(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
                     .append(Text.translatable(super.getTranslationKey() + ".tooltip.3",
                                     Items.SPONGE.getName().copy().formatted(Formatting.WHITE))
                             .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
-            tooltip.add(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
+            tooltip.accept(Text.empty().append(Text.literal("| ").formatted(Formatting.DARK_GRAY))
                     .append(Text.translatable(super.getTranslationKey() + ".tooltip.4",
                                     Items.BRUSH.getName().copy().formatted(Formatting.WHITE))
                             .formatted(Formatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
@@ -130,9 +132,9 @@ public class CanvasItem extends SimplePolymerItem {
                 builder.append(cColor == CanvasColor.CLEAR_FORCE ? "a" : x >= 16 ? "_b" : "-b");
             }
             text.append(Text.literal(builder.toString()).withColor(color.getColor() == MapColor.CLEAR ? background.getRgbColor() : color.getRgbColor()));
-            tooltip.add(text);
+            tooltip.accept(text);
         }
-        tooltip.add(Text.empty());
+        tooltip.accept(Text.empty());
     }
     public static final ComponentType<Data> DATA_TYPE = ComponentType.<Data>builder().codec(Data.CODEC).cache().build();
     public record Data(Optional<byte[]> image, Optional<CanvasColor> background, boolean glowing, boolean waxed, boolean cut) {

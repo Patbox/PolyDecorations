@@ -24,7 +24,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ModelTransformationMode;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -109,9 +109,9 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        ItemScatterer.onStateReplaced(state, newState, world, pos);
-        super.onStateReplaced(state, world, pos, newState, moved);
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        ItemScatterer.onStateReplaced(state, world, pos);
+        super.onStateReplaced(state, world, pos, moved);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
             this.rotating.setScale(new Vector3f(2));
             this.rotating.setYaw(direction);
             this.rotating.setInterpolationDuration(1);
-            this.rotating.setModelTransformation(ModelTransformationMode.NONE);
+            this.rotating.setItemDisplayContext(ItemDisplayContext.NONE);
             setItem(ItemStack.EMPTY);
             this.addElement(this.rotating);
         }
@@ -238,7 +238,7 @@ public class GlobeBlock extends BlockWithEntity implements FactoryBlock, Barrier
             }
             updateAngle();
             this.rotating.setItem(model);
-            this.rotating.setModelTransformation(item.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ModelTransformationMode.FIXED : ModelTransformationMode.NONE);
+            this.rotating.setItemDisplayContext(item.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ItemDisplayContext.FIXED : ItemDisplayContext.NONE);
             this.velocity = 0;
         }
     }

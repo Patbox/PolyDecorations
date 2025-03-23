@@ -25,7 +25,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ModelTransformationMode;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
@@ -81,9 +81,9 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        ItemScatterer.onStateReplaced(state, newState, world, pos);
-        super.onStateReplaced(state, world, pos, newState, moved);
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        ItemScatterer.onStateReplaced(state, world, pos);
+        super.onStateReplaced(state, world, pos, moved);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
             this.item = ItemDisplayElementUtil.createSimple();
             this.item.setViewRange(0.6f);
             this.item.setDisplaySize(1, 1);
-            this.item.setModelTransformation(ModelTransformationMode.NONE);
+            this.item.setItemDisplayContext(ItemDisplayContext.NONE);
             this.setDefaultScale();
             this.item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
             this.item.setYaw(yaw);
@@ -167,7 +167,7 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
         @Override
         public void setItem(ItemStack stack) {
             this.item.setItem(stack.copy());
-            this.item.setModelTransformation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ModelTransformationMode.FIXED : ModelTransformationMode.NONE);
+            this.item.setItemDisplayContext(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ItemDisplayContext.FIXED : ItemDisplayContext.NONE);
             this.item.setLeftRotation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL)
                     ? Direction.UP.getRotationQuaternion()
                     : RotationAxis.NEGATIVE_Y.rotationDegrees(180));

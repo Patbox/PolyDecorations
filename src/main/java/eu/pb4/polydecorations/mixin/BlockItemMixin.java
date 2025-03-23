@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.ActionResult;
@@ -19,8 +20,8 @@ public class BlockItemMixin {
         return original == ActionResult.SUCCESS && state.getBlock() instanceof WallAttachedLanternBlock ? ActionResult.SUCCESS_SERVER : original;
     }
 
-    @ModifyArg(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"))
-    private PlayerEntity swingForLanterns(PlayerEntity player, @Local(ordinal = 0) BlockState state) {
+    @ModifyArg(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"))
+    private Entity swingForLanterns(Entity player, @Local(ordinal = 0) BlockState state) {
         return state.getBlock() instanceof WallAttachedLanternBlock ? null : player;
     }
 }

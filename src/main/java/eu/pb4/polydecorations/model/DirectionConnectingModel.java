@@ -63,7 +63,7 @@ public class DirectionConnectingModel {
                         elements.add(element);
                     }
                 } else if (name != null && name.getAsString().startsWith("rp_")) {
-                    var dir = Direction.byName(name.getAsString().substring("rp_".length()));
+                    var dir = Direction.byId(name.getAsString().substring("rp_".length()));
                     if (dir == null || dirCount == 0) {
                         elements.add(element);
                     } else if (dirCount == 1 && hasDirection(i, dir.getOpposite())) {
@@ -72,14 +72,14 @@ public class DirectionConnectingModel {
                         elements.add(element);
                     }
                 } else if (name != null && name.getAsString().startsWith("tuft_")) {
-                    var dir = Direction.byName(name.getAsString().substring("tuft_".length()));
+                    var dir = Direction.byId(name.getAsString().substring("tuft_".length()));
                     if (dir == null || dirCount == 0) {
                         elements.add(element);
                     } else if (dirCount == 1 && hasDirection(i, dir.getOpposite())) {
                         elements.add(element);
                     }
-                } else if (name != null && Direction.byName(name.getAsString()) != null) {
-                    if (hasDirection(i, Direction.byName(name.getAsString()))) {
+                } else if (name != null && Direction.byId(name.getAsString()) != null) {
+                    if (hasDirection(i, Direction.byId(name.getAsString()))) {
                         elements.add(element);
                     }
                 } else {

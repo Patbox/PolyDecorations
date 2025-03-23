@@ -18,8 +18,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -107,13 +107,15 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.put("stack", this.stack.toNbtAllowEmpty(this.getRegistryManager()));
+        if (!this.stack.isEmpty()) {
+            nbt.put("stack", this.stack.toNbt(this.getRegistryManager()));
+        }
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        setStack(ItemStack.fromNbtOrEmpty(this.getRegistryManager(), nbt.getCompound("stack")));
+        setStack(ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompoundOrEmpty("stack")).orElse(ItemStack.EMPTY));
     }
 
     @Override
@@ -319,7 +321,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         public static final Type TERRACOTTA = nonWood("terracotta", Blocks.TERRACOTTA);
         public static final Map<DyeColor, Type> COLORED_TERRACOTTA = Util.make(new HashMap<>(), (x) -> {
             for (var color : DyeColor.values()) {
-                x.put(color, nonWood(color.getName() + "_terracotta", Registries.BLOCK.get(Identifier.ofVanilla(color.getName() + "_terracotta"))));
+                x.put(color, nonWood(color.asString() + "_terracotta", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_terracotta"))));
             }
         });
 
@@ -418,12 +420,12 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         public record Bone(ItemDisplayElement display, Vector3f offset, MutableObject<EulerAngle> angle) {
             public static Bone from(Vector3f offset, EulerAngle angle) {
                 var d = new ItemDisplayElement();
-                d.setModelTransformation(ModelTransformationMode.GUI);
+                d.setItemDisplayContext(ItemDisplayContext.GUI);
                 d.setInvisible(true);
                 d.setTeleportDuration(3);
                 d.setTranslation(offset.sub(0, EntityType.ARMOR_STAND.getHeight(), 0));
-                d.setLeftRotation(new Quaternionf().rotationZYX(-angle.getRoll() * MathHelper.RADIANS_PER_DEGREE,
-                        -angle.getYaw()  * MathHelper.RADIANS_PER_DEGREE, angle.getPitch() * MathHelper.RADIANS_PER_DEGREE));
+                d.setLeftRotation(new Quaternionf().rotationZYX(-angle.roll() * MathHelper.RADIANS_PER_DEGREE,
+                        -angle.yaw()  * MathHelper.RADIANS_PER_DEGREE, angle.pitch() * MathHelper.RADIANS_PER_DEGREE));
                 return new Bone(d, offset, new MutableObject<>(angle));
             }
 
@@ -432,8 +434,8 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
                     return false;
                 }
                 this.angle.setValue(angle);
-                display.setLeftRotation(new Quaternionf().rotationZYX(-angle.getRoll() * MathHelper.RADIANS_PER_DEGREE,
-                        -angle.getYaw()  * MathHelper.RADIANS_PER_DEGREE, angle.getPitch() * MathHelper.RADIANS_PER_DEGREE));
+                display.setLeftRotation(new Quaternionf().rotationZYX(-angle.roll() * MathHelper.RADIANS_PER_DEGREE,
+                        -angle.yaw()  * MathHelper.RADIANS_PER_DEGREE, angle.pitch() * MathHelper.RADIANS_PER_DEGREE));
                 display.tick();
                 return true;
             }

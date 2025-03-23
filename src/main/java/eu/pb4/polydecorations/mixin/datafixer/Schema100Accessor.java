@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Schema100.class)
 public interface Schema100Accessor {
-    @Invoker
-    static TypeTemplate callTargetItems(Schema schema) {
-        throw new UnsupportedOperationException();
-    }
+    //@Invoker
+    //static TypeTemplate callTargetItems(Schema schema) {
+    //    throw new UnsupportedOperationException();
+    //}
 }

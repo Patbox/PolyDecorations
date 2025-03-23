@@ -1,10 +1,7 @@
-package eu.pb4.polydecorations.mixin;
+package eu.pb4.polydecorations.mixin.flowerpot;
 
 import eu.pb4.polydecorations.block.DecorationsBlocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CropBlock;
-import net.minecraft.block.PitcherCropBlock;
-import net.minecraft.block.PlantBlock;
+import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;

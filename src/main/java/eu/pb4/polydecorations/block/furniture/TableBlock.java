@@ -129,7 +129,7 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
         private static int gId = 0;
 
         private static Corner of(Direction dir, Direction dir2) {
-            return new Corner(gId++, dir.getName() + "_" + dir2.getName(), BooleanProperty.of(dir.getName() + "_" + dir2.getName() + "_corner"), dir, dir2,
+            return new Corner(gId++, dir.asString() + "_" + dir2.asString(), BooleanProperty.of(dir.asString() + "_" + dir2.asString() + "_corner"), dir, dir2,
                     List.of(dir.getVector(), dir2.getVector()/*,  dir.getVector().add(dir2.getVector())*/));
         }
     }

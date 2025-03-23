@@ -94,15 +94,15 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
         tickWater(state, world, tickView, pos);
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
-
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.isOf(newState.getBlock()) && world.getBlockEntity(pos) instanceof MailboxBlockEntity be) {
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        ItemScatterer.onStateReplaced(state, world, pos);
+        super.onStateReplaced(state, world, pos, moved);
+        if (world.getBlockEntity(pos) instanceof MailboxBlockEntity be) {
             for (var value : be.inventories.values()) {
                 ItemScatterer.spawn(world, pos, value);
             }
         }
-        super.onStateReplaced(state, world, pos, newState, moved);
     }
 
     @Nullable
