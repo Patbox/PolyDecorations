@@ -93,14 +93,6 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
-    @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        super.onStateReplaced(state, world, pos, moved);
-        if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be) {
-            ItemScatterer.spawn(world, pos, DefaultedList.copyOf(ItemStack.EMPTY, be.lowerText().item().getDefaultStack(), be.upperText().item().getDefaultStack()));
-        }
-    }
-
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {

@@ -98,11 +98,6 @@ public class MailboxBlock extends BlockWithEntity implements FactoryBlock, Barri
     protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
         ItemScatterer.onStateReplaced(state, world, pos);
         super.onStateReplaced(state, world, pos, moved);
-        if (world.getBlockEntity(pos) instanceof MailboxBlockEntity be) {
-            for (var value : be.inventories.values()) {
-                ItemScatterer.spawn(world, pos, value);
-            }
-        }
     }
 
     @Nullable

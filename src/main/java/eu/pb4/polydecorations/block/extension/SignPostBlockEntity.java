@@ -121,6 +121,14 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         new Gui(player, () -> getText(upper), (t) -> setText(upper, t));
     }
 
+    @Override
+    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
+        super.onBlockReplaced(pos, oldState);
+        if (this.world != null) {
+            ItemScatterer.spawn(world, pos, DefaultedList.copyOf(ItemStack.EMPTY, this.lowerText().item().getDefaultStack(), this.upperText().item().getDefaultStack()));
+        }
+    }
+
     public ActionResult onUse(PlayerEntity player, boolean upper, BlockHitResult hit) {
         if (this.getText(upper).item == Items.AIR || this.getText(upper).waxed() || MathHelper.angleBetween(player.getYaw() + 180, this.getText(upper).yaw) > 90) {
             return ActionResult.PASS;

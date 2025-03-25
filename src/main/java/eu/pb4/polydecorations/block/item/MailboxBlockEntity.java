@@ -91,6 +91,16 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
     }
 
     @Override
+    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
+        super.onBlockReplaced(pos, oldState);
+        if (this.world != null) {
+            for (var value : this.inventories.values()) {
+                ItemScatterer.spawn(world, pos, value);
+            }
+        }
+    }
+
+    @Override
     protected Text getContainerName() {
         return DecorationsUtil.someones(owner, getCachedState().getBlock().getName());
     }
