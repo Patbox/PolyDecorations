@@ -13,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -309,11 +310,6 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
     }
 
-    @Override
-    protected Box calculateBoundingBox() {
-        return super.calculateBoundingBox();
-    }
-
     public record Type(String type, ItemStack head, ItemStack body, ItemStack leftArm, ItemStack rightArm, ItemStack leftLeg, ItemStack rightLeg, Block block, boolean fireproof) {
         public static final List<Type> NON_WOOD = new ArrayList<>();
         public static final Type STONE = nonWood("stone", Blocks.STONE);
@@ -338,7 +334,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         });
         public static final Map<DyeColor, Type> COLORED_WOOL = Util.make(new HashMap<>(), (x) -> {
             for (var color : DyeColor.values()) {
-                x.put(color, burnableNonWood(color.getName() + "_wool", Registries.BLOCK.get(Identifier.ofVanilla(color.getName() + "_wool"))));
+                x.put(color, burnableNonWood(color.asString() + "_wool", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_wool"))));
             }
         });
 
