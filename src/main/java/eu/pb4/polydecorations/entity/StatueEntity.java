@@ -39,6 +39,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.EulerAngle;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -95,6 +96,12 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
 
         Block.dropStack(world, this.getBlockPos(), itemStack);
         this.onBreak(world, damageSource);
+    }
+
+    @Override
+    public void tick() {
+        this.model.setScale(this.getScale());
+        super.tick();
     }
 
     @Override
@@ -302,6 +309,11 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
     }
 
+    @Override
+    protected Box calculateBoundingBox() {
+        return super.calculateBoundingBox();
+    }
+
     public record Type(String type, ItemStack head, ItemStack body, ItemStack leftArm, ItemStack rightArm, ItemStack leftLeg, ItemStack rightLeg, Block block, boolean fireproof) {
         public static final List<Type> NON_WOOD = new ArrayList<>();
         public static final Type STONE = nonWood("stone", Blocks.STONE);
@@ -324,6 +336,17 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
                 x.put(color, nonWood(color.asString() + "_terracotta", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_terracotta"))));
             }
         });
+        public static final Map<DyeColor, Type> COLORED_WOOL = Util.make(new HashMap<>(), (x) -> {
+            for (var color : DyeColor.values()) {
+                x.put(color, burnableNonWood(color.getName() + "_wool", Registries.BLOCK.get(Identifier.ofVanilla(color.getName() + "_wool"))));
+            }
+        });
+
+        public static Type burnableNonWood(String name, Block block) {
+            var x = of(name, block, false);
+            NON_WOOD.add(x);
+            return x;
+        }
 
         public static Type nonWood(String name, Block block) {
             var x = of(name, block, true);
@@ -353,6 +376,8 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         public final Bone leftLeg = Bone.from(new Vector3f(2/16f, (12 / 16f), 0), StatueEntity.DEFAULT_LEFT_LEG_ROTATION);
         public final Bone rightLeg = Bone.from(new Vector3f(-2/16f, (12 / 16f), 0), StatueEntity.DEFAULT_RIGHT_LEG_ROTATION);
         private final StatueEntity entity;
+        private boolean small = false;
+        private float baseScale = 1f;
 
         public Model(StatueEntity entity) {
             this.entity = entity;
@@ -381,8 +406,22 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
 
         public void setSmall(boolean small) {
-            var scale = small ? 0.5f : 1f;
-            this.head.setScale(scale, small ? (12 / 16f) : 1f);
+            if (this.small != small) {
+                this.small = small;
+                this.updateScale();
+            }
+        }
+
+        public void setScale(float scale) {
+            if (this.baseScale != scale) {
+                this.baseScale = scale;
+                this.updateScale();
+            }
+        }
+
+        private void updateScale() {
+            var scale = (small ? 0.5f : 1f) * this.baseScale;
+            this.head.setScale(scale, (small ? (12 / 16f) : 1f) * this.baseScale);
             this.body.setScale(scale, scale);
             this.leftArm.setScale(scale, scale);
             this.rightArm.setScale(scale, scale);

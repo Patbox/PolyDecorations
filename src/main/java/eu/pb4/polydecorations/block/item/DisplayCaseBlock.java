@@ -71,6 +71,9 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
 
     @Override
     public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (!player.canModifyBlocks()) {
+            return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+        }
         if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be && be.getStack().isEmpty() && !player.getStackInHand(hand).isEmpty()) {
             be.setStack(player.getStackInHand(hand).copyWithCount(1));
             player.getStackInHand(hand).decrement(1);

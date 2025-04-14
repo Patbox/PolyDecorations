@@ -41,7 +41,7 @@ public class HammerItem extends SimplePolymerItem {
     }
 
     private boolean apply(PlayerEntity player, World world, BlockPos blockPos, Vec3d hitPos, boolean reverse) {
-        if (!CommonProtection.canBreakBlock(world, blockPos, player.getGameProfile(), player)) {
+        if (!CommonProtection.canBreakBlock(world, blockPos, player.getGameProfile(), player) || !player.canModifyBlocks()) {
             return false;
         }
 
