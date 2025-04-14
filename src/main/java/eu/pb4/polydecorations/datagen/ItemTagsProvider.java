@@ -5,11 +5,13 @@ import eu.pb4.polydecorations.item.DecorationsItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
@@ -71,6 +73,11 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
 
         this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS)
                 .add(Items.BONE_MEAL);
+
+        this.getOrCreateTagBuilder(DecorationsItemTags.STATUES)
+                .add(DecorationsItems.WOODEN_STATUE.values().toArray(Item[]::new))
+                .add(DecorationsItems.OTHER_STATUE.values().toArray(Item[]::new))
+                ;
     }
 
 

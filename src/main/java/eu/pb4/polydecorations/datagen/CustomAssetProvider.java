@@ -292,6 +292,7 @@ class CustomAssetProvider implements DataProvider {
 
         for (var color : DyeColor.values()) {
             writeStatue(color.getName() + "_terracotta", "block/" + color.getName() + "_terracotta", writer);
+            writeStatue(color.getName() + "_wool", "block/" + color.getName() + "_wool", writer);
 
             //b.append('"').append("item.polydecorations.").append(color.getName()).append("_terracotta_statue\": \"")
             //        .append(Character.toUpperCase(color.getName().charAt(0))).append(color.getName().substring(1)).append(" Terracotta Statue\",\n");

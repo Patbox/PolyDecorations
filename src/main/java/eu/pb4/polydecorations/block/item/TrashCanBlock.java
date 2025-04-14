@@ -85,7 +85,7 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
             return ActionResult.SUCCESS;
         }
 
-        if (player.isSneaking() && player.getStackInHand(Hand.MAIN_HAND).isEmpty()) {
+        if (player.isSneaking() && player.getStackInHand(Hand.MAIN_HAND).isEmpty() && player.canModifyBlocks()) {
             if (!state.get(OPEN)) {
                 var x = pos.getX() + 0.5;
                 var z = pos.getY() + 1;

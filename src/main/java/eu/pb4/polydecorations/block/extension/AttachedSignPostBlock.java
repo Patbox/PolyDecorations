@@ -73,7 +73,7 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be) {
+        if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be && player.canModifyBlocks()) {
             return be.onUse(player, hit.getPos().getY() - (int) hit.getPos().getY() >= 0.5, hit);
         }
 

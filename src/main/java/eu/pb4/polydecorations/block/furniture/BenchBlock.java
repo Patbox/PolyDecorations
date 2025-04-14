@@ -123,7 +123,7 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (player.getMainHandStack().isIn(ItemTags.AXES) && state.get(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player)) {
+        if (player.getMainHandStack().isIn(ItemTags.AXES) && state.get(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player) && player.canModifyBlocks()) {
             world.setBlockState(pos, state.with(HAS_REST, false));
             player.getMainHandStack().damage(1, player, EquipmentSlot.MAINHAND);
             world.playSound(null, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);

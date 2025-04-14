@@ -32,6 +32,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.ItemScatterer;
@@ -70,6 +71,9 @@ public class DisplayCaseBlock extends BlockWithEntity implements FactoryBlock, B
 
     @Override
     public ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (!player.canModifyBlocks()) {
+            return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
         if (hand == Hand.MAIN_HAND && !player.isSneaking() && world.getBlockEntity(pos) instanceof GenericSingleItemBlockEntity be && be.getStack().isEmpty() && !player.getStackInHand(hand).isEmpty()) {
             be.setStack(player.getStackInHand(hand).copyWithCount(1));
             player.getStackInHand(hand).decrement(1);
