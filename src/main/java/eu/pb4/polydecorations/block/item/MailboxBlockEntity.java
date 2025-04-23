@@ -231,7 +231,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
 
                 for (var stack : entry.getValue().heldStacks) {
                     if (!stack.isEmpty()) {
-                        b.addLoreLine(Text.translatable("container.shulkerBox.itemCount", stack.getName(), String.valueOf(stack.getCount())).formatted(Formatting.GRAY));
+                        b.addLoreLine(Text.translatable("item.container.item_count", stack.getName(), String.valueOf(stack.getCount())).formatted(Formatting.GRAY));
                     }
                 }
 
