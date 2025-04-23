@@ -23,6 +23,7 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
@@ -84,6 +85,24 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         super.readNbt(nbt, lookup);
         Sign.CODEC.decode(lookup.getOps(NbtOps.INSTANCE), nbt.get("upper")).result().ifPresent(x -> this.upperText = x.getFirst());
         Sign.CODEC.decode(lookup.getOps(NbtOps.INSTANCE), nbt.get("lower")).result().ifPresent(x -> this.lowerText = x.getFirst());
+
+        if (this.upperText.text.getMessage(1, false).getContent() instanceof PlainTextContent.Literal(String string) && string.equals("\"\"")) {
+            var tmp = this.upperText.text;
+            this.upperText = this.upperText.withText(new SignText()
+                    .withColor(tmp.getColor())
+                    .withGlowing(tmp.isGlowing())
+                    .withMessage(0, Text.Serialization.fromLenientJson(tmp.getMessage(0, false).getString(), lookup))
+            );
+        }
+
+        if (this.lowerText.text.getMessage(1, false).getContent() instanceof PlainTextContent.Literal(String string) && string.equals("\"\"")) {
+            var tmp = this.lowerText.text;
+            this.lowerText = this.lowerText.withText(new SignText()
+                    .withColor(tmp.getColor())
+                    .withGlowing(tmp.isGlowing())
+                    .withMessage(0, Text.Serialization.fromLenientJson(tmp.getMessage(0, false).getString(), lookup))
+            );
+        }
 
         if (this.model != null) {
             this.model.update(this.upperText, this.lowerText);
