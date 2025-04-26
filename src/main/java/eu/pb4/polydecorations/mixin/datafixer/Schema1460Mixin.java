@@ -27,6 +27,10 @@ import java.util.function.Supplier;
 public abstract class Schema1460Mixin extends Schema {
     @Shadow protected static void registerInventory(Schema schema, Map<String, Supplier<TypeTemplate>> map, String name) {};
 
+    @Shadow
+    protected static void targetEntityItems(Schema schema, Map<String, Supplier<TypeTemplate>> map, String entityId) {
+    }
+
     public Schema1460Mixin(int versionKey, Schema parent) {
         super(versionKey, parent);
     }
@@ -54,6 +58,8 @@ public abstract class Schema1460Mixin extends Schema {
         schema.register(map, mod("statue"), () -> DSL.allWithRemainder(
                 TypeReferences.ENTITY_EQUIPMENT.in(schema),
                 DSL.optionalFields("stack", TypeReferences.ITEM_STACK.in(schema))));
+        targetEntityItems(schema, map, mod("canvas"));
+        targetEntityItems(schema, map, mod("seat"));
     }
 
     @Unique
