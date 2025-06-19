@@ -29,6 +29,8 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -49,41 +51,35 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
-        super.writeNbt(nbt, lookup);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
         if (this.owner != null) {
-            nbt.put("owner", LegacyNbtHelper.writeGameProfile(new NbtCompound(), this.owner));
+            view.put("owner", NbtCompound.CODEC, LegacyNbtHelper.writeGameProfile(new NbtCompound(), this.owner));
         }
 
-        var inv = new NbtList();
+        var inv = view.getList("inventory");
         for (var x : inventories.entrySet()) {
-            var cpd = new NbtCompound();
-            Inventories.writeNbt(cpd, x.getValue().heldStacks, lookup);
+            var cpd = inv.add();
+            Inventories.writeData(cpd, x.getValue().heldStacks);
             cpd.put("uuid", Uuids.CODEC, x.getKey());
-            inv.add(cpd);
         }
-        nbt.put("inventory", inv);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
-        super.readNbt(nbt, lookup);
-        if (nbt.contains("owner")) {
-            this.owner = LegacyNbtHelper.toGameProfile(nbt.getCompoundOrEmpty("owner"));
-        } else {
-            this.owner = null;
-        }
+    public void readData(ReadView view) {
+        super.readData(view);
+        this.owner = view.read("owner", NbtCompound.CODEC).map(LegacyNbtHelper::toGameProfile).orElse(null);
+
         for (var x : this.inventories.values()) {
             x.clear();
         }
         this.inventories.clear();
-        for (var x : nbt.getListOrEmpty("inventory")) {
-            if (x instanceof NbtCompound cpd) {
-                var uuid = cpd.get("uuid", Uuids.CODEC).orElse(Util.NIL_UUID);
-                var inv = createInventory();
-                Inventories.readNbt(cpd, inv.heldStacks, lookup);
-                this.inventories.put(uuid, inv);
-            }
+        for (var cpd : view.getListReadView(  "inventory")) {
+            var uuid = cpd.read("uuid", Uuids.CODEC).orElse(Util.NIL_UUID);
+            var inv = createInventory();
+            Inventories.readData(cpd, inv.heldStacks);
+            this.inventories.put(uuid, inv);
+
         }
         if (model != null) {
             model.setHasMail(!inventories.isEmpty());
@@ -218,7 +214,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             this.elements.clear();
             for (var entry : inventories.entrySet()) {
                 var b = new GuiElementBuilder();
-                var profile = this.player.server.getUserCache().getByUuid(entry.getKey());
+                var profile = this.player.getServer().getUserCache().getByUuid(entry.getKey());
 
                 if (profile.isPresent()) {
                     b.setItem(Items.PLAYER_HEAD);

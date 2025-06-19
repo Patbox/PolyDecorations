@@ -18,7 +18,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup arg) {
-        this.getOrCreateTagBuilder(BlockTags.AXE_MINEABLE)
+        this.valueLookupBuilder(BlockTags.AXE_MINEABLE)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]))
@@ -26,7 +26,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.TABLE.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(BlockTags.PICKAXE_MINEABLE)
+        this.valueLookupBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WALL_LANTERN)
                 .add(DecorationsBlocks.WALL_SOUL_LANTERN)
@@ -37,31 +37,31 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.TRASHCAN)
         ;
 
-        this.getOrCreateTagBuilder(BlockTags.CLIMBABLE).add(DecorationsBlocks.ROPE);
+        this.valueLookupBuilder(BlockTags.CLIMBABLE).add(DecorationsBlocks.ROPE);
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.BRAZIERS)
+        this.valueLookupBuilder(DecorationsBlockTags.BRAZIERS)
                 .add(DecorationsBlocks.BRAZIER, DecorationsBlocks.SOUL_BRAZIER);
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.SHELVES)
+        this.valueLookupBuilder(DecorationsBlockTags.SHELVES)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.TOOL_RACKS)
+        this.valueLookupBuilder(DecorationsBlockTags.TOOL_RACKS)
                 .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.TABLES)
+        this.valueLookupBuilder(DecorationsBlockTags.TABLES)
                 .add(DecorationsBlocks.TABLE.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.MAILBOXES)
+        this.valueLookupBuilder(DecorationsBlockTags.MAILBOXES)
                 .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.SIGN_POSTS)
+        this.valueLookupBuilder(DecorationsBlockTags.SIGN_POSTS)
                 .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.BENCHES)
+        this.valueLookupBuilder(DecorationsBlockTags.BENCHES)
                 .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]));
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.UNCONNECTABLE)
+        this.valueLookupBuilder(DecorationsBlockTags.UNCONNECTABLE)
                 .addOptionalTag(DecorationsBlockTags.BENCHES)
                 .addOptionalTag(DecorationsBlockTags.TABLES)
                 .addOptionalTag(DecorationsBlockTags.SHELVES)
@@ -71,16 +71,16 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.LARGE_FLOWER_POT)
         ;
 
-        this.getOrCreateTagBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)
+        this.valueLookupBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)
                 .addOptionalTag(DecorationsBlockTags.MAILBOXES);
 
-        this.getOrCreateTagBuilder(BlockTags.BAMBOO_PLANTABLE_ON)
+        this.valueLookupBuilder(BlockTags.BAMBOO_PLANTABLE_ON)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT);
-        this.getOrCreateTagBuilder(BlockTags.DRY_VEGETATION_MAY_PLACE_ON)
+        this.valueLookupBuilder(BlockTags.DRY_VEGETATION_MAY_PLACE_ON)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT);
-        this.getOrCreateTagBuilder(BlockTags.BIG_DRIPLEAF_PLACEABLE)
+        this.valueLookupBuilder(BlockTags.BIG_DRIPLEAF_PLACEABLE)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT);
-        this.getOrCreateTagBuilder(BlockTags.SMALL_DRIPLEAF_PLACEABLE)
+        this.valueLookupBuilder(BlockTags.SMALL_DRIPLEAF_PLACEABLE)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT);
     }
 }

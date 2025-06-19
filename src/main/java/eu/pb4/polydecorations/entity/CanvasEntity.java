@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.entity;
 
+import com.mojang.serialization.Codec;
 import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.mapcanvas.api.core.DrawableCanvas;
@@ -10,6 +11,7 @@ import eu.pb4.mapcanvas.api.utils.VirtualDisplay;
 import eu.pb4.polydecorations.item.CanvasItem;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polydecorations.item.DecorationsItems;
+import eu.pb4.polydecorations.mixin.NbtReadViewAccessor;
 import eu.pb4.polydecorations.util.DecorationSoundEvents;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
@@ -29,7 +31,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -41,6 +47,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -246,11 +253,6 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-
-    }
-
-    @Override
     public void onRemoved() {
         if (this.display != null) {
             this.display.destroy();
@@ -281,45 +283,47 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        if (nbt.get("data") instanceof NbtByteArray) {
-            nbt.put("image", nbt.get("data"));
-            nbt.remove("data");
+    public void readCustomData(ReadView view) {
+        if (view instanceof NbtReadViewAccessor nbtReadViewAccessor) {
+            var nbt = nbtReadViewAccessor.getNbt();
+            if (nbt.get("data") instanceof NbtByteArray) {
+                nbt.put("image", nbt.get("data"));
+                nbt.remove("data");
+            }
         }
 
-        super.readCustomDataFromNbt(nbt);
-        this.facing = Direction.fromHorizontalQuarterTurns(nbt.getByte("facing", (byte) 0));
-        this.glowing = nbt.getBoolean("glowing", false);
-        this.waxed = nbt.getBoolean("waxed", false);
-        this.cut = nbt.getBoolean("cut", false);
-        if (nbt.contains("background")) {
-            this.background = Optional.ofNullable(CanvasColor.getFromRaw(nbt.getByte("background", (byte) 0)));
-        } else {
-            this.background = Optional.empty();
+        super.readCustomData(view);
+        this.setFacing(Direction.fromHorizontalQuarterTurns(view.getByte("facing", (byte) 0)));
+        this.glowing = view.getBoolean("glowing", false);
+        this.waxed = view.getBoolean("waxed", false);
+        this.cut = view.getBoolean("cut", false);
+
+        var backgroundByte = view.getByte("background", (byte) 0);
+        this.background = backgroundByte == 0 ? Optional.empty() : Optional.ofNullable(CanvasColor.getFromRaw(backgroundByte));
+
+        fromByteArray(view.read("image", Codec.BYTE_BUFFER).map(ByteBuffer::array).orElse(new byte[0]));
+
+        this.name = view.read("name", TextCodecs.CODEC).orElse(null);
+
+        if (name != null && this.name.getSiblings().isEmpty() && this.name.getContent() instanceof PlainTextContent.Literal literal
+                && literal.string().length() >= 2 && literal.string().charAt(0) == '"' && literal.string().charAt(literal.string().length() - 1) == '"') {
+            this.name = Text.literal(literal.string().substring(1, literal.string().length() - 1));
         }
 
-        fromByteArray(nbt.getByteArray("image").orElse(new byte[0]));
-
-        if (nbt.contains("name")) {
-            this.name = Text.Serialization.fromLenientJson(nbt.getString("name", ""), this.getRegistryManager());
-        }
-
-
-        this.setFacing(this.facing);
         this.rebuildDisplay();
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putByte("facing", (byte)this.facing.getHorizontalQuarterTurns());
-        nbt.putByteArray("image", Arrays.copyOf(this.data, this.data.length));
-        nbt.putBoolean("glowing", this.glowing);
-        nbt.putBoolean("waxed", this.waxed);
-        nbt.putBoolean("cut", this.cut);
-        this.background.ifPresent(canvasColor -> nbt.putByte("background", canvasColor.getRenderColor()));
+    public void writeCustomData(WriteView view) {
+        super.writeCustomData(view);
+        view.putByte("facing", (byte)this.getFacing().getHorizontalQuarterTurns());
+        view.put("image", Codec.BYTE_BUFFER, ByteBuffer.wrap(Arrays.copyOf(this.data, this.data.length)));
+        view.putBoolean("glowing", this.glowing);
+        view.putBoolean("waxed", this.waxed);
+        view.putBoolean("cut", this.cut);
+        this.background.ifPresent(canvasColor -> view.putByte("background", canvasColor.getRenderColor()));
         if (this.name != null) {
-            nbt.putString("name", Text.Serialization.toJsonString(this.name, this.getRegistryManager()));
+            view.put("name", TextCodecs.CODEC, this.name);;
         }
     }
 

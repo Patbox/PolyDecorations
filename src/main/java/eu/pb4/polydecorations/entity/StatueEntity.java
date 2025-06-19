@@ -36,6 +36,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
@@ -113,17 +115,17 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
+    public void writeCustomData(WriteView view) {
+        super.writeCustomData(view);
         if (!this.stack.isEmpty()) {
-            nbt.put("stack", this.stack.toNbt(this.getRegistryManager()));
+            view.put("stack", ItemStack.OPTIONAL_CODEC, this.stack);
         }
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        setStack(ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompoundOrEmpty("stack")).orElse(ItemStack.EMPTY));
+    public void readCustomData(ReadView view) {
+        super.readCustomData(view);
+        setStack(view.read("stack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
     }
 
     @Override

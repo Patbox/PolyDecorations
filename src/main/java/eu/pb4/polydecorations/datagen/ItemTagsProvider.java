@@ -21,7 +21,7 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
 
     @Override
     protected void configure(RegistryWrapper.WrapperLookup arg) {
-        this.getOrCreateTagBuilder(DecorationsItemTags.GLOBE_REPLACEMENT)
+        this.valueLookupBuilder(DecorationsItemTags.GLOBE_REPLACEMENT)
                 .add(Items.POTATO)
                 .add(Items.PLAYER_HEAD)
                 .add(Items.HEAVY_CORE)
@@ -30,7 +30,7 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
                 .add(Items.SKELETON_SKULL)
                 .add(Items.WITHER_SKELETON_SKULL);
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.TOOL_RACK_ACCEPTABLE)
+        this.valueLookupBuilder(DecorationsItemTags.TOOL_RACK_ACCEPTABLE)
                 .addOptionalTag(ConventionalItemTags.TOOLS)
                 .addOptionalTag(ConventionalItemTags.RODS)
                 .addOptionalTag(ConventionalItemTags.FISHING_ROD_TOOLS)
@@ -42,12 +42,12 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
                 .add(Items.WARPED_FUNGUS_ON_A_STICK)
         ;
 
-        this.getOrCreateTagBuilder(ConventionalItemTags.TOOLS)
+        this.valueLookupBuilder(ConventionalItemTags.TOOLS)
                 .add(DecorationsItems.TROWEL)
                 .add(DecorationsItems.HAMMER)
         ;
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.UNSCALED_DISPLAY_CASE)
+        this.valueLookupBuilder(DecorationsItemTags.UNSCALED_DISPLAY_CASE)
                 .add(Items.PLAYER_HEAD)
                 .add(Items.ZOMBIE_HEAD)
                 .add(Items.HEAVY_CORE)
@@ -57,24 +57,24 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
         ;
 
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.FORCE_FIXED_MODEL)
+        this.valueLookupBuilder(DecorationsItemTags.FORCE_FIXED_MODEL)
                 .add(Items.SPYGLASS)
                 .add(Items.TRIDENT)
                 .add(Items.SHIELD)
         ;
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_CLEAR_PIXELS)
+        this.valueLookupBuilder(DecorationsItemTags.CANVAS_CLEAR_PIXELS)
                 .add(Items.PAPER)
                 .add(Items.SPONGE)
                 .add(Items.WET_SPONGE);
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_DARKEN_PIXELS)
+        this.valueLookupBuilder(DecorationsItemTags.CANVAS_DARKEN_PIXELS)
                 .addOptionalTag(ItemTags.COALS);
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS)
+        this.valueLookupBuilder(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS)
                 .add(Items.BONE_MEAL);
 
-        this.getOrCreateTagBuilder(DecorationsItemTags.STATUES)
+        this.valueLookupBuilder(DecorationsItemTags.STATUES)
                 .add(DecorationsItems.WOODEN_STATUE.values().toArray(Item[]::new))
                 .add(DecorationsItems.OTHER_STATUE.values().toArray(Item[]::new))
                 ;

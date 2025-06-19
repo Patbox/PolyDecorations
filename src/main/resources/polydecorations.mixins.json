@@ -7,12 +7,13 @@
     "BlockItemMixin",
     "BlockMixin",
     "LanternBlockMixin",
-    "flowerpot.PlantBlockMixin",
-    "flowerpot.SaplingBlockMixin",
+    "NbtReadViewAccessor",
     "SignBlockEntityMixin",
     "datafixer.ItemStackComponentizationFixMixin",
     "datafixer.Schema100Accessor",
-    "datafixer.Schema1460Mixin"
+    "datafixer.Schema1460Mixin",
+    "flowerpot.PlantBlockMixin",
+    "flowerpot.SaplingBlockMixin"
   ],
   "client": [
   ],

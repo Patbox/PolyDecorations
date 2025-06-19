@@ -260,7 +260,7 @@ class RecipesProvider extends FabricRecipeProvider {
                             new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.PAPER))), null);
 
                     exporter.accept(key("canvas_dye"), new CanvasTransformRecipe("", "dye", CraftingRecipeCategory.MISC,
-                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.fromTag(itemWrap.getOrThrow(ConventionalItemTags.DYES)))), null);
+                            new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofTag(itemWrap.getOrThrow(ConventionalItemTags.DYES)))), null);
                     exporter.accept(key("canvas_undye"), new CanvasTransformRecipe("", "dye", CraftingRecipeCategory.MISC,
                             new ItemStack(DecorationsItems.CANVAS), Ingredient.ofItems(DecorationsItems.CANVAS), List.of(Ingredient.ofItems(Items.WATER_BUCKET))), null);
 

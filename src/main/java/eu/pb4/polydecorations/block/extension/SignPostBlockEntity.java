@@ -1,6 +1,10 @@
 package eu.pb4.polydecorations.block.extension;
 
+import com.google.gson.JsonParser;
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
@@ -23,8 +27,11 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
@@ -74,24 +81,25 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
-        super.writeNbt(nbt, lookup);
-        Sign.CODEC.encodeStart(lookup.getOps(NbtOps.INSTANCE), this.upperText).result().ifPresent(x -> nbt.put("upper", x));
-        Sign.CODEC.encodeStart(lookup.getOps(NbtOps.INSTANCE), this.lowerText).result().ifPresent(x->  nbt.put("lower", x));
+    protected void writeData(WriteView view) {
+        super.writeData(view);
+        view.put("upper", Sign.CODEC, this.upperText);
+        view.put("lower", Sign.CODEC, this.lowerText);
     }
 
     @Override
-    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
-        super.readNbt(nbt, lookup);
-        Sign.CODEC.decode(lookup.getOps(NbtOps.INSTANCE), nbt.get("upper")).result().ifPresent(x -> this.upperText = x.getFirst());
-        Sign.CODEC.decode(lookup.getOps(NbtOps.INSTANCE), nbt.get("lower")).result().ifPresent(x -> this.lowerText = x.getFirst());
+    public void readData(ReadView view) {
+        super.readData(view);
+        this.upperText = view.read("upper",  Sign.CODEC).orElseGet(Sign::of);
+        this.lowerText = view.read("lower",  Sign.CODEC).orElseGet(Sign::of);
 
         if (this.upperText.text.getMessage(1, false).getContent() instanceof PlainTextContent.Literal(String string) && string.equals("\"\"")) {
             var tmp = this.upperText.text;
             this.upperText = this.upperText.withText(new SignText()
                     .withColor(tmp.getColor())
                     .withGlowing(tmp.isGlowing())
-                    .withMessage(0, Text.Serialization.fromLenientJson(tmp.getMessage(0, false).getString(), lookup))
+                    .withMessage(0, TextCodecs.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(tmp.getMessage(0, false).getString()))
+                            .result().map(Pair::getFirst).orElse(tmp.getMessage(0, false)))
             );
         }
 
@@ -100,8 +108,8 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             this.lowerText = this.lowerText.withText(new SignText()
                     .withColor(tmp.getColor())
                     .withGlowing(tmp.isGlowing())
-                    .withMessage(0, Text.Serialization.fromLenientJson(tmp.getMessage(0, false).getString(), lookup))
-            );
+                    .withMessage(0, TextCodecs.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(tmp.getMessage(0, false).getString()))
+                            .result().map(Pair::getFirst).orElse(tmp.getMessage(0, false)))            );
         }
 
         if (this.model != null) {

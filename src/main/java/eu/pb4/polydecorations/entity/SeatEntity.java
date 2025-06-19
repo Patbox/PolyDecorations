@@ -11,6 +11,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import xyz.nucleoid.packettweaker.PacketContext;
@@ -70,6 +72,16 @@ public class SeatEntity extends Entity implements PolymerEntity {
     }
 
     @Override
+    protected void readCustomData(ReadView view) {
+
+    }
+
+    @Override
+    protected void writeCustomData(WriteView view) {
+
+    }
+
+    @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityType.BLOCK_DISPLAY;
     }
@@ -87,10 +99,4 @@ public class SeatEntity extends Entity implements PolymerEntity {
         }
         return Vec3d.ofBottomCenter(this.getBlockPos());
     }
-
-    @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {}
-
-    @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {}
 }
