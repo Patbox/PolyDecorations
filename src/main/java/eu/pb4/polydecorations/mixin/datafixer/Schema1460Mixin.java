@@ -42,6 +42,7 @@ public abstract class Schema1460Mixin extends Schema {
         registerInventory(schema, map, mod("shelf"));
         registerInventory(schema, map, mod("tool_rack"));
         registerInventory(schema, map, mod("trashcan"));
+        registerInventory(schema, map, mod("long_flower_pot"));
 
 
         schema.register(map, mod("sign_post"), (n) -> DSL.optionalFields("upper", DSL.optionalFields("item", TypeReferences.ITEM_NAME.in(schema)),
@@ -50,6 +51,8 @@ public abstract class Schema1460Mixin extends Schema {
         schema.register(map, mod("mailbox"), (n) -> DSL.optionalFields("inventory", DSL.list(DSL.optionalFields("Items", DSL.list(TypeReferences.ITEM_STACK.in(schema))))));
         schema.register(map, mod("globe"), (n) -> DSL.optionalFields("item", TypeReferences.ITEM_STACK.in(schema)));
         schema.register(map, mod("display_case"), (n) -> DSL.optionalFields("item", TypeReferences.ITEM_STACK.in(schema)));
+
+        schema.registerSimple(map, mod("wind_chime"));
     }
 
     @Inject(method = "registerEntities", at = @At("RETURN"))

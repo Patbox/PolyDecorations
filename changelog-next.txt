@@ -1,1 +1,12 @@
-Fix canvas copying recipe
+- Added Long Flower Pot:
+  - New Flower Pot type that can hold 3 plants (same as regular Flower Pot). The plants can be of different types.
+  - It's rotated depending on player's facing direction.
+  - Crafted with Flower Pot and 2 Bricks.
+- Added Wind Chime:
+  - Decorative block, that moves in the wind.
+  - Can be dyed with up to 5 different dyes at the same time.
+  - Crafted with Chain, a Plank and 5 Iron Nuggets.
+- Canvas can now be placed on floors and ceilings.
+- Improved Tool Rack's hitbox, making it way smaller.
+- Tweaked some block particles.
+- Fixed Statues being visually in ground on first tick after placement.

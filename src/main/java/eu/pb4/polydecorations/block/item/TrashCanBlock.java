@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.block.item;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
+import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
@@ -20,6 +21,9 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ItemStackParticleEffect;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -44,12 +48,15 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
+import java.util.function.Supplier;
+
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, CustomBreakingParticleBlock {
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = Properties.OPEN;
     public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.of("force_open", OpenState.class);
+    private final ParticleEffect breakingParticle = new ItemStackParticleEffect(ParticleTypes.ITEM, ItemDisplayElementUtil.getModel(id("block/trashcan_bin")));
 
     public TrashCanBlock(Settings settings) {
         super(settings);
@@ -134,6 +141,11 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
     @Override
     public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
+    }
+
+    @Override
+    public ParticleEffect getBreakingParticle(BlockState blockState) {
+        return this.breakingParticle;
     }
 
     public enum OpenState implements StringIdentifiable {

@@ -95,5 +95,16 @@
         }
       ],
       "subtitle": "subtitles.polydecorations.block.trashcan.clear"
-    }
+    },
+
+  "block.wind_chime.chime": {
+    "sounds": [
+      {
+        "name": "note/icechime",
+        "volume": 0.4,
+        "pitch": 1
+      }
+    ],
+    "subtitle": "subtitles.polydecorations.block.wind_chime.chime"
+  }
 }

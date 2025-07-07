@@ -44,6 +44,7 @@ public class DecorationsItems {
     public static final Item BRAZIER = register(DecorationsBlocks.BRAZIER);
     public static final Item SOUL_BRAZIER = register(DecorationsBlocks.SOUL_BRAZIER);
     public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
+    public static final Item WIND_CHIME = register("wind_chime", (s) -> new WindChimeItem(DecorationsBlocks.WIND_CHIME, s.useBlockPrefixedTranslationKey()));
     public static final Item TRASHCAN = register(DecorationsBlocks.TRASHCAN);
     public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF, WoodType::name);
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH, WoodType::name);
@@ -60,6 +61,7 @@ public class DecorationsItems {
     public static final Item DISPLAY_CASE = register(DecorationsBlocks.DISPLAY_CASE);
     public static final Item ROPE = register("rope", (settings) -> new RopeItem(DecorationsBlocks.ROPE, settings.useBlockPrefixedTranslationKey()));
     public static final Item LARGE_FLOWER_POT = register(DecorationsBlocks.LARGE_FLOWER_POT);
+    public static final Item LONG_FLOWER_POT = register(DecorationsBlocks.LONG_FLOWER_POT);
     public static final Item CANVAS = register("canvas", (settings) -> new CanvasItem(settings.maxCount(16)));
     public static final Map<StatueEntity.Type, StatueItem> OTHER_STATUE = registerList(StatueEntity.Type.NON_WOOD,
             (t) -> t.type() + "_statue",
@@ -85,7 +87,8 @@ public class DecorationsItems {
 
     public static void register() {
         Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(ModInit.ID, "canvas_data"), CanvasItem.DATA_TYPE);
-        PolymerComponent.registerDataComponent(CanvasItem.DATA_TYPE);
+        Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(ModInit.ID, "wind_chime_color"), WindChimeItem.WIND_CHIME_COLOR);
+        PolymerComponent.registerDataComponent(CanvasItem.DATA_TYPE, WindChimeItem.WIND_CHIME_COLOR);
         PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ModInit.ID, "a_group"), PolymerItemGroupUtils.builder()
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultStack())
                 .displayName(Text.translatable("itemgroup." + ModInit.ID))
@@ -96,8 +99,10 @@ public class DecorationsItems {
                     entries.add(SOUL_BRAZIER);
                     entries.add(GHOST_LIGHT);
                     entries.add(LARGE_FLOWER_POT);
+                    entries.add(LONG_FLOWER_POT);
                     entries.add(DISPLAY_CASE);
                     entries.add(GLOBE);
+                    entries.add(WIND_CHIME);
                     entries.add(TRASHCAN);
                     entries.add(ROPE);
                     entries.add(CANVAS);

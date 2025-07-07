@@ -2,8 +2,11 @@ package eu.pb4.polydecorations.util;
 
 import com.mojang.authlib.GameProfile;
 import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polymer.blocks.api.BlockModelType;
+import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -15,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DecorationsUtil {
@@ -24,6 +29,18 @@ public class DecorationsUtil {
     public static final Vec3d HALF_BELOW = new Vec3d(0, -0.5, 0);
 
     private static final List<Runnable> RUN_NEXT_TICK = new ArrayList<>();
+
+    public static final Map<Direction, BlockState> TRAPDOOR_STATES_REGULAR = Util.mapEnum(Direction.class, x -> PolymerBlockResourceUtils.requestEmpty(BlockModelType.valueOf(switch (x) {
+        case UP -> "BOTTOM";
+        case DOWN -> "TOP";
+        default -> x.asString().toUpperCase(Locale.ROOT);
+    } + "_TRAPDOOR")));
+    public static final Map<Direction, BlockState> TRAPDOOR_STATES_WATERLOGGED = Util.mapEnum(Direction.class, x -> PolymerBlockResourceUtils.requestEmpty(BlockModelType.valueOf(switch (x) {
+        case UP -> "BOTTOM";
+        case DOWN -> "TOP";
+        default -> x.asString().toUpperCase(Locale.ROOT);
+    } + "_TRAPDOOR_WATERLOGGED")));
+
 
     public static void runNextTick(Runnable runnable) {
         RUN_NEXT_TICK.add(runnable);

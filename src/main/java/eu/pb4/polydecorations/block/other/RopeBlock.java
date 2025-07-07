@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.block.other;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
@@ -15,6 +16,9 @@ import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.block.*;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.particle.ItemStackParticleEffect;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -34,7 +38,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Map;
 
-public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlock {
+public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlock, CustomBreakingParticleBlock {
     public static final BooleanProperty NORTH = Properties.NORTH;
     public static final BooleanProperty EAST = Properties.EAST;
     public static final BooleanProperty SOUTH = Properties.SOUTH;
@@ -51,6 +55,7 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
         directions.put(Direction.DOWN, Properties.DOWN);
     }));
     private static final BlockState STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.VINES_BLOCK);
+    private static final ParticleEffect BREAKING_PARTICLE = new ItemStackParticleEffect(ParticleTypes.ITEM, DecorationsModels.ROPE.get(0));
     public RopeBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(NORTH, false).with(SOUTH, false)
@@ -153,6 +158,11 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
     @Override
     public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
+    }
+
+    @Override
+    public ParticleEffect getBreakingParticle(BlockState blockState) {
+        return BREAKING_PARTICLE;
     }
 
     public static class Model extends BlockModel {

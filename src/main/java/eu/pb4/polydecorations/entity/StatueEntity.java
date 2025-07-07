@@ -458,8 +458,10 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
             public static Bone from(Vector3f offset, EulerAngle angle) {
                 var d = new ItemDisplayElement();
                 d.setItemDisplayContext(ItemDisplayContext.GUI);
+                d.setOffset(new Vec3d(0, EntityType.ARMOR_STAND.getHeight(), 0));
                 d.setInvisible(true);
-                d.setTeleportDuration(3);
+                d.setSendPositionUpdates(false);
+                d.setTeleportDuration(2);
                 d.setTranslation(offset.sub(0, EntityType.ARMOR_STAND.getHeight(), 0));
                 d.setLeftRotation(new Quaternionf().rotationZYX(-angle.roll() * MathHelper.RADIANS_PER_DEGREE,
                         -angle.yaw()  * MathHelper.RADIANS_PER_DEGREE, angle.pitch() * MathHelper.RADIANS_PER_DEGREE));

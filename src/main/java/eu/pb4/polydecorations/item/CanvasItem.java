@@ -21,9 +21,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static eu.pb4.polydecorations.ModInit.id;
@@ -45,7 +43,7 @@ public class CanvasItem extends SimplePolymerItem {
             return ActionResult.FAIL;
         } else {
             World world = context.getWorld();
-            var entity = CanvasEntity.create(world, context.getSide(), context.getBlockPos().offset(context.getSide()));
+            var entity = CanvasEntity.create(world, context.getSide(), context.getBlockPos().offset(context.getSide()), context.getPlayerYaw());
 
             if (entity.canStayAttached()) {
                 if (!world.isClient) {
@@ -81,7 +79,7 @@ public class CanvasItem extends SimplePolymerItem {
     }
 
     protected boolean canPlaceOn(PlayerEntity player, Direction side, ItemStack stack, BlockPos pos) {
-        return !side.getAxis().isVertical() && player.canPlaceOn(pos, side, stack);
+        return player.canPlaceOn(pos, side, stack);
     }
 
     @Override
@@ -138,6 +136,7 @@ public class CanvasItem extends SimplePolymerItem {
     }
     public static final ComponentType<Data> DATA_TYPE = ComponentType.<Data>builder().codec(Data.CODEC).cache().build();
     public record Data(Optional<byte[]> image, Optional<CanvasColor> background, boolean glowing, boolean waxed, boolean cut) {
+        private static final byte[] EMPTY_IMAGE = new byte[0];
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.BYTE_BUFFER.xmap(ByteBuffer::array, ByteBuffer::wrap).optionalFieldOf("image").forGetter(Data::image),
                 Codec.BYTE.xmap(CanvasColor::getFromRaw, CanvasColor::getRenderColor).optionalFieldOf("background").forGetter(Data::background),
@@ -145,6 +144,24 @@ public class CanvasItem extends SimplePolymerItem {
                 Codec.BOOL.optionalFieldOf("waxed", false).forGetter(Data::waxed),
                 Codec.BOOL.optionalFieldOf("cut", false).forGetter(Data::cut)
         ).apply(instance, Data::new));
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) return true;
+            if (object == null || getClass() != object.getClass()) return false;
+            Data data = (Data) object;
+
+
+            return glowing == data.glowing && waxed == data.waxed && cut == data.cut
+                    && Arrays.equals(image.orElse(EMPTY_IMAGE), data.image.orElse(EMPTY_IMAGE))
+                    && Objects.equals(background, data.background);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(image, background, glowing, waxed, cut);
+        }
+
         public static final Data DEFAULT = new Data(Optional.empty(),  Optional.empty(), false, false, false);
     }
 }

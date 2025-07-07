@@ -1,11 +1,8 @@
 package eu.pb4.polydecorations.block;
 
 import eu.pb4.polydecorations.ModInit;
-import eu.pb4.polydecorations.block.furniture.BenchBlock;
-import eu.pb4.polydecorations.block.furniture.LargeFlowerPotBlock;
-import eu.pb4.polydecorations.block.furniture.TableBlock;
+import eu.pb4.polydecorations.block.furniture.*;
 import eu.pb4.polydecorations.block.item.*;
-import eu.pb4.polydecorations.block.furniture.BrazierBlock;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
@@ -55,10 +52,18 @@ public class DecorationsBlocks {
     public static final GlobeBlock GLOBE = register("globe", AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).nonOpaque(), GlobeBlock::new);
     public static final RopeBlock ROPE = register("rope", AbstractBlock.Settings.create().strength(1f).sounds(BlockSoundGroup.COBWEB).breakInstantly().nonOpaque(), RopeBlock::new);
     public static final DisplayCaseBlock DISPLAY_CASE = register("display_case", AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque(), DisplayCaseBlock::new);
+    public static final WindChimeBlock WIND_CHIME = register("wind_chime", AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque(), WindChimeBlock::new);
     public static final TrashCanBlock TRASHCAN = register("trashcan", settings -> new TrashCanBlock(settings
             .mapColor(MapColor.IRON_GRAY).strength(3.5F).sounds(BlockSoundGroup.LANTERN).nonOpaque()));
-    public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", settings ->new LargeFlowerPotBlock(settings
+    public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", settings -> new LargeFlowerPotBlock(settings
             .mapColor(MapColor.ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).nonOpaque()));
+
+    public static final LongFlowerPotBlock LONG_FLOWER_POT = register("long_flower_pot", AbstractBlock.Settings.create()
+            .mapColor(MapColor.CLEAR).breakInstantly().nonOpaque(), LongFlowerPotBlock::new);
+
+    public static final GhostLightBlock GHOST_LIGHT = register("ghost_light",
+            settings -> new GhostLightBlock(settings.nonOpaque()
+                    .noCollision().breakInstantly().luminance(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
 
     public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x, id, settings) -> {
         var planks = Identifier.of(x.name() + "_planks");
@@ -149,11 +154,6 @@ public class DecorationsBlocks {
 
         return null;
     });
-    public static final GhostLightBlock GHOST_LIGHT = register("ghost_light",
-            settings -> new GhostLightBlock(settings.nonOpaque()
-                    .noCollision().breakInstantly().luminance(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
-
-
 
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, TriFunction<WoodType, Identifier, AbstractBlock.Settings, T> object) {
         var map = new HashMap<WoodType, T>();
@@ -187,6 +187,7 @@ public class DecorationsBlocks {
             ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(((server, resourceManager, success) -> {
                 validateLootTables(server);
             }));
+            LongFlowerPotBlock.setupResourcesAndMapping();
         }
     }
 

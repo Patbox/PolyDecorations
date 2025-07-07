@@ -15,19 +15,19 @@ import eu.pb4.polydecorations.mixin.NbtReadViewAccessor;
 import eu.pb4.polydecorations.util.DecorationSoundEvents;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.minecraft.block.AbstractRedstoneGateBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.MapColor;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtByteArray;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -36,6 +36,7 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextCodecs;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -44,6 +45,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -52,21 +54,22 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class CanvasEntity extends AbstractDecorationEntity implements PolymerEntity {
-    private byte[] data = new byte[16 * 16];
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType"})
+    @Nullable
+    private static Optional<ComponentType<Integer>> POLYFACTORY_COLOR = null;
+    private static final Codec<Direction> LEGACY_DIRECTION_CODEC = Codec.withAlternative(Direction.CODEC, Codec.INT, Direction::fromHorizontalQuarterTurns);
     private final PlayerCanvas canvas;
+    private final Set<ServerPlayerEntity> players = new HashSet<>();
+    private byte[] data = new byte[16 * 16];
     private VirtualDisplay display;
     private boolean glowing;
     private boolean waxed;
     private boolean cut;
     private Optional<CanvasColor> background = Optional.empty();
-    private final Set<ServerPlayerEntity> players = new HashSet<>();
-
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType"})
-    @Nullable
-    private static Optional<ComponentType<Integer>> POLYFACTORY_COLOR = null;
-
+    private BlockRotation rotation = BlockRotation.NONE;
     @Nullable
     private Text name;
 
@@ -92,6 +95,47 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         return Optional.empty();
     }
 
+    public static CanvasEntity create(World world, Direction side, BlockPos pos, float yaw) {
+        var entity = new CanvasEntity(DecorationsEntities.CANVAS, world);
+        entity.attachedBlockPos = pos;
+        entity.setFacing(side);
+        if (side == Direction.UP) {
+            entity.rotation = switch (Direction.fromHorizontalDegrees(yaw)) {
+                case NORTH -> BlockRotation.NONE;
+                case SOUTH -> BlockRotation.CLOCKWISE_180;
+                case EAST -> BlockRotation.CLOCKWISE_90;
+                case WEST -> BlockRotation.COUNTERCLOCKWISE_90;
+                default -> entity.rotation;
+            };
+        } else if (side == Direction.DOWN) {
+            entity.rotation = switch (Direction.fromHorizontalDegrees(yaw)) {
+                case NORTH -> BlockRotation.NONE;
+                case SOUTH -> BlockRotation.CLOCKWISE_180;
+                case EAST -> BlockRotation.COUNTERCLOCKWISE_90;
+                case WEST -> BlockRotation.CLOCKWISE_90;
+                default -> entity.rotation;
+            };
+        }
+        return entity;
+    }
+
+    @Override
+    protected void setFacing(Direction facing) {
+        Validate.notNull(facing);
+        super.setFacingInternal(facing);
+        if (facing.getAxis().isHorizontal()) {
+            this.setPitch(0.0F);
+            this.setYaw((float) (facing.getHorizontalQuarterTurns() * 90));
+        } else {
+            this.setPitch((float) (-90 * facing.getDirection().offset()));
+            this.setYaw(0.0F);
+        }
+
+        this.lastPitch = this.getPitch();
+        this.lastYaw = this.getYaw();
+        this.updateAttachmentPosition();
+    }
+
     @Override
     protected Box calculateBoundingBox(BlockPos pos, Direction side) {
         Vec3d vec3d = Vec3d.ofCenter(pos).offset(side, -0.46875);
@@ -100,13 +144,6 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         double e = axis == Direction.Axis.Y ? 0.0625 : 1;
         double g = axis == Direction.Axis.Z ? 0.0625 : 1;
         return Box.of(vec3d, d, e, g);
-    }
-
-    public static CanvasEntity create(World world, Direction side, BlockPos pos) {
-        var entity = new CanvasEntity(DecorationsEntities.CANVAS, world);
-        entity.attachedBlockPos = pos;
-        entity.setFacing(side);
-        return entity;
     }
 
     @Override
@@ -123,6 +160,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         this.display = VirtualDisplay.builder(this.canvas, this.attachedBlockPos, this.getHorizontalFacing())
                 .glowing(this.glowing)
                 .invisible(this.cut)
+                .rotation(this.rotation)
                 .callback(this::onUsed)
                 .build();
     }
@@ -293,7 +331,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         }
 
         super.readCustomData(view);
-        this.setFacing(Direction.fromHorizontalQuarterTurns(view.getByte("facing", (byte) 0)));
+        this.setFacing(view.read("facing", LEGACY_DIRECTION_CODEC).orElse(this.getHorizontalFacing()));
         this.glowing = view.getBoolean("glowing", false);
         this.waxed = view.getBoolean("waxed", false);
         this.cut = view.getBoolean("cut", false);
@@ -304,6 +342,8 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         fromByteArray(view.read("image", Codec.BYTE_BUFFER).map(ByteBuffer::array).orElse(new byte[0]));
 
         this.name = view.read("name", TextCodecs.CODEC).orElse(null);
+
+        this.rotation = view.read("block_rotation", BlockRotation.CODEC).orElse(BlockRotation.NONE);
 
         if (name != null && this.name.getSiblings().isEmpty() && this.name.getContent() instanceof PlainTextContent.Literal literal
                 && literal.string().length() >= 2 && literal.string().charAt(0) == '"' && literal.string().charAt(literal.string().length() - 1) == '"') {
@@ -316,14 +356,15 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     @Override
     public void writeCustomData(WriteView view) {
         super.writeCustomData(view);
-        view.putByte("facing", (byte)this.getFacing().getHorizontalQuarterTurns());
+        view.put("facing", LEGACY_DIRECTION_CODEC, this.getHorizontalFacing());
         view.put("image", Codec.BYTE_BUFFER, ByteBuffer.wrap(Arrays.copyOf(this.data, this.data.length)));
         view.putBoolean("glowing", this.glowing);
         view.putBoolean("waxed", this.waxed);
         view.putBoolean("cut", this.cut);
+        view.put("block_rotation", BlockRotation.CODEC, this.rotation);
         this.background.ifPresent(canvasColor -> view.putByte("background", canvasColor.getRenderColor()));
         if (this.name != null) {
-            view.put("name", TextCodecs.CODEC, this.name);;
+            view.put("name", TextCodecs.CODEC, this.name);
         }
     }
 
@@ -331,6 +372,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
     public void onPlace() {
         this.playSound(DecorationSoundEvents.CANVAS_PLACE, 1.0F, 1.0F);
     }
+
     @Override
     public void onBreak(ServerWorld serverWorld, @Nullable Entity entity) {
         this.playSound(DecorationSoundEvents.CANVAS_BREAK, 1.0F, 1.0F);

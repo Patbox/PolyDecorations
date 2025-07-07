@@ -3,9 +3,12 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
+import eu.pb4.polydecorations.util.DecorationsUtil;
+import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -39,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, PolymerTexturedBlock, QuickWaterloggable {
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     private final Block base;
 
@@ -47,6 +50,11 @@ public class ToolRackBlock extends BlockWithEntity implements FactoryBlock, Barr
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
         this.base = base;
+    }
+
+    @Override
+    public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
+        return (blockState.get(WATERLOGGED) ? DecorationsUtil.TRAPDOOR_STATES_WATERLOGGED : DecorationsUtil.TRAPDOOR_STATES_REGULAR).get(blockState.get(FACING));
     }
 
     @Override

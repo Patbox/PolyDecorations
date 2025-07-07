@@ -69,6 +69,8 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .addOptionalTag(DecorationsBlockTags.MAILBOXES)
                 .add(DecorationsBlocks.DISPLAY_CASE)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT)
+                .add(DecorationsBlocks.LONG_FLOWER_POT)
+                .add(DecorationsBlocks.WIND_CHIME)
         ;
 
         this.valueLookupBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)

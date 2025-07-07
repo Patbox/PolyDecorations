@@ -1,10 +1,11 @@
 package eu.pb4.polydecorations.block;
 
 import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.block.furniture.WindChimeBlockEntity;
 import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.other.GenericSingleItemBlockEntity;
-import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
+import eu.pb4.polydecorations.block.furniture.LongFlowerPotBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
@@ -31,10 +32,16 @@ public class DecorationsBlockEntities {
             DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
     public static final BlockEntityType<?> GLOBE = register("globe", GenericSingleItemBlockEntity::globe, DecorationsBlocks.GLOBE);
     public static final BlockEntityType<?> TRASHCAN = register("trashcan", TrashCanBlockEntity::new, DecorationsBlocks.TRASHCAN);
+    public static final BlockEntityType<?> WIND_CHIME = register("wind_chime", WindChimeBlockEntity::new, DecorationsBlocks.WIND_CHIME);
 
     public static final BlockEntityType<?> DISPLAY_CASE = register("display_case",
             GenericSingleItemBlockEntity::displayCase,
             DecorationsBlocks.DISPLAY_CASE
+    );
+
+    public static final BlockEntityType<?> LONG_FLOWER_POT = register("long_flower_pot",
+            LongFlowerPotBlockEntity::new,
+            DecorationsBlocks.LONG_FLOWER_POT
     );
 
     public static final BlockEntityType<?> TOOL_RACK = register("tool_rack", ToolRackBlockEntity::new,

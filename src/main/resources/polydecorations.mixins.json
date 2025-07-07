@@ -6,6 +6,7 @@
   "mixins": [
     "BlockItemMixin",
     "BlockMixin",
+    "FlowerPotBlockAccessor",
     "LanternBlockMixin",
     "NbtReadViewAccessor",
     "SignBlockEntityMixin",

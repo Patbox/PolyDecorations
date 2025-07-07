@@ -2,10 +2,8 @@ package eu.pb4.polydecorations.datagen;
 
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import eu.pb4.polydecorations.block.DecorationsBlocks;
-import eu.pb4.polydecorations.block.furniture.BenchBlock;
+import com.mojang.serialization.JsonOps;
 import eu.pb4.polydecorations.block.furniture.TableBlock;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.model.DecorationsModels;
@@ -16,6 +14,10 @@ import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
 import eu.pb4.polymer.resourcepack.extras.api.format.item.ItemAsset;
 import eu.pb4.polymer.resourcepack.extras.api.format.item.model.BasicItemModel;
+import eu.pb4.polymer.resourcepack.extras.api.format.item.tint.ConstantTintSource;
+import eu.pb4.polymer.resourcepack.extras.api.format.item.tint.CustomModelDataTintSource;
+import eu.pb4.polymer.resourcepack.extras.api.format.model.ModelAsset;
+import eu.pb4.polymer.resourcepack.extras.api.format.model.ModelElement;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.block.WoodType;
@@ -24,8 +26,9 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -34,6 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -42,6 +46,55 @@ import java.util.function.BiConsumer;
 import static eu.pb4.polydecorations.ModInit.id;
 
 class CustomAssetProvider implements DataProvider {
+    private static final String BASE_WOOD_MODEL_JSON = """
+            {
+              "parent": "polydecorations:block/base_|TYPE|",
+              "textures": {
+                "planks": "|PLANKS|",
+                "logs": "|LOG|"
+              }
+            }
+            """;
+    private static final String MAILBOX_MODEL_JSON = """
+            {
+              "parent": "polydecorations:block/base_|TYPE|",
+              "textures": {
+                "front": "|FRONT|",
+                "stripped_log": "|STRIPPED_LOG|",
+                "stripped_log_top": "|STRIPPED_LOG|_top",
+                "log": "|LOG|",
+                "log_top": "|LOG|_top"
+              }
+            }
+            """;
+    private static final String MAILBOX_BAMBOO_MODEL_JSON = """
+            {
+              "parent": "polydecorations:block/base_|TYPE|",
+              "textures": {
+                "front": "|FRONT|",
+                "stripped_log": "|STRIPPED_LOG|",
+                "stripped_log_top": "|STRIPPED_LOG|",
+                "log": "|LOG|",
+                "log_top": "|LOG|_top"
+              }
+            }
+            """;
+    private static final String STATUE_MODEL_JSON = """
+            {
+              "parent": "polydecorations:block/statue/stone/|TYPE|",
+              "textures": {
+                "0": "|TXT|"
+              }
+            }
+            """;
+    private static final String STATUE_ITEM_JSON = """
+            {
+              "parent": "polydecorations:item/stone_statue",
+              "textures": {
+                "0": "|TXT|"
+              }
+            }
+            """;
     private final DataOutput output;
 
     public CustomAssetProvider(FabricDataOutput output) {
@@ -68,7 +121,7 @@ class CustomAssetProvider implements DataProvider {
         }, Util.getMainWorkerExecutor());
     }
 
-    private void createWoodPalettes(BiConsumer<String,byte[]> assetWriter) throws Exception {
+    private void createWoodPalettes(BiConsumer<String, byte[]> assetWriter) throws Exception {
         var jar = PolymerCommonUtils.getClientJarRoot();
         var oakPlanks = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/oak_planks.png")));
         var positions = new ArrayList<int[]>();
@@ -99,61 +152,6 @@ class CustomAssetProvider implements DataProvider {
         }
 
     }
-
-    private static final String BASE_WOOD_MODEL_JSON = """
-            {
-              "parent": "polydecorations:block/base_|TYPE|",
-              "textures": {
-                "planks": "|PLANKS|",
-                "logs": "|LOG|"
-              }
-            }
-            """;
-
-    private static final String MAILBOX_MODEL_JSON = """
-            {
-              "parent": "polydecorations:block/base_|TYPE|",
-              "textures": {
-                "front": "|FRONT|",
-                "stripped_log": "|STRIPPED_LOG|",
-                "stripped_log_top": "|STRIPPED_LOG|_top",
-                "log": "|LOG|",
-                "log_top": "|LOG|_top"
-              }
-            }
-            """;
-
-    private static final String MAILBOX_BAMBOO_MODEL_JSON = """
-            {
-              "parent": "polydecorations:block/base_|TYPE|",
-              "textures": {
-                "front": "|FRONT|",
-                "stripped_log": "|STRIPPED_LOG|",
-                "stripped_log_top": "|STRIPPED_LOG|",
-                "log": "|LOG|",
-                "log_top": "|LOG|_top"
-              }
-            }
-            """;
-
-
-    private static final String STATUE_MODEL_JSON = """
-            {
-              "parent": "polydecorations:block/statue/stone/|TYPE|",
-              "textures": {
-                "0": "|TXT|"
-              }
-            }
-            """;
-
-    private static final String STATUE_ITEM_JSON = """
-            {
-              "parent": "polydecorations:item/stone_statue",
-              "textures": {
-                "0": "|TXT|"
-              }
-            }
-            """;
 
     private void writeBlocksAndItems(BiConsumer<String, byte[]> writer) {
         var t = new StringBuilder();
@@ -232,11 +230,11 @@ class CustomAssetProvider implements DataProvider {
         DecorationsItems.WOODEN_MAILBOX.forEach((type, item) -> {
             writer.accept("assets/polydecorations/models/block/" + type.name() + "_mailbox.json",
                     (type != WoodType.BAMBOO ? MAILBOX_MODEL_JSON : MAILBOX_BAMBOO_MODEL_JSON)
-                    .replace("|TYPE|", "mailbox")
-                    .replace("|FRONT|", "polydecorations:block/mailbox_front_" + type.name())
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .replace("|STRIPPED_LOG|", "minecraft:block/stripped_" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
+                            .replace("|TYPE|", "mailbox")
+                            .replace("|FRONT|", "polydecorations:block/mailbox_front_" + type.name())
+                            .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
+                            .replace("|STRIPPED_LOG|", "minecraft:block/stripped_" + WoodUtil.getLogName(type))
+                            .getBytes(StandardCharsets.UTF_8)
             );
 
             writer.accept(AssetPaths.itemAsset(id(type.name() + "_mailbox")),
@@ -298,6 +296,8 @@ class CustomAssetProvider implements DataProvider {
 
         DecorationsModels.ROPE.generateModels(writer);
 
+        generateWindChimeModels(writer);
+
         for (var item : List.of(DecorationsItems.CANVAS, DecorationsItems.ROPE, DecorationsItems.GLOBE, DecorationsItems.GHOST_LIGHT,
                 DecorationsItems.TRASHCAN, DecorationsItems.HAMMER, DecorationsItems.TROWEL)) {
             var id = Registries.ITEM.getId(item);
@@ -305,7 +305,8 @@ class CustomAssetProvider implements DataProvider {
                     new ItemAsset(new BasicItemModel(id.withPrefixedPath("item/")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
         }
-        for (var item : List.of(DecorationsItems.DISPLAY_CASE, DecorationsItems.BRAZIER, DecorationsItems.SOUL_BRAZIER, DecorationsItems.LARGE_FLOWER_POT)) {
+
+        for (var item : List.of(DecorationsItems.DISPLAY_CASE, DecorationsItems.BRAZIER, DecorationsItems.SOUL_BRAZIER, DecorationsItems.LARGE_FLOWER_POT, DecorationsItems.LONG_FLOWER_POT)) {
             var id = Registries.ITEM.getId(item);
             writer.accept(AssetPaths.itemAsset(id),
                     new ItemAsset(new BasicItemModel(id.withPrefixedPath("block/")), ItemAsset.Properties.DEFAULT)
@@ -313,7 +314,91 @@ class CustomAssetProvider implements DataProvider {
         }
     }
 
-    private void writeBaseTable(BiConsumer<String,byte[]> writer) throws IOException {
+    private void generateWindChimeModels(BiConsumer<String,byte[]> writer) {
+        writer.accept(AssetPaths.itemAsset(id("wind_chime")),
+                new ItemAsset(new BasicItemModel(id("block/wind_chime"), List.of(
+                        new ConstantTintSource(0xFFFFFF),
+                        new CustomModelDataTintSource(0, 0xFFFFFF),
+                        new CustomModelDataTintSource(1, 0xFFFFFF),
+                        new CustomModelDataTintSource(2, 0xFFFFFF),
+                        new CustomModelDataTintSource(3, 0xFFFFFF),
+                        new CustomModelDataTintSource(4, 0xFFFFFF)
+                )), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
+
+        var model = ResourceUtils.getModel(id("block/wind_chime"));
+        var decoded = ModelAsset.CODEC.decode(JsonOps.INSTANCE, model).getOrThrow().getFirst();
+        var groups = BlockbenchGroup.CODEC.decode(JsonOps.INSTANCE, model).getOrThrow().getFirst();
+
+        var base = ModelAsset.builder();
+        var chimes = new ModelAsset.Builder[5];
+        //noinspection unchecked
+        List<ModelElement>[] chimesElement = new List[5];
+        for (int i = 0; i < 5; i++) {
+            chimes[i] = ModelAsset.builder();
+            chimesElement[i] = new ArrayList<>();
+            decoded.textures().forEach(chimes[i]::texture);
+        }
+
+        decoded.textures().forEach(base::texture);
+
+        var el = decoded.elements().orElseThrow();
+
+        outerLoop:
+        for (var e = 0; e < el.size(); e++) {
+            for (var g : groups) {
+                if (g.children().contains(e)) {
+                    chimesElement[Integer.parseInt(g.name().substring("chime_".length()))].add(el.get(e));
+                    continue outerLoop;
+                }
+            }
+            base.element(el.get(e));
+        }
+        var chimeOffset = new ArrayList<Vec3d>();
+
+        for (int i = 0; i < 5; i++) {
+            chimeOffset.add(chimesElement[i].getFirst().rotation().orElseThrow().origin());
+            for (var e : chimesElement[i]) {
+                var offset = e.rotation().orElseThrow().origin().negate().add(8, 8, 8);
+                var map = new EnumMap<Direction, ModelElement.Face>(Direction.class);
+
+                for (var face : e.faces().entrySet()) {
+                    map.put(face.getKey(), face.getValue().tintIndex() > -1
+                            ? new ModelElement.Face(face.getValue().uv(), face.getValue().texture(), face.getValue().cullface(), face.getValue().rotation(), 0)
+                            : face.getValue());
+                }
+
+                chimes[i].element(new ModelElement(e.from().add(offset), e.to().add(offset), map));
+            }
+            writer.accept(AssetPaths.blockModel(id("wind_chime/chime_" + i)), chimes[i].build().toBytes());
+
+            writer.accept(AssetPaths.itemAsset(id("-/block/wind_chime/chime_" + i)),
+                    new ItemAsset(new BasicItemModel(id("block/wind_chime/chime_" + i), List.of(
+                            new CustomModelDataTintSource(0, 0xFFFFFF)
+                    )), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+
+        }
+
+        writer.accept("wind_chime_offsets.json", Vec3d.CODEC.listOf().encodeStart(JsonOps.INSTANCE, chimeOffset).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
+
+        writer.accept(AssetPaths.blockModel(id("wind_chime/base")), base.build().toBytes());
+
+        writer.accept(AssetPaths.itemAsset(id("wind_chime")),
+                new ItemAsset(new BasicItemModel(id("block/wind_chime"), List.of(
+                        new ConstantTintSource(0xFFFFFF),
+                        new CustomModelDataTintSource(0, 0xFFFFFF),
+                        new CustomModelDataTintSource(1, 0xFFFFFF),
+                        new CustomModelDataTintSource(2, 0xFFFFFF),
+                        new CustomModelDataTintSource(3, 0xFFFFFF),
+                        new CustomModelDataTintSource(4, 0xFFFFFF)
+                )), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
+
+
+    }
+
+    private void writeBaseTable(BiConsumer<String, byte[]> writer) throws IOException {
         var json = JsonParser.parseString(new String(Objects.requireNonNull(ResourceUtils.getJarData("assets/polydecorations/models/block/base_table.json"))));
 
         for (int i = 1; i < TableBlock.TableModel.COUNT; i++) {

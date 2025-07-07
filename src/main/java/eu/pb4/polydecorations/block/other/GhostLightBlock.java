@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.block.other;
 
+import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -13,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class GhostLightBlock extends Block implements FactoryBlock {
+public class GhostLightBlock extends Block implements FactoryBlock, CustomBreakingParticleBlock {
     private final ParticleEffect effect;
     private final int rate;
     private final int count;
@@ -40,6 +41,11 @@ public class GhostLightBlock extends Block implements FactoryBlock {
     @Override
     public boolean tickElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
         return true;
+    }
+
+    @Override
+    public ParticleEffect getBreakingParticle(BlockState blockState) {
+        return this.effect;
     }
 
     private class Emitter extends BlockModel {

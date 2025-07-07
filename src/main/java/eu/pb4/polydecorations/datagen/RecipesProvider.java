@@ -5,6 +5,7 @@ import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.StatueItem;
 import eu.pb4.polydecorations.recipe.CloneCanvasCraftingRecipe;
 import eu.pb4.polydecorations.recipe.CanvasTransformRecipe;
+import eu.pb4.polydecorations.recipe.ColorWindChimeRecipe;
 import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
@@ -237,11 +238,30 @@ class RecipesProvider extends FabricRecipeProvider {
                         .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
                         .offerTo(exporter);
 
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.LONG_FLOWER_POT, 1)
+                        .pattern("bfb")
+                        .input('b', Items.BRICK)
+                        .input('f', Items.FLOWER_POT)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.WIND_CHIME, 1)
+                        .pattern(" c ")
+                        .pattern("ipi")
+                        .pattern("iii")
+                        .input('c', Items.CHAIN)
+                        .input('p', ItemTags.PLANKS)
+                        .input('i', Items.IRON_NUGGET)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
                 ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsItems.GHOST_LIGHT, 1)
                         .input(Items.FIRE_CHARGE)
                         .input(ItemTags.SOUL_FIRE_BASE_BLOCKS)
                         .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.BRICK))
                         .offerTo(exporter);
+
+                exporter.accept(key("wind_chime_coloring"), new ColorWindChimeRecipe(CraftingRecipeCategory.BUILDING), null);
 
                 {
                     exporter.accept(key("canvas_waxing"), new CanvasTransformRecipe("", "wax", CraftingRecipeCategory.MISC,

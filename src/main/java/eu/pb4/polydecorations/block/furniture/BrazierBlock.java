@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.block.furniture;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
+import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
@@ -18,6 +19,9 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ItemStackParticleEffect;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -43,8 +47,9 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
-public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
+public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, CustomBreakingParticleBlock {
     public static final BooleanProperty LIT = Properties.LIT;
+    private final ParticleEffect breakingParticle = new ItemStackParticleEffect(ParticleTypes.ITEM, ItemDisplayElementUtil.getModel(id("block/unlit_brazier")));
 
     public BrazierBlock(Settings settings) {
         super(settings);
@@ -140,6 +145,11 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
         } else {
             return false;
         }
+    }
+
+    @Override
+    public ParticleEffect getBreakingParticle(BlockState blockState) {
+        return this.breakingParticle;
     }
 
     public static final class Model extends BlockModel {

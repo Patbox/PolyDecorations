@@ -81,9 +81,11 @@
   "block.polydecorations.globe": "Globe",
   "block.polydecorations.display_case": "Display Case",
   "block.polydecorations.large_flower_pot": "Large Flower Pot",
+  "block.polydecorations.long_flower_pot": "Long Flower Pot",
   "block.polydecorations.ghost_light": "Ghost Light",
   "block.polydecorations.trashcan": "Trash Can",
   "block.polydecorations.rope": "Rope",
+  "block.polydecorations.wind_chime": "Wind Chime",
 
   "item.polydecorations.stone_statue": "Stone Statue",
   "item.polydecorations.deepslate_statue": "Deepslate Statue",
@@ -162,7 +164,7 @@
   "item.polydecorations.canvas.tooltip.4": "Use %s to apply offhand item in 3x3 area",
 
   "entity.polydecorations.canvas": "Canvas",
-
+  "entity.polydecorations.statue": "Statue",
   "entity.polydecorations.seat": "Seat",
 
   "text.polydecorations.someones": "%s's %s",
@@ -174,6 +176,8 @@
   "subtitles.polydecorations.entity.canvas.place": "Canvas placed",
   "subtitles.polydecorations.block.trashcan.open": "Trash Can opens",
   "subtitles.polydecorations.block.trashcan.close": "Trash Can closes",
-  "subtitles.polydecorations.block.trashcan.clear": "Trash Can empties"
+  "subtitles.polydecorations.block.trashcan.clear": "Trash Can empties",
+
+  "subtitles.polydecorations.block.wind_chime.chime": "Wind Chime chimes"
 
 }
