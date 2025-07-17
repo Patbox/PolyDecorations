@@ -182,12 +182,13 @@ public class DecorationsBlocks {
     }
 
     public static void register() {
+        LongFlowerPotBlock.setupResourcesAndMapping();
+
         if (ModInit.DEV_MODE) {
             ServerLifecycleEvents.SERVER_STARTED.register((DecorationsBlocks::validateLootTables));
             ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(((server, resourceManager, success) -> {
                 validateLootTables(server);
             }));
-            LongFlowerPotBlock.setupResourcesAndMapping();
         }
     }
 
