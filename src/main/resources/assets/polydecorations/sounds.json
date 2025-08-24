@@ -97,6 +97,68 @@
       "subtitle": "subtitles.polydecorations.block.trashcan.clear"
     },
 
+  "block.basket.close": {
+    "sounds": [
+      {
+        "name": "block/bamboo_wood/break1",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break2",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break3",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break4",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break5",
+        "volume": 0.6,
+        "pitch": 1.4
+      }
+    ],
+    "subtitle": "subtitles.polydecorations.block.basket.close"
+  },
+
+  "block.basket.open": {
+    "sounds": [
+      {
+        "name": "block/bamboo_wood/break1",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break2",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break3",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break4",
+        "volume": 0.6,
+        "pitch": 1.4
+      },
+      {
+        "name": "block/bamboo_wood/break5",
+        "volume": 0.6,
+        "pitch": 1.4
+      }
+    ],
+    "subtitle": "subtitles.polydecorations.block.basket.open"
+  },
+
   "block.wind_chime.chime": {
     "sounds": [
       {

@@ -43,6 +43,7 @@ public abstract class Schema1460Mixin extends Schema {
         registerInventory(schema, map, mod("tool_rack"));
         registerInventory(schema, map, mod("trashcan"));
         registerInventory(schema, map, mod("long_flower_pot"));
+        registerInventory(schema, map, mod("basket"));
 
 
         schema.register(map, mod("sign_post"), (n) -> DSL.optionalFields("upper", DSL.optionalFields("item", TypeReferences.ITEM_NAME.in(schema)),

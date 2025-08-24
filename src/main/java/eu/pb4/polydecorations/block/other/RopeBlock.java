@@ -6,6 +6,7 @@ import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.model.DecorationsModels;
 import eu.pb4.polymer.blocks.api.BlockModelType;
 import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
@@ -91,7 +92,11 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
     private boolean canConnect(WorldView world, BlockPos neighborPos, BlockState neighbor, Direction opposite) {
         if (neighbor.isOf(this)) {
             return true;
-        } else if (opposite == Direction.UP && neighbor.getBlock() instanceof LanternBlock) {
+        } else if (opposite == Direction.UP &&
+                (neighbor.getBlock() instanceof LanternBlock
+                        || neighbor.isOf(DecorationsBlocks.WIND_CHIME)
+                        || neighbor.getBlock() instanceof HangingSignBlock hangingSignBlock
+                )) {
             return true;
         }
         return false;

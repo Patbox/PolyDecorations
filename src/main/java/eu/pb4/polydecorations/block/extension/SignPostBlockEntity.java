@@ -214,8 +214,8 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             return new Sign(new SignText(), Items.AIR, 0, false, false);
         }
 
-        public static Sign of(Item item, float yaw) {
-            return new Sign(new SignText(), item, yaw, false, false);
+        public static Sign of(Item item, float yaw, boolean flip) {
+            return new Sign(new SignText(), item, yaw, false, flip);
         }
 
         public Sign withText(SignText text) {

@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.datagen;
 
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import eu.pb4.polydecorations.block.furniture.TableBlock;
@@ -95,6 +96,26 @@ class CustomAssetProvider implements DataProvider {
               }
             }
             """;
+    private static final String BASE_STUMP_MODEL_JSON = """
+            {
+              "parent": "polydecorations:block/base_|TYPE|",
+              "textures": {
+                "top": "|TOP|",
+                "side": "|SIDE|"
+              }
+            }
+            """;
+
+    private static final String BASE_SLEEPING_BAG_JSON = """
+            {
+              "parent": "polydecorations:block/|TYPE|",
+              "textures": {
+                "texture": "|TXT|",
+                "particle": "|PARTICLE|"
+              }
+            }
+            """;
+
     private final DataOutput output;
 
     public CustomAssetProvider(FabricDataOutput output) {
@@ -112,45 +133,14 @@ class CustomAssetProvider implements DataProvider {
         };
         return CompletableFuture.runAsync(() -> {
             try {
-                createWoodPalettes(assetWriter);
+                createWoodTextures(assetWriter);
+                createBedPalette(assetWriter);
                 UiResourceCreator.generateAssets(assetWriter);
                 writeBlocksAndItems(assetWriter);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         }, Util.getMainWorkerExecutor());
-    }
-
-    private void createWoodPalettes(BiConsumer<String, byte[]> assetWriter) throws Exception {
-        var jar = PolymerCommonUtils.getClientJarRoot();
-        var oakPlanks = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/oak_planks.png")));
-        var positions = new ArrayList<int[]>();
-        {
-            var existingColors = new IntOpenHashSet();
-            for (int x = 0; x < 16; x++) {
-                for (int y = 0; y < 16; y++) {
-                    var rgb = oakPlanks.getRGB(x, y);
-                    if (existingColors.add(rgb)) {
-                        positions.add(new int[]{x, y});
-                    }
-                }
-            }
-        }
-
-        var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
-        var b = new ByteArrayOutputStream();
-
-        for (var wood : WoodUtil.VANILLA) {
-            var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + wood.name() + "_planks.png")));
-            for (int i = 0; i < positions.size(); i++) {
-                var pos = positions.get(i);
-                palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
-            }
-            ImageIO.write(palette, "png", b);
-            assetWriter.accept("assets/polydecorations/textures/palette/wood/" + wood.name() + ".png", b.toByteArray());
-            b.reset();
-        }
-
     }
 
     private void writeBlocksAndItems(BiConsumer<String, byte[]> writer) {
@@ -181,6 +171,33 @@ class CustomAssetProvider implements DataProvider {
                     new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_shelf")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
         });
+
+        DecorationsItems.STUMP.forEach((type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name() + "_stump.json", BASE_STUMP_MODEL_JSON
+                    .replace("|TYPE|", "stump")
+                    .replace("|TOP|", "polydecorations:block/" + WoodUtil.getLogName(type) + "_stump_top")
+                    .replace("|SIDE|", "minecraft:block/" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.name() + "_stump")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_stump")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+        DecorationsItems.STRIPPED_STUMP.forEach((type, item) -> {
+            writer.accept("assets/polydecorations/models/block/stripped_" + type.name() + "_stump.json", BASE_STUMP_MODEL_JSON
+                    .replace("|TYPE|", "stump")
+                    .replace("|TOP|", "polydecorations:block/stripped_" + WoodUtil.getLogName(type) + "_stump_top")
+                    .replace("|SIDE|", "minecraft:block/stripped_" + WoodUtil.getLogName(type))
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id("stripped_" + type.name() + "_stump")),
+                    new ItemAsset(new BasicItemModel(id("block/stripped_" + type.name() + "_stump")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
         DecorationsItems.BENCH.forEach((type, item) -> {
             writeBench(type, writer);
 
@@ -256,6 +273,20 @@ class CustomAssetProvider implements DataProvider {
                             .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
+        DecorationsItems.SLEEPING_BAG.forEach((type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.asString() + "_sleeping_bag.json",
+                    BASE_SLEEPING_BAG_JSON
+                            .replace("|TYPE|", "base_sleeping_bag")
+                            .replace("|TXT|", "polydecorations:block/sleeping_bag_" + type.asString())
+                            .replace("|PARTICLE|", "minecraft:block/" + type.asString() + "_wool")
+                            .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.asString() + "_sleeping_bag")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.asString() + "_sleeping_bag")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
         try {
             writeBaseTable(writer);
         } catch (Throwable e) {
@@ -311,6 +342,117 @@ class CustomAssetProvider implements DataProvider {
             writer.accept(AssetPaths.itemAsset(id),
                     new ItemAsset(new BasicItemModel(id.withPrefixedPath("block/")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
+        }
+
+        writer.accept(AssetPaths.itemAsset(id("basket")),
+                new ItemAsset(new BasicItemModel(id("block/basket_open")), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void createWoodTextures(BiConsumer<String, byte[]> assetWriter) throws Exception {
+        var jar = PolymerCommonUtils.getClientJarRoot();
+        var b = new ByteArrayOutputStream();
+
+        { // Palette
+            var oakPlanks = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/oak_planks.png")));
+            var positions = new ArrayList<int[]>();
+            {
+                var existingColors = new IntOpenHashSet();
+                for (int x = 0; x < 16; x++) {
+                    for (int y = 0; y < 16; y++) {
+                        var rgb = oakPlanks.getRGB(x, y);
+                        if (existingColors.add(rgb)) {
+                            positions.add(new int[]{x, y});
+                        }
+                    }
+                }
+            }
+
+            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
+
+            for (var wood : WoodUtil.VANILLA) {
+                var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + wood.name() + "_planks.png")));
+                for (int i = 0; i < positions.size(); i++) {
+                    var pos = positions.get(i);
+                    palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
+                }
+                ImageIO.write(palette, "png", b);
+                assetWriter.accept("assets/polydecorations/textures/palette/wood/" + wood.name() + ".png", b.toByteArray());
+                b.reset();
+            }
+        }
+
+        // Stump top
+        for (var prefix :List.of("", "stripped_")) {
+            for (var wood : WoodUtil.VANILLA) {
+                var source = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_top.png")));
+                var texture = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
+                var frames = source.getHeight() / source.getWidth();
+
+                for (int i = 0; i < frames; i++) {
+                    var offset = i * source.getWidth();
+                    for (int x = 0; x < 5; x++) {
+                        for (int y = 0; y < 5; y++) {
+                            texture.setRGB(x + 3, y + 3 + offset, source.getRGB(x, y + offset));
+                            texture.setRGB(x + 3 + 5, y + 3 + offset, source.getRGB(11 + x, y + offset));
+                            texture.setRGB(x + 3, y + 3 + 5 + offset, source.getRGB(x, 11 + y + offset));
+                            texture.setRGB(x + 3 + 5, y + 3 + 5 + offset, source.getRGB(11 + x, 11 + y + offset));
+                        }
+                    }
+                }
+
+                ImageIO.write(texture, "png", b);
+                assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_stump_top.png", b.toByteArray());
+
+                var mcMeta = jar.resolve("assets/minecraft/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_top.png.mcmeta");
+                if (Files.exists(mcMeta)) {
+                    assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_stump_top.png.mcmeta",
+                            Files.readAllBytes(mcMeta));
+                }
+                b.reset();
+            }
+        }
+    }
+
+    private void createBedPalette(BiConsumer<String, byte[]> assetWriter) throws Exception {
+        var jar = PolymerCommonUtils.getClientJarRoot();
+        var b = new ByteArrayOutputStream();
+
+        { // Palette
+
+            var positions = new ArrayList<int[]>();
+            {
+                var base = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/entity/bed/red.png")));
+                var existingColors = new IntOpenHashSet();
+                var oakPlanks = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/oak_planks.png")));
+
+                for (int x = 0; x < oakPlanks.getWidth(); x++) {
+                    for (int y = 0; y < oakPlanks.getHeight(); y++) {
+                        existingColors.add(oakPlanks.getRGB(x, y));
+                    }
+                }
+                for (int x = 0; x < base.getWidth(); x++) {
+                    for (int y = 0; y < base.getHeight(); y++) {
+                        var rgb = base.getRGB(x, y);
+                        if (existingColors.add(rgb)) {
+                            positions.add(new int[]{x, y});
+                        }
+                    }
+                }
+            }
+
+            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
+
+            for (var color : DyeColor.values()) {
+                var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/entity/bed/" + color.asString() + ".png")));
+                for (int i = 0; i < positions.size(); i++) {
+                    var pos = positions.get(i);
+                    palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
+                }
+                ImageIO.write(palette, "png", b);
+                assetWriter.accept("assets/polydecorations/textures/palette/bed_color/" + color.asString() + ".png", b.toByteArray());
+                b.reset();
+            }
         }
     }
 

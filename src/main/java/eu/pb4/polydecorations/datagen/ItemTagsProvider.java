@@ -78,6 +78,15 @@ class ItemTagsProvider extends FabricTagProvider.ItemTagProvider {
                 .add(DecorationsItems.WOODEN_STATUE.values().toArray(Item[]::new))
                 .add(DecorationsItems.OTHER_STATUE.values().toArray(Item[]::new))
                 ;
+
+        this.valueLookupBuilder(DecorationsItemTags.STUMPS)
+                .add(DecorationsItems.STUMP.values().toArray(Item[]::new))
+                .add(DecorationsItems.STRIPPED_STUMP.values().toArray(Item[]::new))
+        ;
+
+        this.valueLookupBuilder(DecorationsItemTags.SLEEPING_BAGS)
+                .add(DecorationsItems.SLEEPING_BAG.values().toArray(Item[]::new))
+        ;
     }
 
 

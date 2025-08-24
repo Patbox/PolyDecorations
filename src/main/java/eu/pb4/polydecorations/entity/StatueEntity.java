@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.entity;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.StatueItem;
+import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.VirtualEntityUtils;
@@ -325,17 +326,17 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         public static final Type DIORITE = nonWood("diorite", Blocks.DIORITE);
         public static final Type GRANITE = nonWood("granite", Blocks.GRANITE);
         public static final Type TUFF = nonWood("tuff", Blocks.TUFF);
-        public static final Type PACKED_MUD = nonWood("packed_mud", Blocks.TUFF);
+        public static final Type PACKED_MUD = nonWood("packed_mud", Blocks.PACKED_MUD);
         public static final Type STONE_BRICKS = nonWood("stone_bricks", Blocks.STONE_BRICKS);
-        public static final Type TUFF_BRICKS = nonWood("tuff_bricks", Blocks.TUFF);
+        public static final Type TUFF_BRICKS = nonWood("tuff_bricks", Blocks.TUFF_BRICKS);
         public static final Type TERRACOTTA = nonWood("terracotta", Blocks.TERRACOTTA);
         public static final Map<DyeColor, Type> COLORED_TERRACOTTA = Util.make(new HashMap<>(), (x) -> {
-            for (var color : DyeColor.values()) {
+            for (var color : DecorationsUtil.COLORS_CREATIVE) {
                 x.put(color, nonWood(color.asString() + "_terracotta", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_terracotta"))));
             }
         });
         public static final Map<DyeColor, Type> COLORED_WOOL = Util.make(new HashMap<>(), (x) -> {
-            for (var color : DyeColor.values()) {
+            for (var color : DecorationsUtil.COLORS_CREATIVE) {
                 x.put(color, burnableNonWood(color.asString() + "_wool", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_wool"))));
             }
         });

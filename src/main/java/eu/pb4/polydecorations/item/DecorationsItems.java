@@ -4,7 +4,9 @@ import eu.pb4.factorytools.api.item.FactoryBlockItem;
 import eu.pb4.factorytools.api.item.MultiBlockItem;
 import eu.pb4.factorytools.api.block.MultiBlock;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
+import eu.pb4.polydecorations.block.item.BasketBlock;
 import eu.pb4.polydecorations.entity.StatueEntity;
+import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
@@ -29,6 +31,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static eu.pb4.polydecorations.ModInit.id;
@@ -46,17 +49,21 @@ public class DecorationsItems {
     public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
     public static final Item WIND_CHIME = register("wind_chime", (s) -> new WindChimeItem(DecorationsBlocks.WIND_CHIME, s.useBlockPrefixedTranslationKey()));
     public static final Item TRASHCAN = register(DecorationsBlocks.TRASHCAN);
+    public static final Item BASKET = register(DecorationsBlocks.BASKET, s -> s.maxCount(1));
     public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF, WoodType::name);
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH, WoodType::name);
     public static final Map<WoodType, Item> TABLE = register(DecorationsBlocks.TABLE, WoodType::name);
     public static final Map<WoodType, Item> TOOL_RACK = register(DecorationsBlocks.TOOL_RACK, WoodType::name);
     public static final Map<WoodType, Item> WOODEN_MAILBOX = register(DecorationsBlocks.WOODEN_MAILBOX, WoodType::name);
+    public static final Map<WoodType, Item> STUMP = register(DecorationsBlocks.STUMP, WoodType::name);
+    public static final Map<WoodType, Item> STRIPPED_STUMP = register(DecorationsBlocks.STRIPPED_STUMP, WoodType::name);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> (settings) -> new SignPostItem(settings.useBlockPrefixedTranslationKey()));
     public static final Map<WoodType, StatueItem> WOODEN_STATUE = registerWood("statue", (x) -> {
         var planks = Registries.BLOCK.get(Identifier.of(x.name() + "_planks"));
         return (settings) -> new StatueItem(StatueEntity.Type.of(x.name(), planks, false), settings.maxCount(16));
     });
-    //public static final Map<DyeColor, Item> BANNER_BED = register(DecorationsBlocks.BANNER_BED);
+    public static final Map<DyeColor, Item> SLEEPING_BAG = register(DecorationsBlocks.SLEEPING_BAG, DyeColor::name, x -> x.maxCount(1));
+
     public static final Item GHOST_LIGHT = register(DecorationsBlocks.GHOST_LIGHT);
     public static final Item DISPLAY_CASE = register(DecorationsBlocks.DISPLAY_CASE);
     public static final Item ROPE = register("rope", (settings) -> new RopeItem(DecorationsBlocks.ROPE, settings.useBlockPrefixedTranslationKey()));
@@ -68,11 +75,14 @@ public class DecorationsItems {
             (t) -> (settings) -> new StatueItem(t, settings.maxCount(16)));
 
     private static <T extends Block & PolymerBlock, B, U extends Comparable<? super U>> Map<B, Item> register(Map<B, T> blockMap, Function<B, U> toComparable) {
+        return register(blockMap, toComparable, (s) -> {});
+    }
+    private static <T extends Block & PolymerBlock, B, U extends Comparable<? super U>> Map<B, Item> register(Map<B, T> blockMap, Function<B, U> toComparable, Consumer<Item.Settings> settingsConsumer) {
         var map = new LinkedHashMap<B, Item>();
         var keys = new ArrayList<>(blockMap.keySet());
         keys.sort(Comparator.comparing(toComparable));
         for (var key : keys) {
-            map.put(key, register(blockMap.get(key)));
+            map.put(key, register(blockMap.get(key), settingsConsumer));
         }
         return map;
     }
@@ -104,11 +114,13 @@ public class DecorationsItems {
                     entries.add(GLOBE);
                     entries.add(WIND_CHIME);
                     entries.add(TRASHCAN);
+                    entries.add(BASKET);
                     entries.add(ROPE);
                     entries.add(CANVAS);
                     entries.add(Items.LANTERN);
                     entries.add(Items.SOUL_LANTERN);
-                    WoodUtil.<Item>forEach(List.of(BENCH, TABLE, SHELF, TOOL_RACK, SIGN_POST, WOODEN_MAILBOX, WOODEN_STATUE), entries::add);
+                    WoodUtil.<Item>forEach(List.of(BENCH, STUMP, STRIPPED_STUMP, TABLE, SHELF, TOOL_RACK, SIGN_POST, WOODEN_MAILBOX, WOODEN_STATUE), entries::add);
+                    DecorationsUtil.COLORS_CREATIVE.forEach(a -> entries.add(SLEEPING_BAG.get(a)));
                     OTHER_STATUE.forEach((a, b) -> entries.add(b));
                 })).build()
         );
@@ -148,11 +160,22 @@ public class DecorationsItems {
     }
 
     public static <E extends Block & PolymerBlock> BlockItem register(E block) {
+        return register(block, (s) -> {});
+    }
+    public static <E extends Block & PolymerBlock> BlockItem register(E block, Consumer<Item.Settings> settingsConsumer) {
         var id = Registries.BLOCK.getId(block);
         BlockItem item;
         var settings = new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, id)).useBlockPrefixedTranslationKey();
+        settingsConsumer.accept(settings);
         if (block instanceof MultiBlock multiBlock) {
             item = new MultiBlockItem(multiBlock, settings);
+        } else if (block instanceof BasketBlock) {
+            item = new FactoryBlockItem(block, settings) {
+                @Override
+                public boolean canBeNested() {
+                    return false;
+                }
+            };
         } else {
             item = new FactoryBlockItem(block, settings);
         }

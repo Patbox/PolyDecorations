@@ -15,14 +15,17 @@ import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class SeatEntity extends Entity implements PolymerEntity {
+    @Nullable
     private Direction direction = Direction.UP;
 
-    public static boolean create(World world, BlockPos pos, double yOffset, Direction direction, Entity player) {
+    public static boolean create(World world, BlockPos pos, double yOffset, @Nullable Direction direction, Entity player) {
         if (!world.getEntitiesByClass(SeatEntity.class, new Box(pos), x -> true).isEmpty()) {
             return false;
         }
@@ -30,7 +33,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
         var entity = new SeatEntity(DecorationsEntities.SEAT, world);
         entity.direction = direction;
         entity.setPosition(pos.getX() + 0.5, pos.getY() + 0.5 + yOffset, pos.getZ() + 0.5);
-        entity.setYaw(direction.getPositiveHorizontalDegrees());
+        entity.setYaw(direction != null ? direction.getPositiveHorizontalDegrees() : player.getYaw() + 180);
         world.spawnEntity(entity);
         player.setSprinting(false);
         player.startRiding(entity);
@@ -64,6 +67,8 @@ public class SeatEntity extends Entity implements PolymerEntity {
         super.tick();
         if (!this.hasPassengers()) {
             this.discard();
+        } else {
+            this.setYaw(Objects.requireNonNull(this.getFirstPassenger()).getYaw());
         }
     }
 
@@ -90,7 +95,8 @@ public class SeatEntity extends Entity implements PolymerEntity {
     @Override
     public Vec3d updatePassengerForDismount(LivingEntity passenger) {
         var box = passenger.getBoundingBox(EntityPose.STANDING);
-        var curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(this.direction, 1);
+        var dir = this.direction == null ? passenger.getHorizontalFacing() : this.direction;
+        var curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(dir  , 1);
         if (this.getWorld().isSpaceEmpty(box.offset(curr))) {
            return curr;
         }

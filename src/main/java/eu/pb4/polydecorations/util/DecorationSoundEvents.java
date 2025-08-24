@@ -10,6 +10,8 @@ public interface DecorationSoundEvents {
     SoundEvent TRASHCAN_OPEN = of("block.trashcan.open");
     SoundEvent TRASHCAN_CLOSE = of("block.trashcan.close");
     SoundEvent TRASHCAN_CLEAR = of("block.trashcan.clear");
+    SoundEvent BASKET_OPEN = of("block.basket.open");
+    SoundEvent BASKET_CLOSE = of("block.basket.close");
 
     static SoundEvent of(String string) {
         return SoundEvent.of(id(string));

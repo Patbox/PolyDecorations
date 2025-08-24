@@ -32,6 +32,7 @@ public class DecorationsBlockEntities {
             DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
     public static final BlockEntityType<?> GLOBE = register("globe", GenericSingleItemBlockEntity::globe, DecorationsBlocks.GLOBE);
     public static final BlockEntityType<?> TRASHCAN = register("trashcan", TrashCanBlockEntity::new, DecorationsBlocks.TRASHCAN);
+    public static final BlockEntityType<?> BASKET = register("basket", BasketBlockEntity::new, DecorationsBlocks.BASKET);
     public static final BlockEntityType<?> WIND_CHIME = register("wind_chime", WindChimeBlockEntity::new, DecorationsBlocks.WIND_CHIME);
 
     public static final BlockEntityType<?> DISPLAY_CASE = register("display_case",

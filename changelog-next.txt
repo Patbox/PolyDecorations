@@ -1,12 +1,19 @@
-- Added Long Flower Pot:
-  - New Flower Pot type that can hold 3 plants (same as regular Flower Pot). The plants can be of different types.
-  - It's rotated depending on player's facing direction.
-  - Crafted with Flower Pot and 2 Bricks.
-- Added Wind Chime:
-  - Decorative block, that moves in the wind.
-  - Can be dyed with up to 5 different dyes at the same time.
-  - Crafted with Chain, a Plank and 5 Iron Nuggets.
-- Canvas can now be placed on floors and ceilings.
-- Improved Tool Rack's hitbox, making it way smaller.
-- Tweaked some block particles.
-- Fixed Statues being visually in ground on first tick after placement.
+- Added Basket:
+  - Storage block that can hold up to 5 stacks of items.
+  - Keeps items inside when broken (like Shulker Boxes).
+  - When placed under Rope or Chains, it will visually move up to connect to it.
+  - Crafted with 2 Ropes, 5 Sticks and a Plank.
+- Added Sleeping Bags:
+  - A 2x1 block that allows you to skip the night (like Beds).
+  - Unlike a bed, it doesn't change player's spawn point.
+  - Crafted with 3 wool blocks.
+  - Has 16 colored variants.
+- Added Stumps:
+  - A small log-like block you can sit on.
+  - Crafted from 2 logs placed vertically.
+  - Comes in regular and stripped variants.
+- Renamed all Shelves to Plain Shelf, to make it distinct from 1.21.9 Vanilla Shelf block.
+- You can now place Hanging Signs on Ropes.
+- Tweaked placement of Sign Posts to pain in direction depending on side of targeted face that was clicked.
+- Fixed some statues using wrong block in recipe.
+- Fixed missing texture references logs on client.

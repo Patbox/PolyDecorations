@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
 public class SignPostItem extends SimplePolymerItem {
@@ -39,7 +40,17 @@ public class SignPostItem extends SimplePolymerItem {
         if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof SignPostBlockEntity be) {
             var text = be.getText(upper);
             if (text.item() == Items.AIR) {
-                be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), roundAngle(180 + context.getPlayerYaw())));
+                var rel = context.getHitPos().subtract(context.getBlockPos().toCenterPos());
+                var axis = context.getSide().getAxis();
+                if (axis == Direction.Axis.Y) {
+                    axis = rel.x > rel.z ? Direction.Axis.Z : Direction.Axis.X;
+                } else {
+                    axis = context.getSide().rotateYClockwise().getAxis();
+                }
+
+                var flip = (rel.getComponentAlongAxis(axis) * context.getSide().getDirection().offset() < 0) == (axis == Direction.Axis.X);
+
+                be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), roundAngle(180 + context.getPlayerYaw()), flip));
                         //.withFlip(context.getPlayerYaw() > 90 || context.getPlayerYaw() < -90));
                 if (context.getPlayer() instanceof ServerPlayerEntity player) {
                     be.openText(upper, player);

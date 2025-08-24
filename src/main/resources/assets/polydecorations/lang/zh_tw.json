@@ -80,9 +80,11 @@
   "block.polydecorations.globe": "地球儀",
   "block.polydecorations.display_case": "展示櫃",
   "block.polydecorations.large_flower_pot": "大型花盆",
+  "block.polydecorations.long_flower_pot": "長條型花盆",
   "block.polydecorations.ghost_light": "幽靈燈",
   "block.polydecorations.trashcan": "垃圾桶",
   "block.polydecorations.rope": "繩子",
+  "block.polydecorations.wind_chime": "風鈴",
   "item.polydecorations.stone_statue": "石頭雕像",
   "item.polydecorations.deepslate_statue": "深板岩雕像",
   "item.polydecorations.blackstone_statue": "黑石雕像",
@@ -157,6 +159,7 @@
   "item.polydecorations.canvas.tooltip.3": "使用 %s 清除像素",
   "item.polydecorations.canvas.tooltip.4": "使用 %s 在 3x3 區域應用非慣用手物品",
   "entity.polydecorations.canvas": "畫布",
+  "entity.polydecorations.statue": "雕像",
   "entity.polydecorations.seat": "座位",
   "text.polydecorations.someones": "%s 的 %s",
   "text.polydecorations.your": "您的 %s",
@@ -166,5 +169,6 @@
   "subtitles.polydecorations.entity.canvas.place": "畫布放置",
   "subtitles.polydecorations.block.trashcan.open": "垃圾桶開啟",
   "subtitles.polydecorations.block.trashcan.close": "垃圾桶關閉",
-  "subtitles.polydecorations.block.trashcan.clear": "垃圾桶清空"
+  "subtitles.polydecorations.block.trashcan.clear": "垃圾桶清空",
+  "subtitles.polydecorations.block.wind_chime.chime": "風鈴聲"
 }

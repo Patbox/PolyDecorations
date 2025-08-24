@@ -7,12 +7,15 @@ import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
 import eu.pb4.polydecorations.block.other.RopeBlock;
+import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
+import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.loot.LootTable;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
@@ -55,6 +58,12 @@ public class DecorationsBlocks {
     public static final WindChimeBlock WIND_CHIME = register("wind_chime", AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque(), WindChimeBlock::new);
     public static final TrashCanBlock TRASHCAN = register("trashcan", settings -> new TrashCanBlock(settings
             .mapColor(MapColor.IRON_GRAY).strength(3.5F).sounds(BlockSoundGroup.LANTERN).nonOpaque()));
+
+    public static final BasketBlock BASKET = register("basket", settings -> new BasketBlock(settings
+            .mapColor(MapColor.OAK_TAN).strength(0.5F)
+            .burnable()
+            .sounds(BlockSoundGroup.SCAFFOLDING).nonOpaque()));
+
     public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", settings -> new LargeFlowerPotBlock(settings
             .mapColor(MapColor.ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).nonOpaque()));
 
@@ -117,11 +126,55 @@ public class DecorationsBlocks {
         return null;
     });
 
+    public static final Map<WoodType, StumpBlock> STUMP = registerWood("stump", (x, id, settings) -> {
+        var log = Identifier.of(WoodUtil.getLogName(x));
+
+        if (Registries.BLOCK.containsId(log)) {
+            var logBlock = Registries.BLOCK.get(log);
+
+            return new StumpBlock(
+                    AbstractBlock.Settings.copy(logBlock).mapColor(logBlock.getDefaultMapColor()).registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)).nonOpaque()
+                            .solidBlock(Blocks::never),
+                    logBlock
+            );
+        }
+
+        return null;
+    });
+
+    public static final Map<WoodType, StumpBlock> STRIPPED_STUMP = registerWood("stripped_", "stump", (x, id, settings) -> {
+        var log = Identifier.of("stripped_" + WoodUtil.getLogName(x));
+
+        if (Registries.BLOCK.containsId(log)) {
+            var logBlock = Registries.BLOCK.get(log);
+
+            var b = new StumpBlock(
+                    AbstractBlock.Settings.copy(logBlock).mapColor(logBlock.getDefaultMapColor()).registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)).nonOpaque()
+                            .solidBlock(Blocks::never),
+                    logBlock
+            );
+            //StrippableBlockRegistry.register(STUMP.get(x), b);
+            return b;
+        }
+
+        return null;
+    });
+
     public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = registerWood("sign_post", (x, id, settings) -> {
         var planks = Identifier.of(x.name() + "_fence");
         var block = Registries.BLOCK.get(planks);
         if (block instanceof FenceBlock) {
             return new AttachedSignPostBlock(AbstractBlock.Settings.copy(block).registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)), block, 4);
+        }
+
+        return null;
+    });
+
+    public static final Map<DyeColor, SleepingBagBlock> SLEEPING_BAG = registerDye("sleeping_bag", (x, id, settings) -> {
+        var bed = Identifier.of(x.asString() + "_bed");
+        var block = Registries.BLOCK.get(bed);
+        if (block instanceof BedBlock) {
+            return new SleepingBagBlock(x, AbstractBlock.Settings.copy(block).pistonBehavior(PistonBehavior.BLOCK).registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)));
         }
 
         return null;
@@ -156,10 +209,13 @@ public class DecorationsBlocks {
     });
 
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, TriFunction<WoodType, Identifier, AbstractBlock.Settings, T> object) {
+        return registerWood("", id, object);
+    }
+    private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String prefix, String id, TriFunction<WoodType, Identifier, AbstractBlock.Settings, T> object) {
         var map = new HashMap<WoodType, T>();
 
         WoodUtil.VANILLA.forEach(x -> {
-            var y = register(x.name() + "_" + id, (s) -> object.apply(x, id(x.name() + "_" + id), s));
+            var y = register(prefix + x.name() + "_" + id, (s) -> object.apply(x,  id(prefix + x.name() + "_" + id), s));
             if (y != null) {
                 map.put(x, y);
             }
@@ -168,13 +224,13 @@ public class DecorationsBlocks {
         return map;
     }
 
-    private static <T extends Block & PolymerBlock> Map<DyeColor, T> registerDye(String id, Function<DyeColor, T> object) {
+    private static <T extends Block & PolymerBlock> Map<DyeColor, T> registerDye(String id, TriFunction<DyeColor, Identifier, AbstractBlock.Settings, T> object) {
         var map = new HashMap<DyeColor, T>();
 
         for (var x : DyeColor.values()) {
-            var y = object.apply(x);
+            var y = register( x.asString() + "_" + id, (s) -> object.apply(x, id(x.asString() + "_" + id), s));
             if (y != null) {
-                map.put(x, register(x.name().toLowerCase(Locale.ROOT) + "_" + id, (s) -> y));
+                map.put(x, y);
             }
         }
 

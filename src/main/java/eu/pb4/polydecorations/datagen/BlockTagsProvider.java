@@ -1,6 +1,5 @@
 package eu.pb4.polydecorations.datagen;
 
-import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.polydecorations.block.DecorationsBlockTags;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -67,8 +66,11 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .addOptionalTag(DecorationsBlockTags.SHELVES)
                 .addOptionalTag(DecorationsBlockTags.BRAZIERS)
                 .addOptionalTag(DecorationsBlockTags.MAILBOXES)
+                .addOptionalTag(DecorationsBlockTags.STUMPS)
+                .addOptionalTag(DecorationsBlockTags.SLEEPING_BAGS)
                 .add(DecorationsBlocks.DISPLAY_CASE)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT)
+                .add(DecorationsBlocks.BASKET)
                 .add(DecorationsBlocks.LONG_FLOWER_POT)
                 .add(DecorationsBlocks.WIND_CHIME)
         ;
@@ -84,5 +86,14 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.LARGE_FLOWER_POT);
         this.valueLookupBuilder(BlockTags.SMALL_DRIPLEAF_PLACEABLE)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT);
+
+        this.valueLookupBuilder(DecorationsBlockTags.STUMPS)
+                .add(DecorationsBlocks.STUMP.values().toArray(Block[]::new))
+                .add(DecorationsBlocks.STRIPPED_STUMP.values().toArray(Block[]::new))
+        ;
+
+        this.valueLookupBuilder(DecorationsBlockTags.SLEEPING_BAGS)
+                .add(DecorationsBlocks.SLEEPING_BAG.values().toArray(Block[]::new))
+        ;
     }
 }

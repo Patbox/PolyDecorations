@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.advancement.criterion.InventoryChangedCriterion;
 import net.minecraft.data.recipe.*;
 import net.minecraft.item.DyeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
@@ -135,6 +136,49 @@ class RecipesProvider extends FabricRecipeProvider {
                             .offerTo(exporter);
                 }));
 
+                DecorationsItems.STUMP.forEach(((woodType, item) -> {
+                    var log = Registries.ITEM.get(Identifier.ofVanilla(WoodUtil.getLogName(woodType)));
+                    if (log == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:stump")
+                            .pattern("s")
+                            .pattern("s")
+                            .input('s', log)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(log))
+                            .offerTo(exporter);
+                }));
+
+                DecorationsItems.STRIPPED_STUMP.forEach(((woodType, item) -> {
+                    var log = Registries.ITEM.get(Identifier.ofVanilla("stripped_" + WoodUtil.getLogName(woodType)));
+                    if (log == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:stump")
+                            .pattern("s")
+                            .pattern("s")
+                            .input('s', log)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(log))
+                            .offerTo(exporter);
+                }));
+
+                DecorationsItems.SLEEPING_BAG.forEach(((color, item) -> {
+                    var wool = Registries.ITEM.get(Identifier.ofVanilla(color.asString() + "_wool"));
+                    if (wool == Items.AIR) {
+                        return;
+                    }
+                    ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, item)
+                            .group("polydecorations:sleeping_bag")
+                            .pattern("sss")
+                            .input('s', wool)
+                            .criterion("planks", InventoryChangedCriterion.Conditions.items(wool))
+                            .offerTo(exporter);
+
+                }));
+                offerDyeableRecipes(List.copyOf(dyes), List.copyOf(DecorationsItems.SLEEPING_BAG.values()), "polydecorations:sleeping_bag_dying", RecipeCategory.DECORATIONS);
+
                 DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
                     var planks = Registries.ITEM.get(Identifier.ofVanilla(woodType.name() + "_planks"));
                     if (planks == null) {
@@ -193,6 +237,16 @@ class RecipesProvider extends FabricRecipeProvider {
                         .input('c', Items.CACTUS)
                         .input('i', Items.IRON_INGOT)
                         .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.BASKET, 1)
+                        .pattern("r r")
+                        .pattern("sws")
+                        .pattern("sss")
+                        .input('r', DecorationsItems.ROPE)
+                        .input('w', ItemTags.PLANKS)
+                        .input('s', Items.STICK)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(DecorationsItems.ROPE, Items.STICK))
                         .offerTo(exporter);
 
                 ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.ROPE, 4)
