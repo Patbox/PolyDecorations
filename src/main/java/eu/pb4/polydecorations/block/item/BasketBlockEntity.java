@@ -16,6 +16,8 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.ComponentsAccess;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
+import net.minecraft.entity.ContainerUser;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
@@ -55,7 +57,8 @@ public class BasketBlockEntity extends LockableBlockEntity implements MinimalInv
         protected void onViewerCountUpdate(World world, BlockPos pos, BlockState state, int oldViewerCount, int newViewerCount) {
         }
 
-        protected boolean isPlayerViewing(PlayerEntity player) {
+        @Override
+        public boolean isPlayerViewing(PlayerEntity player) {
             return player instanceof ServerPlayerEntity serverPlayer && GuiHelpers.getCurrentGui(serverPlayer) instanceof BasketBlockEntity.Gui gui && gui.isSource(BasketBlockEntity.this);
         }
     };
@@ -103,9 +106,9 @@ public class BasketBlockEntity extends LockableBlockEntity implements MinimalInv
     }
 
     @Override
-    public void onOpen(PlayerEntity player) {
-        if (!this.removed && !player.isSpectator()) {
-            this.stateManager.openContainer(player, this.getWorld(), this.getPos(), this.getCachedState());
+    public void onOpen(ContainerUser user) {
+        if (!this.removed && !user.asLivingEntity().isSpectator()) {
+            this.stateManager.openContainer(user.asLivingEntity(), this.getWorld(), this.getPos(), this.getCachedState(), user.getContainerInteractionRange());
         }
     }
 
@@ -114,9 +117,9 @@ public class BasketBlockEntity extends LockableBlockEntity implements MinimalInv
     }
 
     @Override
-    public void onClose(PlayerEntity player) {
-        if (!this.removed && !player.isSpectator()) {
-            this.stateManager.closeContainer(player, this.getWorld(), this.getPos(), this.getCachedState());
+    public void onClose(ContainerUser user) {
+        if (!this.removed && !user.asLivingEntity().isSpectator()) {
+            this.stateManager.closeContainer(user.asLivingEntity(), this.getWorld(), this.getPos(), this.getCachedState());
         }
     }
 
@@ -178,7 +181,7 @@ public class BasketBlockEntity extends LockableBlockEntity implements MinimalInv
 
         @Override
         public void onTick() {
-            if (isRemoved() || player.getPos().squaredDistanceTo(Vec3d.ofCenter(BasketBlockEntity.this.pos)) > (18 * 18)) {
+            if (isRemoved() || player.getEntityPos().squaredDistanceTo(Vec3d.ofCenter(BasketBlockEntity.this.pos)) > (18 * 18)) {
                 this.close();
             }
 

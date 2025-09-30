@@ -161,7 +161,7 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
                 .glowing(this.glowing)
                 .invisible(this.cut)
                 .rotation(this.rotation)
-                .callback(this::onUsed)
+                .interactionCallback(this::onUsed)
                 .build();
     }
 
@@ -199,14 +199,14 @@ public class CanvasEntity extends AbstractDecorationEntity implements PolymerEnt
         return CanvasColor.getFromRaw(color);
     }
 
-    private void onUsed(ServerPlayerEntity serverPlayerEntity, ClickType clickType, int x, int y) {
-        if (clickType == ClickType.LEFT) {
-            if (CommonProtection.canDamageEntity(this.getWorld(), this, serverPlayerEntity.getGameProfile(), serverPlayerEntity)) {
+    private void onUsed(ServerPlayerEntity serverPlayerEntity, VirtualDisplay.ClickType clickType, int x, int y) {
+        if (clickType.isLeft()) {
+            if (CommonProtection.canDamageEntity(this.getEntityWorld(), this, serverPlayerEntity.getGameProfile(), serverPlayerEntity)) {
                 serverPlayerEntity.attack(this);
             }
             return;
         }
-        if (this.waxed || !CommonProtection.canInteractEntity(this.getWorld(), this, serverPlayerEntity.getGameProfile(), serverPlayerEntity)) {
+        if (this.waxed || !CommonProtection.canInteractEntity(this.getEntityWorld(), this, serverPlayerEntity.getGameProfile(), serverPlayerEntity)) {
             return;
         }
 

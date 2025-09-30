@@ -42,14 +42,14 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class ShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<SlabType> TYPE = Properties.SLAB_TYPE;
     private final Block base;
     private final ItemStack topModel;
     private final ItemStack doubleModel;
 
-    public ShelfBlock(Settings settings, Block base, Identifier identifier) {
+    public PlainShelfBlock(Settings settings, Block base, Identifier identifier) {
         super(settings);
         this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(TYPE, SlabType.BOTTOM));
         this.base = base;

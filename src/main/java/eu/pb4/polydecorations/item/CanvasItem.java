@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -46,9 +47,9 @@ public class CanvasItem extends SimplePolymerItem {
             var entity = CanvasEntity.create(world, context.getSide(), context.getBlockPos().offset(context.getSide()), context.getPlayerYaw());
 
             if (entity.canStayAttached()) {
-                if (!world.isClient) {
+                if (!world.isClient()) {
                     entity.onPlace();
-                    world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, entity.getPos());
+                    world.emitGameEvent(playerEntity, GameEvent.ENTITY_PLACE, entity.getEntityPos());
                     entity.loadFromStack(context.getStack());
                     world.spawnEntity(entity);
                 }
@@ -113,7 +114,7 @@ public class CanvasItem extends SimplePolymerItem {
 
 
         for (var y = 0; y < 16 * 16; y += 32) {
-            var text = Text.empty().setStyle(Style.EMPTY.withFont(id("canvas")));
+            var text = Text.empty().setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(id("canvas"))));
             var builder = new StringBuilder();
             var color = CanvasColor.CLEAR;
 

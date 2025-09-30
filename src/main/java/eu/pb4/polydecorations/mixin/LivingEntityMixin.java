@@ -32,16 +32,16 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyVariable(method = "setSleepingPosition", at = @At("HEAD"), argsOnly = true)
     private BlockPos hackBlockPos(BlockPos value) {
-        var state = this.getWorld().getBlockState(value);
+        var state = this.getEntityWorld().getBlockState(value);
         if (!(state.getBlock() instanceof SleepingBagBlock)) {
             this.realSleepPos = null;
             return value;
         }
 
         realSleepPos = value;
-        var fakePos = value.withY(value.getY() > 0 ? this.getWorld().getBottomY() : this.getWorld().getTopYInclusive() - 1);
+        var fakePos = value.withY(value.getY() > 0 ? this.getEntityWorld().getBottomY() : this.getEntityWorld().getTopYInclusive() - 1);
 
-        for (var player : ((ServerWorld) this.getWorld()).getChunkManager().chunkLoadingManager.getPlayersWatchingChunk(this.getChunkPos())) {
+        for (var player : ((ServerWorld) this.getEntityWorld()).getChunkManager().chunkLoadingManager.getPlayersWatchingChunk(this.getChunkPos())) {
             player.networkHandler.sendPacket(new BlockUpdateS2CPacket(fakePos, Blocks.BLACK_BED.getDefaultState().with(BedBlock.FACING, state.get(BedBlock.FACING))));
         }
 
@@ -61,10 +61,10 @@ public abstract class LivingEntityMixin extends Entity {
             return;
         }
 
-        var fakePos = realSleepPos.withY(realSleepPos.getY() > 0 ? this.getWorld().getBottomY() : this.getWorld().getTopYInclusive() - 1);
+        var fakePos = realSleepPos.withY(realSleepPos.getY() > 0 ? this.getEntityWorld().getBottomY() : this.getEntityWorld().getTopYInclusive() - 1);
 
-        for (var player : ((ServerWorld) this.getWorld()).getChunkManager().chunkLoadingManager.getPlayersWatchingChunk(this.getChunkPos())) {
-            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(this.getWorld(), fakePos));
+        for (var player : ((ServerWorld) this.getEntityWorld()).getChunkManager().chunkLoadingManager.getPlayersWatchingChunk(this.getChunkPos())) {
+            player.networkHandler.sendPacket(new BlockUpdateS2CPacket(this.getEntityWorld(), fakePos));
         }
         realSleepPos = null;
     }

@@ -23,7 +23,11 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.TABLE.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]));
+                .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]))
+                .add(DecorationsBlocks.STUMP.values().toArray(Block[]::new))
+                .add(DecorationsBlocks.STRIPPED_STUMP.values().toArray(Block[]::new))
+                .add(DecorationsBlocks.BASKET)
+        ;
 
         this.valueLookupBuilder(BlockTags.PICKAXE_MINEABLE)
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]))

@@ -110,8 +110,8 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
 
     @Override
     protected void spawnBreakParticles() {
-        if (this.getWorld() instanceof ServerWorld) {
-            ((ServerWorld)this.getWorld()).spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, this.item.getType().block().getDefaultState()), this.getX(), this.getBodyY(0.6666666666666666), this.getZ(), 10, (double)(this.getWidth() / 4.0F), (double)(this.getHeight() / 4.0F), (double)(this.getWidth() / 4.0F), 0.05);
+        if (this.getEntityWorld() instanceof ServerWorld) {
+            ((ServerWorld)this.getEntityWorld()).spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, this.item.getType().block().getDefaultState()), this.getX(), this.getBodyY(0.6666666666666666), this.getZ(), 10, (double)(this.getWidth() / 4.0F), (double)(this.getHeight() / 4.0F), (double)(this.getWidth() / 4.0F), 0.05);
         }
     }
 
@@ -193,9 +193,9 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
                             this.kill(world);
                             return true;
                         } else {
-                            long l = this.getWorld().getTime();
+                            long l = this.getEntityWorld().getTime();
                             if (l - this.lastHitTime > 5L && !bl2) {
-                                this.getWorld().sendEntityStatus(this, (byte)32);
+                                this.getEntityWorld().sendEntityStatus(this, (byte)32);
                                 this.emitGameEvent(GameEvent.ENTITY_DAMAGE, source.getAttacker());
                                 this.lastHitTime = l;
                             } else {
@@ -244,7 +244,7 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
 
     @Override
     protected void playBreakSound() {
-        this.getWorld().playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), this.item.getType().soundGroup().getBreakSound(), this.getSoundCategory(), 1.0F, 1.0F);
+        this.getEntityWorld().playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), this.item.getType().soundGroup().getBreakSound(), this.getSoundCategory(), 1.0F, 1.0F);
     }
 
     @Override

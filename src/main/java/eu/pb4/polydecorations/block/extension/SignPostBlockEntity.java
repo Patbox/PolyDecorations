@@ -188,10 +188,10 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             var sign = this.getText(upper);
             this.setText(upper, Sign.of());
             if (this.lowerText.item == Items.AIR && this.upperText.item == Items.AIR) {
-                player.getWorld().setBlockState(pos, ((AttachedSignPostBlock) this.getCachedState().getBlock()).getBacking()
+                player.getEntityWorld().setBlockState(pos, ((AttachedSignPostBlock) this.getCachedState().getBlock()).getBacking()
                         .getDefaultState().withIfExists(Properties.WATERLOGGED, getCachedState().get(Properties.WATERLOGGED)));
             }
-            ItemScatterer.spawn(player.getWorld(), pos, DefaultedList.copyOf(ItemStack.EMPTY, sign.item.getDefaultStack()));
+            ItemScatterer.spawn(player.getEntityWorld(), pos, DefaultedList.copyOf(ItemStack.EMPTY, sign.item.getDefaultStack()));
             return ActionResult.SUCCESS;
         } else if (player instanceof ServerPlayerEntity serverPlayer) {
             openText(upper, serverPlayer);
@@ -318,7 +318,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
 
         @Override
         public void onTick() {
-            if (player.getPos().squaredDistanceTo(Vec3d.ofCenter(SignPostBlockEntity.this.pos)) > (18 * 18)) {
+            if (player.getEntityPos().squaredDistanceTo(Vec3d.ofCenter(SignPostBlockEntity.this.pos)) > (18 * 18)) {
                 this.close();
             }
             super.onTick();

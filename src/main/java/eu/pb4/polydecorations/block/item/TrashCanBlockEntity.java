@@ -15,6 +15,7 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.ComponentsAccess;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
+import net.minecraft.entity.ContainerUser;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
@@ -63,7 +64,7 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
         protected void onViewerCountUpdate(World world, BlockPos pos, BlockState state, int oldViewerCount, int newViewerCount) {
         }
 
-        protected boolean isPlayerViewing(PlayerEntity player) {
+        public boolean isPlayerViewing(PlayerEntity player) {
             return player instanceof ServerPlayerEntity serverPlayer && GuiHelpers.getCurrentGui(serverPlayer) instanceof Gui gui && gui.isSource(TrashCanBlockEntity.this);
         }
     };
@@ -86,15 +87,17 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
         Inventories.readData(view, this.items);
     }
 
-    public void onOpen(PlayerEntity player) {
-        if (!this.removed && !player.isSpectator()) {
-            this.stateManager.openContainer(player, this.getWorld(), this.getPos(), this.getCachedState());
+    @Override
+    public void onOpen(ContainerUser user) {
+        if (!this.removed && !user.asLivingEntity().isSpectator()) {
+            this.stateManager.openContainer(user.asLivingEntity(), this.getWorld(), this.getPos(), this.getCachedState(), user.getContainerInteractionRange());
         }
     }
 
-    public void onClose(PlayerEntity player) {
-        if (!this.removed && !player.isSpectator()) {
-            this.stateManager.closeContainer(player, this.getWorld(), this.getPos(), this.getCachedState());
+    @Override
+    public void onClose(ContainerUser user) {
+        if (!this.removed && !user.asLivingEntity().isSpectator()) {
+            this.stateManager.closeContainer(user.asLivingEntity(), this.getWorld(), this.getPos(), this.getCachedState());
         }
 
     }
@@ -214,7 +217,7 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
 
         @Override
         public void onTick() {
-            if (isRemoved() || player.getPos().squaredDistanceTo(Vec3d.ofCenter(TrashCanBlockEntity.this.pos)) > (18 * 18)) {
+            if (isRemoved() || player.getEntityPos().squaredDistanceTo(Vec3d.ofCenter(TrashCanBlockEntity.this.pos)) > (18 * 18)) {
                 this.close();
             }
 

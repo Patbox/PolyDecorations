@@ -83,8 +83,8 @@ public class DecorationsUtil {
     }
 
     public static Text someones(@Nullable GameProfile owner, Text thing) {
-        if (owner != null && owner.getName() != null) {
-            return Text.translatable("text.polydecorations.someones", owner.getName(), thing);
+        if (owner != null && owner.name() != null) {
+            return Text.translatable("text.polydecorations.someones", owner.name(), thing);
         }
 
         return thing;

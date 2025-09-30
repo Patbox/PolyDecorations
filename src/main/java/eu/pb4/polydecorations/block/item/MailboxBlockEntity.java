@@ -115,7 +115,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
     public ActionResult onUse(PlayerEntity player) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
 
-            if (((this.owner != null && player.getUuid().equals(this.owner.getId()))
+            if (((this.owner != null && player.getUuid().equals(this.owner.id()))
                     || (this.getContainerLock() != ContainerLock.EMPTY && this.checkUnlocked(player, false)))
                     && !(player.isCreativeLevelTwoOp() && player.getStackInHand(Hand.MAIN_HAND).isOf(Items.DEBUG_STICK))) {
                 new SelectorGui(serverPlayer);
@@ -214,12 +214,12 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             this.elements.clear();
             for (var entry : inventories.entrySet()) {
                 var b = new GuiElementBuilder();
-                var profile = this.player.getServer().getUserCache().getByUuid(entry.getKey());
+                var profile = this.player.getEntityWorld().getServer().getApiServices().nameToIdCache().getByUuid(entry.getKey());
 
                 if (profile.isPresent()) {
                     b.setItem(Items.PLAYER_HEAD);
-                    b.setSkullOwner(profile.get(), null);
-                    b.setName(Text.literal(profile.get().getName()));
+                    b.setProfile(profile.get().id());
+                    b.setName(Text.literal(profile.get().name()));
                 } else {
                     b.setItem(Items.SKELETON_SKULL);
                     b.setName(Text.literal(entry.getKey().toString()).formatted(Formatting.DARK_RED));
@@ -240,7 +240,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
                     }
                 });
 
-                this.elements.add(b.build());
+                this.elements.add(b.hideDefaultTooltip().build());
             }
 
             this.pageCount = (this.elements.size() / ENTRIES_PER_PAGE) + (((this.elements.size() % ENTRIES_PER_PAGE) == 0) ? 0 : 1);
@@ -248,7 +248,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
 
         @Override
         public void onTick() {
-            if (isRemoved() || player.getPos().squaredDistanceTo(Vec3d.ofCenter(MailboxBlockEntity.this.pos)) > (18 * 18)) {
+            if (isRemoved() || player.getEntityPos().squaredDistanceTo(Vec3d.ofCenter(MailboxBlockEntity.this.pos)) > (18 * 18)) {
                 this.close();
                 return;
             }
@@ -317,7 +317,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
 
         @Override
         public void onTick() {
-            if (isRemoved() || player.getPos().squaredDistanceTo(Vec3d.ofCenter(MailboxBlockEntity.this.pos)) > (18 * 18)) {
+            if (isRemoved() || player.getEntityPos().squaredDistanceTo(Vec3d.ofCenter(MailboxBlockEntity.this.pos)) > (18 * 18)) {
                 this.close();
                 return;
             }

@@ -89,7 +89,7 @@ public class BasketBlock extends BlockWithEntity implements FactoryBlock, Barrie
     @Override
     public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         if (world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
-            if (!world.isClient && player.shouldSkipBlockDrops() && !be.isEmpty()) {
+            if (!world.isClient() && player.shouldSkipBlockDrops() && !be.isEmpty()) {
                 var itemStack = this.asItem().getDefaultStack();
                 itemStack.applyComponentsFrom(be.createComponentMap());
                 ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);

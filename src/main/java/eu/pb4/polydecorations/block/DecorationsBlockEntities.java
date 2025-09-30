@@ -19,7 +19,7 @@ import net.minecraft.util.Util;
 import java.util.ArrayList;
 
 public class DecorationsBlockEntities {
-    public static final BlockEntityType<?> SHELF = register("shelf", ShelfBlockEntity::new, DecorationsBlocks.SHELF.values().toArray(new ShelfBlock[0]));
+    public static final BlockEntityType<?> SHELF = register("shelf", ShelfBlockEntity::new, DecorationsBlocks.SHELF.values().toArray(new PlainShelfBlock[0]));
     public static final BlockEntityType<?> SIGN_POST = register("sign_post", SignPostBlockEntity::new,
             Util.make(new ArrayList<Block>(), (l) -> {
                 l.addAll(DecorationsBlocks.WOOD_SIGN_POST.values());

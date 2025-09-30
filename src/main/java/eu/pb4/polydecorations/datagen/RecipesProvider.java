@@ -303,7 +303,7 @@ class RecipesProvider extends FabricRecipeProvider {
                         .pattern(" c ")
                         .pattern("ipi")
                         .pattern("iii")
-                        .input('c', Items.CHAIN)
+                        .input('c', Items.IRON_CHAIN)
                         .input('p', ItemTags.PLANKS)
                         .input('i', Items.IRON_NUGGET)
                         .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))

@@ -9,10 +9,12 @@ import net.minecraft.block.enums.BedPart;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
+import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.CopyComponentsLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.util.context.ContextParameter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +45,7 @@ class LootTables extends FabricBlockLootTableProvider {
         this.addDrop(DecorationsBlocks.ROPE);
         this.addDrop(DecorationsBlocks.WIND_CHIME, (drop) -> LootTable.builder().pool(
                 this.addSurvivesExplosionCondition(drop, LootPool.builder().rolls(ConstantLootNumberProvider.create(1.0F))
-                        .with(ItemEntry.builder(drop).apply(CopyComponentsLootFunction.builder(CopyComponentsLootFunction.Source.BLOCK_ENTITY)
+                        .with(ItemEntry.builder(drop).apply(CopyComponentsLootFunction.blockEntity(LootContextParameters.BLOCK_ENTITY)
                                 .include(WindChimeItem.WIND_CHIME_COLOR))))));
     }
 }

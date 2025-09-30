@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.entity;
 
+import eu.pb4.polydecorations.util.DecorationsGamerules;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
@@ -26,9 +27,16 @@ public class SeatEntity extends Entity implements PolymerEntity {
     private Direction direction = Direction.UP;
 
     public static boolean create(World world, BlockPos pos, double yOffset, @Nullable Direction direction, Entity player) {
-        if (!world.getEntitiesByClass(SeatEntity.class, new Box(pos), x -> true).isEmpty()) {
+        if (!(world instanceof ServerWorld serverWorld) || !world.getEntitiesByClass(SeatEntity.class, new Box(pos), x -> true).isEmpty()) {
             return false;
         }
+
+        var timeout = serverWorld.getGameRules().getInt(DecorationsGamerules.SEAT_USE_COOLDOWN);
+
+        if (player.getVehicle() instanceof SeatEntity seatEntity && seatEntity.age < timeout) {
+            return false;
+        }
+
 
         var entity = new SeatEntity(DecorationsEntities.SEAT, world);
         entity.direction = direction;
@@ -97,11 +105,11 @@ public class SeatEntity extends Entity implements PolymerEntity {
         var box = passenger.getBoundingBox(EntityPose.STANDING);
         var dir = this.direction == null ? passenger.getHorizontalFacing() : this.direction;
         var curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(dir  , 1);
-        if (this.getWorld().isSpaceEmpty(box.offset(curr))) {
+        if (this.getEntityWorld().isSpaceEmpty(box.offset(curr))) {
            return curr;
         }
         curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(Direction.UP, 1);
-        if (this.getWorld().isSpaceEmpty(box.offset(curr))) {
+        if (this.getEntityWorld().isSpaceEmpty(box.offset(curr))) {
             return curr;
         }
         return Vec3d.ofBottomCenter(this.getBlockPos());

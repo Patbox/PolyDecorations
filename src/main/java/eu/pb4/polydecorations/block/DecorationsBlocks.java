@@ -5,14 +5,13 @@ import eu.pb4.polydecorations.block.furniture.*;
 import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
+import eu.pb4.polydecorations.block.item.PlainShelfBlock;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
 import eu.pb4.polydecorations.block.other.RopeBlock;
-import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
-import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
@@ -74,10 +73,10 @@ public class DecorationsBlocks {
             settings -> new GhostLightBlock(settings.nonOpaque()
                     .noCollision().breakInstantly().luminance(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
 
-    public static final Map<WoodType, ShelfBlock> SHELF = registerWood("shelf", (x, id, settings) -> {
+    public static final Map<WoodType, PlainShelfBlock> SHELF = registerWood("shelf", (x, id, settings) -> {
         var planks = Identifier.of(x.name() + "_planks");
         if (Registries.BLOCK.containsId(planks)) {
-            return new ShelfBlock(
+            return new PlainShelfBlock(
                     AbstractBlock.Settings.copy(Registries.BLOCK.get(planks)).registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)).nonOpaque()
                             .solidBlock(Blocks::never), Registries.BLOCK.get(planks), id(x.name() + "_shelf")
             );
