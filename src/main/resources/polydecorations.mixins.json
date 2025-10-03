@@ -13,6 +13,7 @@
     "LivingEntityMixin",
     "NbtReadViewAccessor",
     "ServerPlayerEntityMixin",
+    "ShulkerBoxBlockEntityMixin",
     "SignBlockEntityMixin",
     "datafixer.ItemStackComponentizationFixMixin",
     "datafixer.Schema100Accessor",
