@@ -94,7 +94,7 @@ public class BasketBlockEntity extends LockableBlockEntity implements MinimalInv
 
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return true;
+        return stack.getItem().canBeNested();
     }
 
     @Override
