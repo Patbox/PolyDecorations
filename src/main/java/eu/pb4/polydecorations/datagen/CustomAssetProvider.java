@@ -32,6 +32,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -368,7 +369,8 @@ class CustomAssetProvider implements DataProvider {
                 }
             }
 
-            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
+            int newWidth = (positions.size() + 7) & ~7;
+            var palette = new BufferedImage(newWidth, 8, BufferedImage.TYPE_INT_RGB);
 
             for (var wood : WoodUtil.VANILLA) {
                 var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + wood.name() + "_planks.png")));
@@ -441,7 +443,8 @@ class CustomAssetProvider implements DataProvider {
                 }
             }
 
-            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
+            int newWidth = (positions.size() + 7) & ~7;
+            var palette = new BufferedImage(newWidth, 8, BufferedImage.TYPE_INT_RGB);
 
             for (var color : DyeColor.values()) {
                 var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/entity/bed/" + color.asString() + ".png")));
