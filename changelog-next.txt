@@ -1,1 +1,4 @@
-- Baskets and Stumps now have correct tool set (Axe).
+- Added Copper Campfire and Copper Brazier.
+- Copper Lanterns can now be placed on walls.
+- Changed hitbox of Long Flower Pot, Basket and Benches to be half block high.
+- Fixed Plain Shelf loosing items when placing additional one in block.

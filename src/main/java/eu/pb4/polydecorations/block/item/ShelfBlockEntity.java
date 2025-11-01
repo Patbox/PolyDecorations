@@ -118,7 +118,10 @@ public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInve
     @Override
     protected void readComponents(ComponentsAccess components) {
         super.readComponents(components);
-        components.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).copyTo(this.getStacks());
+        var container = components.get(DataComponentTypes.CONTAINER);
+        if (container != null) {
+            container.copyTo(this.getStacks());
+        }
     }
 
     @Override

@@ -27,6 +27,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.DyeColor;
+import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -37,10 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -116,6 +114,12 @@ class CustomAssetProvider implements DataProvider {
             }
             """;
 
+    private static final List<Map.Entry<String, String>> COPPER_PREFIXES = List.of(
+            Map.entry("", "unaffected"),
+            Map.entry("exposed_", "exposed"),
+            Map.entry("weathered_", "weathered"),
+            Map.entry("oxidized_", "oxidized"));
+
     private final DataOutput output;
 
     public CustomAssetProvider(FabricDataOutput output) {
@@ -135,6 +139,7 @@ class CustomAssetProvider implements DataProvider {
             try {
                 createWoodTextures(assetWriter);
                 createBedPalette(assetWriter);
+                createCopperBarPalette(assetWriter);
                 UiResourceCreator.generateAssets(assetWriter);
                 writeBlocksAndItems(assetWriter);
             } catch (Throwable e) {
@@ -330,14 +335,14 @@ class CustomAssetProvider implements DataProvider {
         generateWindChimeModels(writer);
 
         for (var item : List.of(DecorationsItems.CANVAS, DecorationsItems.ROPE, DecorationsItems.GLOBE, DecorationsItems.GHOST_LIGHT,
-                DecorationsItems.TRASHCAN, DecorationsItems.HAMMER, DecorationsItems.TROWEL)) {
+                DecorationsItems.TRASHCAN, DecorationsItems.HAMMER, DecorationsItems.TROWEL, DecorationsItems.COPPER_CAMPFIRE)) {
             var id = Registries.ITEM.getId(item);
             writer.accept(AssetPaths.itemAsset(id),
                     new ItemAsset(new BasicItemModel(id.withPrefixedPath("item/")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
         }
 
-        for (var item : List.of(DecorationsItems.DISPLAY_CASE, DecorationsItems.BRAZIER, DecorationsItems.SOUL_BRAZIER, DecorationsItems.LARGE_FLOWER_POT, DecorationsItems.LONG_FLOWER_POT)) {
+        for (var item : List.of(DecorationsItems.DISPLAY_CASE, DecorationsItems.BRAZIER, DecorationsItems.SOUL_BRAZIER, DecorationsItems.COPPER_BRAZIER, DecorationsItems.LARGE_FLOWER_POT, DecorationsItems.LONG_FLOWER_POT)) {
             var id = Registries.ITEM.getId(item);
             writer.accept(AssetPaths.itemAsset(id),
                     new ItemAsset(new BasicItemModel(id.withPrefixedPath("block/")), ItemAsset.Properties.DEFAULT)
@@ -409,6 +414,41 @@ class CustomAssetProvider implements DataProvider {
                     assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_stump_top.png.mcmeta",
                             Files.readAllBytes(mcMeta));
                 }
+                b.reset();
+            }
+        }
+    }
+
+    private void createCopperBarPalette(BiConsumer<String, byte[]> assetWriter) throws Exception {
+        var jar = PolymerCommonUtils.getClientJarRoot();
+        var b = new ByteArrayOutputStream();
+
+        { // Palette
+
+            var positions = new ArrayList<int[]>();
+            {
+                var ironBars = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/iron_bars.png")));
+                var existingColors = new IntOpenHashSet();
+                for (int x = 0; x < ironBars.getWidth(); x++) {
+                    for (int y = 0; y < ironBars.getHeight(); y++) {
+                        var rgb = ironBars.getRGB(x, y);
+                        if (existingColors.add(rgb)) {
+                            positions.add(new int[]{x, y});
+                        }
+                    }
+                }
+            }
+
+            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
+
+            for (var type : COPPER_PREFIXES) {
+                var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + type.getKey() + "copper_bars.png")));
+                for (int i = 0; i < positions.size(); i++) {
+                    var pos = positions.get(i);
+                    palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
+                }
+                ImageIO.write(palette, "png", b);
+                assetWriter.accept("assets/polydecorations/textures/palette/copper_bars/" + type.getValue() + ".png", b.toByteArray());
                 b.reset();
             }
         }

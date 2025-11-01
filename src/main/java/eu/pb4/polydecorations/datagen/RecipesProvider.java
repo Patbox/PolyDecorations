@@ -230,6 +230,21 @@ class RecipesProvider extends FabricRecipeProvider {
                         .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
                         .offerTo(exporter);
 
+                ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.COPPER_BRAZIER, 1)
+                        .group("polydecorations:brazier")
+                        .pattern("ici")
+                        .pattern(" i ")
+                        .input('c', DecorationsItems.COPPER_CAMPFIRE)
+                        .input('i', Items.IRON_INGOT)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.IRON_INGOT))
+                        .offerTo(exporter);
+
+                ShapelessRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.COPPER_CAMPFIRE, 1)
+                        .input(Items.CAMPFIRE)
+                        .input(Items.RAW_COPPER)
+                        .criterion("planks", InventoryChangedCriterion.Conditions.items(Items.RAW_COPPER))
+                        .offerTo(exporter);
+
                 ShapedRecipeJsonBuilder.create(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.TRASHCAN, 1)
                         .pattern("i i")
                         .pattern("ici")

@@ -3,9 +3,12 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
+import eu.pb4.polydecorations.util.DecorationsUtil;
+import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -45,7 +48,7 @@ import java.util.List;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
-public class BasketBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
+public class BasketBlock extends BlockWithEntity implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
     public static final Identifier CONTENTS_DYNAMIC_DROP_ID = ShulkerBoxBlock.CONTENTS_DYNAMIC_DROP_ID;
 
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
@@ -116,6 +119,11 @@ public class BasketBlock extends BlockWithEntity implements FactoryBlock, Barrie
         }
 
         return super.getDroppedStacks(state, builder);
+    }
+
+    @Override
+    public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
+        return blockState.get(WATERLOGGED) ? DecorationsUtil.CAMPFIRE_WATERLOGGED_STATE : DecorationsUtil.CAMPFIRE_STATE;
     }
 
     @Override

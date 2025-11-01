@@ -6,15 +6,16 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.enums.BedPart;
-import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.Items;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.entry.ItemEntry;
+import net.minecraft.loot.entry.LootPoolEntry;
 import net.minecraft.loot.function.CopyComponentsLootFunction;
+import net.minecraft.loot.function.SetCountLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.context.ContextParameter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -36,6 +37,13 @@ class LootTables extends FabricBlockLootTableProvider {
         this.addDrop(DecorationsBlocks.BASKET, this.shulkerBoxDrops(DecorationsBlocks.BASKET));
         this.addDrop(DecorationsBlocks.BRAZIER);
         this.addDrop(DecorationsBlocks.SOUL_BRAZIER);
+        this.addDrop(DecorationsBlocks.COPPER_BRAZIER);
+        this.addDrop(DecorationsBlocks.COPPER_CAMPFIRE, (block) -> {
+            return this.dropsWithSilkTouch(block,
+                    this.addSurvivesExplosionCondition(block, ItemEntry.builder(Items.CHARCOAL)
+                            .apply(SetCountLootFunction.builder(ConstantLootNumberProvider.create(2.0F))))
+            );
+        });
         this.addDrop(DecorationsBlocks.GLOBE);
         this.addDrop(DecorationsBlocks.GHOST_LIGHT);
         this.addDrop(DecorationsBlocks.DISPLAY_CASE);

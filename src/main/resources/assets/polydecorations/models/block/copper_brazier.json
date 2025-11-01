@@ -1,0 +1,7 @@
+{
+  "parent": "polydecorations:block/unlit_brazier",
+  "textures": {
+	"fire": "polydecorations:block/copper_campfire_fire",
+	"base": "polydecorations:block/copper_campfire_log_lit"
+  }
+}

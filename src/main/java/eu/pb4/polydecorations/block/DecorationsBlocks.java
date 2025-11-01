@@ -1,11 +1,11 @@
 package eu.pb4.polydecorations.block;
 
 import eu.pb4.polydecorations.ModInit;
-import eu.pb4.polydecorations.block.furniture.*;
-import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
-import eu.pb4.polydecorations.block.item.PlainShelfBlock;
+import eu.pb4.polydecorations.block.extension.WallAttachedOxidizableLanternBlock;
+import eu.pb4.polydecorations.block.furniture.*;
+import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
 import eu.pb4.polydecorations.block.other.RopeBlock;
 import eu.pb4.polydecorations.util.WoodUtil;
@@ -30,7 +30,10 @@ import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,6 +45,12 @@ public class DecorationsBlocks {
     public static final WallAttachedLanternBlock WALL_LANTERN = register("wall_lantern", (LanternBlock) Blocks.LANTERN, WallAttachedLanternBlock::new);
     public static final WallAttachedLanternBlock WALL_SOUL_LANTERN = register("wall_soul_lantern", (LanternBlock) Blocks.SOUL_LANTERN, WallAttachedLanternBlock::new);
 
+    public static CopperBlockSet WALL_COPPER_LANTERNS = registerRelativeCopper("copper_wall_lantern", Blocks.COPPER_LANTERNS,
+            (settings, block) -> new WallAttachedLanternBlock(settings, (LanternBlock) block),
+            (level, settings, block) -> new WallAttachedOxidizableLanternBlock(settings, (OxidizableLanternBlock) block),
+            (level, block) -> AbstractBlock.Settings.copy(block)
+    );
+
     public static final BrazierBlock BRAZIER = register("brazier", Blocks.LANTERN, (settings, ignored) -> new BrazierBlock(settings.nonOpaque().luminance(x -> {
                 return x.get(BrazierBlock.LIT) ? Blocks.CAMPFIRE.getDefaultState().getLuminance() : 0;
             }))
@@ -51,6 +60,14 @@ public class DecorationsBlocks {
                 return x.get(BrazierBlock.LIT) ? Blocks.SOUL_CAMPFIRE.getDefaultState().getLuminance() : 0;
             }))
     );
+
+    public static final BrazierBlock COPPER_BRAZIER = register("copper_brazier", Blocks.COPPER_LANTERNS.unaffected(), (settings, ignored) -> new BrazierBlock(settings.nonOpaque().luminance(x -> {
+                return x.get(BrazierBlock.LIT) ? Blocks.CAMPFIRE.getDefaultState().getLuminance() : 0;
+            }))
+    );
+
+    public static final PolymerCampfireBlock COPPER_CAMPFIRE = register("copper_campfire", Blocks.CAMPFIRE, (settings, block) -> new PolymerCampfireBlock(true, 1, settings));
+
     public static final GlobeBlock GLOBE = register("globe", AbstractBlock.Settings.copy(Blocks.OAK_PLANKS).nonOpaque(), GlobeBlock::new);
     public static final RopeBlock ROPE = register("rope", AbstractBlock.Settings.create().strength(1f).sounds(BlockSoundGroup.COBWEB).breakInstantly().nonOpaque(), RopeBlock::new);
     public static final DisplayCaseBlock DISPLAY_CASE = register("display_case", AbstractBlock.Settings.copy(Blocks.GLASS).nonOpaque(), DisplayCaseBlock::new);
@@ -291,4 +308,36 @@ public class DecorationsBlocks {
     }
 
 
+    public static <Waxed extends Block, Regular extends Block & Oxidizable> CopperBlockSet registerRelativeCopper(String baseId, CopperBlockSet source,
+                                                                                                                  BiFunction<AbstractBlock.Settings, Block, Waxed> waxedBlockFactory,
+                                                                                                                  TriFunction<Oxidizable.OxidationLevel, AbstractBlock.Settings, Block, Regular> unwaxedBlockFactory,
+                                                                                                                  BiFunction<Oxidizable.OxidationLevel, Block, AbstractBlock.Settings> settingsFromOxidationLevel) {
+
+        Block unaffected = register(baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.UNAFFECTED, source.unaffected()), (settings) -> {
+            return unwaxedBlockFactory.apply(Oxidizable.OxidationLevel.UNAFFECTED, settings, source.unaffected());
+        });
+        Block exposed = register("exposed_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.EXPOSED, source.exposed()), (settings) -> {
+            return unwaxedBlockFactory.apply(Oxidizable.OxidationLevel.EXPOSED, settings, source.exposed());
+        });
+        Block weathered = register("weathered_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.WEATHERED, source.weathered()), (settings) -> {
+            return unwaxedBlockFactory.apply(Oxidizable.OxidationLevel.WEATHERED, settings, source.weathered());
+        });
+        Block oxidized = register("oxidized_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.OXIDIZED, source.oxidized()), (settings) -> {
+            return unwaxedBlockFactory.apply(Oxidizable.OxidationLevel.OXIDIZED, settings, source.oxidized());
+        });
+
+        Block unaffectedWaxed = register("waxed_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.UNAFFECTED, source.waxed()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxed());
+        });
+        Block exposedWaxed = register("waxed_exposed_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.EXPOSED, source.waxedExposed()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxedExposed());
+        });
+        Block weatheredWaxed = register("waxed_weathered_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.WEATHERED, source.waxedWeathered()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxedWeathered());
+        });
+        Block oxidizedWaxed = register("waxed_oxidized_" + baseId, settingsFromOxidationLevel.apply(Oxidizable.OxidationLevel.OXIDIZED, source.waxedOxidized()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxedOxidized());
+        });
+        return new CopperBlockSet(unaffected, exposed, weathered, oxidized, unaffectedWaxed, exposedWaxed, weatheredWaxed, oxidizedWaxed);
+    }
 }

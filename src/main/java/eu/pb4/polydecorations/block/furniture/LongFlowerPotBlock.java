@@ -5,6 +5,8 @@ import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.mixin.FlowerPotBlockAccessor;
+import eu.pb4.polydecorations.util.DecorationsUtil;
+import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.polymer.resourcepack.api.ResourcePackBuilder;
@@ -41,7 +43,7 @@ import java.util.Map;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock {
+public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock, PolymerTexturedBlock {
     public static final EnumProperty<Direction.Axis> AXIS = Properties.HORIZONTAL_AXIS;
 
     private static final Map<Block, ItemStack> MODEL_MAP = new IdentityHashMap<>();
@@ -92,7 +94,7 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock 
 
     @Override
     public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
-        return Blocks.BARRIER.getDefaultState();
+        return DecorationsUtil.CAMPFIRE_STATE;
     }
 
     @Override

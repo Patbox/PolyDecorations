@@ -26,6 +26,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.STUMP.values().toArray(Block[]::new))
                 .add(DecorationsBlocks.STRIPPED_STUMP.values().toArray(Block[]::new))
+                .add(DecorationsBlocks.COPPER_CAMPFIRE)
                 .add(DecorationsBlocks.BASKET)
         ;
 
@@ -33,17 +34,22 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WALL_LANTERN)
                 .add(DecorationsBlocks.WALL_SOUL_LANTERN)
+                .add(DecorationsBlocks.WALL_COPPER_LANTERNS.getAll())
                 .add(DecorationsBlocks.BRAZIER)
                 .add(DecorationsBlocks.SOUL_BRAZIER)
+                .add(DecorationsBlocks.COPPER_BRAZIER)
                 .add(DecorationsBlocks.LARGE_FLOWER_POT)
                 .add(DecorationsBlocks.DISPLAY_CASE)
                 .add(DecorationsBlocks.TRASHCAN)
         ;
 
+        this.valueLookupBuilder(BlockTags.CAMPFIRES)
+                .add(DecorationsBlocks.COPPER_CAMPFIRE);
+
         this.valueLookupBuilder(BlockTags.CLIMBABLE).add(DecorationsBlocks.ROPE);
 
         this.valueLookupBuilder(DecorationsBlockTags.BRAZIERS)
-                .add(DecorationsBlocks.BRAZIER, DecorationsBlocks.SOUL_BRAZIER);
+                .add(DecorationsBlocks.BRAZIER, DecorationsBlocks.SOUL_BRAZIER, DecorationsBlocks.COPPER_BRAZIER);
 
         this.valueLookupBuilder(DecorationsBlockTags.SHELVES)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]));

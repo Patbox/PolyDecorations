@@ -46,6 +46,8 @@ public class DecorationsItems {
     public static final Item HAMMER = register("hammer", (settings) -> new HammerItem(settings.maxCount(1)));
     public static final Item BRAZIER = register(DecorationsBlocks.BRAZIER);
     public static final Item SOUL_BRAZIER = register(DecorationsBlocks.SOUL_BRAZIER);
+    public static final Item COPPER_BRAZIER = register(DecorationsBlocks.COPPER_BRAZIER);
+    public static final Item COPPER_CAMPFIRE = register(DecorationsBlocks.COPPER_CAMPFIRE );
     public static final Item GLOBE = register(DecorationsBlocks.GLOBE);
     public static final Item WIND_CHIME = register("wind_chime", (s) -> new WindChimeItem(DecorationsBlocks.WIND_CHIME, s.useBlockPrefixedTranslationKey()));
     public static final Item TRASHCAN = register(DecorationsBlocks.TRASHCAN);
@@ -107,6 +109,8 @@ public class DecorationsItems {
                     entries.add(HAMMER);
                     entries.add(BRAZIER);
                     entries.add(SOUL_BRAZIER);
+                    entries.add(COPPER_BRAZIER);
+                    entries.add(COPPER_CAMPFIRE);
                     entries.add(GHOST_LIGHT);
                     entries.add(LARGE_FLOWER_POT);
                     entries.add(LONG_FLOWER_POT);

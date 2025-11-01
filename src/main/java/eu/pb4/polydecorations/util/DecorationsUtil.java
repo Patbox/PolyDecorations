@@ -59,6 +59,8 @@ public class DecorationsUtil {
         default -> x.asString().toUpperCase(Locale.ROOT);
     } + "_TRAPDOOR_WATERLOGGED")));
 
+    public static final BlockState CAMPFIRE_STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.CAMPFIRE);
+    public static final BlockState CAMPFIRE_WATERLOGGED_STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.CAMPFIRE_WATERLOGGED);
 
     public static void runNextTick(Runnable runnable) {
         RUN_NEXT_TICK.add(runnable);

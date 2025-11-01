@@ -4,9 +4,12 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.entity.SeatEntity;
+import eu.pb4.polydecorations.util.DecorationsUtil;
+import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -43,7 +46,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Locale;
 
-public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
+public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final EnumProperty<Type> TYPE = EnumProperty.of("type", Type.class);
     public static final BooleanProperty HAS_REST = BooleanProperty.of("has_rest");
@@ -67,6 +70,11 @@ public class BenchBlock extends Block implements FactoryBlock, BarrierBasedWater
         this.rightNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
         this.middleNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
         this.base = planks;
+    }
+
+    @Override
+    public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
+        return blockState.get(WATERLOGGED) ? DecorationsUtil.CAMPFIRE_WATERLOGGED_STATE : DecorationsUtil.CAMPFIRE_STATE;
     }
 
     @Override
