@@ -2,20 +2,20 @@ package eu.pb4.polydecorations.entity;
 
 import eu.pb4.polydecorations.util.DecorationsGamerules;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -26,23 +26,23 @@ public class SeatEntity extends Entity implements PolymerEntity {
     @Nullable
     private Direction direction = Direction.UP;
 
-    public static boolean create(World world, BlockPos pos, double yOffset, @Nullable Direction direction, Entity player) {
-        if (!(world instanceof ServerWorld serverWorld) || !world.getEntitiesByClass(SeatEntity.class, new Box(pos), x -> true).isEmpty()) {
+    public static boolean create(Level world, BlockPos pos, double yOffset, @Nullable Direction direction, Entity player) {
+        if (!(world instanceof ServerLevel serverWorld) || !world.getEntitiesOfClass(SeatEntity.class, new AABB(pos), x -> true).isEmpty()) {
             return false;
         }
 
-        var timeout = serverWorld.getGameRules().getInt(DecorationsGamerules.SEAT_USE_COOLDOWN);
+        var timeout = serverWorld.getGameRules().get(DecorationsGamerules.SEAT_USE_COOLDOWN);
 
-        if (player.getVehicle() instanceof SeatEntity seatEntity && seatEntity.age < timeout) {
+        if (player.getVehicle() instanceof SeatEntity seatEntity && seatEntity.tickCount < timeout) {
             return false;
         }
 
 
         var entity = new SeatEntity(DecorationsEntities.SEAT, world);
         entity.direction = direction;
-        entity.setPosition(pos.getX() + 0.5, pos.getY() + 0.5 + yOffset, pos.getZ() + 0.5);
-        entity.setYaw(direction != null ? direction.getPositiveHorizontalDegrees() : player.getYaw() + 180);
-        world.spawnEntity(entity);
+        entity.setPos(pos.getX() + 0.5, pos.getY() + 0.5 + yOffset, pos.getZ() + 0.5);
+        entity.setYRot(direction != null ? direction.toYRot() : player.getYRot() + 180);
+        world.addFreshEntity(entity);
         player.setSprinting(false);
         player.startRiding(entity);
         /*if (MathHelper.angleBetween(direction.getPositiveHorizontalDegrees(), player.getYaw()) > 90) {
@@ -55,13 +55,13 @@ public class SeatEntity extends Entity implements PolymerEntity {
 
         return true;
     }
-    public SeatEntity(EntityType<?> type, World world) {
+    public SeatEntity(EntityType<?> type, Level world) {
         super(type, world);
         this.setInvisible(true);
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
 
     }
 
@@ -73,25 +73,25 @@ public class SeatEntity extends Entity implements PolymerEntity {
     @Override
     public void tick() {
         super.tick();
-        if (!this.hasPassengers()) {
+        if (!this.isVehicle()) {
             this.discard();
         } else {
-            this.setYaw(Objects.requireNonNull(this.getFirstPassenger()).getYaw());
+            this.setYRot(Objects.requireNonNull(this.getFirstPassenger()).getYRot());
         }
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         return false;
     }
 
     @Override
-    protected void readCustomData(ReadView view) {
+    protected void readAdditionalSaveData(ValueInput view) {
 
     }
 
     @Override
-    protected void writeCustomData(WriteView view) {
+    protected void addAdditionalSaveData(ValueOutput view) {
 
     }
 
@@ -101,17 +101,17 @@ public class SeatEntity extends Entity implements PolymerEntity {
     }
 
     @Override
-    public Vec3d updatePassengerForDismount(LivingEntity passenger) {
-        var box = passenger.getBoundingBox(EntityPose.STANDING);
-        var dir = this.direction == null ? passenger.getHorizontalFacing() : this.direction;
-        var curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(dir  , 1);
-        if (this.getEntityWorld().isSpaceEmpty(box.offset(curr))) {
+    public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
+        var box = passenger.getLocalBoundsForPose(Pose.STANDING);
+        var dir = this.direction == null ? passenger.getDirection() : this.direction;
+        var curr = Vec3.atBottomCenterOf(this.blockPosition()).relative(dir  , 1);
+        if (this.level().noCollision(box.move(curr))) {
            return curr;
         }
-        curr = Vec3d.ofBottomCenter(this.getBlockPos()).offset(Direction.UP, 1);
-        if (this.getEntityWorld().isSpaceEmpty(box.offset(curr))) {
+        curr = Vec3.atBottomCenterOf(this.blockPosition()).relative(Direction.UP, 1);
+        if (this.level().noCollision(box.move(curr))) {
             return curr;
         }
-        return Vec3d.ofBottomCenter(this.getBlockPos());
+        return Vec3.atBottomCenterOf(this.blockPosition());
     }
 }

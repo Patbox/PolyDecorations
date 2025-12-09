@@ -14,32 +14,32 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.*;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
@@ -47,9 +47,9 @@ import xyz.nucleoid.packettweaker.PacketContext;
 import java.util.Locale;
 
 public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
-    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
-    public static final EnumProperty<Type> TYPE = EnumProperty.of("type", Type.class);
-    public static final BooleanProperty HAS_REST = BooleanProperty.of("has_rest");
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Type> TYPE = EnumProperty.create("type", Type.class);
+    public static final BooleanProperty HAS_REST = BooleanProperty.create("has_rest");
     private final ItemStack leftModel;
     private final ItemStack rightModel;
     private final ItemStack middleModel;
@@ -59,39 +59,39 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
     private final ItemStack rightNoRestModel;
     private final ItemStack middleNoRestModel;
 
-    public BenchBlock(Settings settings, Identifier identifier, Block planks) {
+    public BenchBlock(Properties settings, Identifier identifier, Block planks) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
-        this.leftModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_left"));
-        this.rightModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_right"));
-        this.middleModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_middle"));
-        this.noRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest"));
-        this.leftNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_left"));
-        this.rightNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_right"));
-        this.middleNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_norest_middle"));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
+        this.leftModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_left"));
+        this.rightModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_right"));
+        this.middleModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_middle"));
+        this.noRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest"));
+        this.leftNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest_left"));
+        this.rightNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest_right"));
+        this.middleNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest_middle"));
         this.base = planks;
     }
 
     @Override
     public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
-        return blockState.get(WATERLOGGED) ? DecorationsUtil.CAMPFIRE_WATERLOGGED_STATE : DecorationsUtil.CAMPFIRE_STATE;
+        return blockState.getValue(WATERLOGGED) ? DecorationsUtil.CAMPFIRE_WATERLOGGED_STATE : DecorationsUtil.CAMPFIRE_STATE;
     }
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext player) {
-        return this.base.getDefaultState();
+        return this.base.defaultBlockState();
     }
 
     public ItemStack getModel(BlockState state) {
-        if (state.get(HAS_REST)) {
-            return switch (state.get(TYPE)) {
+        if (state.getValue(HAS_REST)) {
+            return switch (state.getValue(TYPE)) {
                 case BOTH -> ItemDisplayElementUtil.getModel(this.asItem());
                 case LEFT -> leftModel;
                 case RIGHT -> rightModel;
                 case MIDDLE -> middleModel;
             };
         } else {
-            return switch (state.get(TYPE)) {
+            return switch (state.getValue(TYPE)) {
                 case BOTH -> noRestModel;
                 case LEFT -> leftNoRestModel;
                 case RIGHT -> rightNoRestModel;
@@ -101,75 +101,75 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, TYPE, HAS_REST, WATERLOGGED);
     }
 
     public FluidState getFluidState(BlockState state) {
-        return (Boolean)state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return (Boolean)state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         var type = Type.BOTH;
 
-        var dir = ctx.getHorizontalPlayerFacing().getOpposite();
-        var right = ctx.getWorld().getBlockState(ctx.getBlockPos().offset(dir.rotateYClockwise()));
-        if (right.isOf(this) && right.get(FACING) == dir && right.get(HAS_REST)) {
+        var dir = ctx.getHorizontalDirection().getOpposite();
+        var right = ctx.getLevel().getBlockState(ctx.getClickedPos().relative(dir.getClockWise()));
+        if (right.is(this) && right.getValue(FACING) == dir && right.getValue(HAS_REST)) {
             type = Type.RIGHT;
         }
 
-        var left = ctx.getWorld().getBlockState(ctx.getBlockPos().offset(dir.rotateYCounterclockwise()));
-        if (left.isOf(this) && left.get(FACING) == dir && left.get(HAS_REST)) {
+        var left = ctx.getLevel().getBlockState(ctx.getClickedPos().relative(dir.getCounterClockWise()));
+        if (left.is(this) && left.getValue(FACING) == dir && left.getValue(HAS_REST)) {
             type = type == Type.RIGHT ? Type.MIDDLE : Type.LEFT;
         }
 
-        return waterLog(ctx, this.getDefaultState().with(FACING, dir).with(TYPE, type));
+        return waterLog(ctx, this.defaultBlockState().setValue(FACING, dir).setValue(TYPE, type));
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (player.getMainHandStack().isIn(ItemTags.AXES) && state.get(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player) && player.canModifyBlocks()) {
-            world.setBlockState(pos, state.with(HAS_REST, false));
-            player.getMainHandStack().damage(1, player, EquipmentSlot.MAINHAND);
-            world.playSound(null, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            return ActionResult.SUCCESS_SERVER;
-        } else if (!player.isSneaking() && SeatEntity.create(world, pos, 1 / 16f, state.get(FACING), player)) {
-            return ActionResult.SUCCESS_SERVER;
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (player.getMainHandItem().is(ItemTags.AXES) && state.getValue(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.getGameProfile(), player) && player.mayBuild()) {
+            world.setBlockAndUpdate(pos, state.setValue(HAS_REST, false));
+            player.getMainHandItem().hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
+            world.playSound(null, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
+            return InteractionResult.SUCCESS_SERVER;
+        } else if (!player.isShiftKeyDown() && SeatEntity.create(world, pos, 1 / 16f, state.getValue(FACING), player)) {
+            return InteractionResult.SUCCESS_SERVER;
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         tickWater(state, world, tickView, pos);
-        var facing = state.get(FACING);
-        var type = state.get(TYPE);
-        var rest = state.get(HAS_REST);
+        var facing = state.getValue(FACING);
+        var type = state.getValue(TYPE);
+        var rest = state.getValue(HAS_REST);
 
-        if (facing.rotateYClockwise() == direction) {
-            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && neighborState.get(FACING) == facing) {
-                state = state.with(TYPE, switch (type) {
+        if (facing.getClockWise() == direction) {
+            if (neighborState.is(this) && neighborState.getValue(HAS_REST) == rest && neighborState.getValue(FACING) == facing) {
+                state = state.setValue(TYPE, switch (type) {
                     case MIDDLE, LEFT -> Type.MIDDLE;
                     case RIGHT, BOTH -> Type.RIGHT;
                 });
             } else {
-                state = state.with(TYPE, switch (type) {
+                state = state.setValue(TYPE, switch (type) {
                     case MIDDLE, LEFT -> Type.LEFT;
                     case RIGHT, BOTH -> Type.BOTH;
                 });
             }
-        } else if (facing.rotateYCounterclockwise() == direction) {
-            if (neighborState.isOf(this) && neighborState.get(HAS_REST) == rest && neighborState.get(FACING) == facing) {
-                state = state.with(TYPE, switch (type) {
+        } else if (facing.getCounterClockWise() == direction) {
+            if (neighborState.is(this) && neighborState.getValue(HAS_REST) == rest && neighborState.getValue(FACING) == facing) {
+                state = state.setValue(TYPE, switch (type) {
                     case MIDDLE, RIGHT -> Type.MIDDLE;
                     case LEFT, BOTH -> Type.LEFT;
                 });
             } else {
-                state = state.with(TYPE, switch (type) {
+                state = state.setValue(TYPE, switch (type) {
                     case MIDDLE, RIGHT -> Type.RIGHT;
                     case LEFT, BOTH -> Type.BOTH;
                 });
@@ -179,23 +179,23 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
     }
 
-    public enum Type implements StringIdentifiable {
+    public enum Type implements StringRepresentable {
         BOTH,
         LEFT,
         RIGHT,
         MIDDLE;
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return this.name().toLowerCase(Locale.ROOT);
         }
     }
@@ -207,7 +207,7 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
             this.main = ItemDisplayElementUtil.createSimple(getModel(state));
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
-            var yaw = state.get(FACING).getPositiveHorizontalDegrees();
+            var yaw = state.getValue(FACING).toYRot();
             this.main.setYaw(yaw);
             this.addElement(this.main);
         }
@@ -216,7 +216,7 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var yaw = state.get(FACING).getPositiveHorizontalDegrees();
+                var yaw = state.getValue(FACING).toYRot();
                 this.main.setYaw(yaw);
                 this.main.setItem(getModel(state));
 

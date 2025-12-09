@@ -16,24 +16,31 @@ import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
@@ -43,38 +50,38 @@ import java.util.Map;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock, PolymerTexturedBlock {
-    public static final EnumProperty<Direction.Axis> AXIS = Properties.HORIZONTAL_AXIS;
+public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock, PolymerTexturedBlock {
+    public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
     private static final Map<Block, ItemStack> MODEL_MAP = new IdentityHashMap<>();
 
-    public LongFlowerPotBlock(Settings settings) {
+    public LongFlowerPotBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.getDefaultState());
+        this.registerDefaultState(this.defaultBlockState());
     }
 
     public static void setupResourcesAndMapping() {
         PolymerResourcePackUtils.RESOURCE_PACK_CREATION_EVENT.register(LongFlowerPotBlock::createModels);
-        RegistryEntryAddedCallback.allEntries(Registries.BLOCK, (blockReference -> {
+        RegistryEntryAddedCallback.allEntries(BuiltInRegistries.BLOCK, (blockReference -> {
             if (blockReference.value() instanceof FlowerPotBlock flowerPotBlock) {
-                if (flowerPotBlock.getContent() == Blocks.AIR) {
+                if (flowerPotBlock.getPotted() == Blocks.AIR) {
                     return;
                 }
-                MODEL_MAP.put(flowerPotBlock.getContent(),
-                        ItemDisplayElementUtil.getModel(id("block/long_flower_pot/" + Registries.BLOCK.getId(flowerPotBlock.getContent()).toUnderscoreSeparatedString())));
+                MODEL_MAP.put(flowerPotBlock.getPotted(),
+                        ItemDisplayElementUtil.getModel(id("block/long_flower_pot/" + BuiltInRegistries.BLOCK.getKey(flowerPotBlock.getPotted()).toDebugFileName())));
             }
         }));
     }
 
     private static void createModels(ResourcePackBuilder builder) {
-        for (var entry : FlowerPotBlockAccessor.getCONTENT_TO_POTTED().entrySet()) {
+        for (var entry : FlowerPotBlockAccessor.getPOTTED_BY_CONTENT().entrySet()) {
             if (entry.getKey() == Blocks.AIR) {
                 continue;
             }
-            var id = Registries.BLOCK.getId(entry.getKey());
-            var output = id("long_flower_pot/" + id.toUnderscoreSeparatedString());
+            var id = BuiltInRegistries.BLOCK.getKey(entry.getKey());
+            var output = id("long_flower_pot/" + id.toDebugFileName());
             builder.addData(AssetPaths.blockModel(output), ModelAsset.builder()
-                    .parent(Registries.BLOCK.getId(entry.getValue()).withPrefixedPath("block/"))
+                    .parent(BuiltInRegistries.BLOCK.getKey(entry.getValue()).withPrefix("block/"))
                     .texture("flowerpot", "polydecorations:block/empty")
                     .texture("dirt", "polydecorations:block/empty")
                     .build());
@@ -82,14 +89,14 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock,
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(AXIS);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(AXIS, ctx.getHorizontalPlayerFacing().getAxis());
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return this.defaultBlockState().setValue(AXIS, ctx.getHorizontalDirection().getAxis());
     }
 
     @Override
@@ -99,17 +106,17 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock,
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
-        return Blocks.FLOWER_POT.getDefaultState();
+        return Blocks.FLOWER_POT.defaultBlockState();
     }
 
     @Override
-    public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (!player.canModifyBlocks()) {
-            return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!player.mayBuild()) {
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
-        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof LongFlowerPotBlockEntity be) {
-            var offsetAxis = state.get(AXIS) == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-            var offset = hit.getPos().getComponentAlongAxis(offsetAxis) - pos.getComponentAlongAxis(offsetAxis);
+        if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof LongFlowerPotBlockEntity be) {
+            var offsetAxis = state.getValue(AXIS) == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+            var offset = hit.getLocation().get(offsetAxis) - pos.get(offsetAxis);
             int slot = 1;
             if (offset < 1 / 3f) {
                 slot = 0;
@@ -119,27 +126,27 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock,
 
             if (stack.getItem() instanceof BlockItem blockItem && MODEL_MAP.containsKey(blockItem.getBlock())) {
                 if (!be.getItem(slot).isEmpty()) {
-                    return ActionResult.CONSUME;
+                    return InteractionResult.CONSUME;
                 }
-                world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-                player.incrementStat(Stats.POT_FLOWER);
+                world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+                player.awardStat(Stats.POT_FLOWER);
                 be.setItem(slot, stack.copyWithCount(1));
-                stack.decrementUnlessCreative(1, player);
-                return ActionResult.SUCCESS_SERVER;
+                stack.consume(1, player);
+                return InteractionResult.SUCCESS_SERVER;
             }
         }
 
-        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        return super.useItemOn(stack, state, world, pos, player, hand, hit);
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!player.canModifyBlocks()) {
-            return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!player.mayBuild()) {
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
-        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof LongFlowerPotBlockEntity be) {
-            var offsetAxis = state.get(AXIS) == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-            var offset = hit.getPos().getComponentAlongAxis(offsetAxis) - pos.getComponentAlongAxis(offsetAxis);
+        if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof LongFlowerPotBlockEntity be) {
+            var offsetAxis = state.getValue(AXIS) == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+            var offset = hit.getLocation().get(offsetAxis) - pos.get(offsetAxis);
             int slot = 1;
             if (offset < 1 / 3f) {
                 slot = 0;
@@ -151,36 +158,36 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock,
                 var stack = be.getItem(slot);
                 be.setItem(slot, ItemStack.EMPTY);
 
-                if (!player.giveItemStack(stack)) {
-                    player.dropItem(stack, false);
+                if (!player.addItem(stack)) {
+                    player.drop(stack, false);
                 }
-                world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-                return ActionResult.SUCCESS_SERVER;
+                world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+                return InteractionResult.SUCCESS_SERVER;
             }
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        ItemScatterer.onStateReplaced(state, world, pos);
-        super.onStateReplaced(state, world, pos, moved);
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
+        Containers.updateNeighboursAfterDestroy(state, world, pos);
+        super.affectNeighborsAfterRemoval(state, world, pos, moved);
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new LongFlowerPotBlockEntity(pos, state);
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
     }
 
@@ -194,7 +201,7 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock,
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
-            var yaw = -state.get(AXIS).getPositiveDirection().getPositiveHorizontalDegrees();
+            var yaw = -state.getValue(AXIS).getPositive().toYRot();
             this.main.setYaw(yaw);
             this.addElement(this.main);
 
@@ -214,7 +221,7 @@ public class LongFlowerPotBlock extends BlockWithEntity implements FactoryBlock,
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var yaw = -state.get(AXIS).getPositiveDirection().getPositiveHorizontalDegrees();
+                var yaw = -state.getValue(AXIS).getPositive().toYRot();
                 this.main.setYaw(yaw);
                 for (var plant : this.plants) {
                     plant.setYaw(yaw);

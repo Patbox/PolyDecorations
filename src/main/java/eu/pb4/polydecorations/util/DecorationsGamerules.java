@@ -1,12 +1,13 @@
 package eu.pb4.polydecorations.util;
 
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
-import net.minecraft.world.GameRules;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
 
 public interface DecorationsGamerules {
-    static GameRules.Key<GameRules.IntRule> SEAT_USE_COOLDOWN =
-            GameRuleRegistry.register("polydecorations:seat_use_cooldown", GameRules.Category.PLAYER, GameRuleFactory.createIntRule(20, 0, 200));
+    static GameRule<Integer> SEAT_USE_COOLDOWN = GameRuleBuilder.forInteger(20).range(0, 200)
+            .category(GameRuleCategory.PLAYER).buildAndRegister(Identifier.parse("polydecorations:seat_use_cooldown"));
 
 
     static void register() {}

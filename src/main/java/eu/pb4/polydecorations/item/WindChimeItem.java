@@ -5,22 +5,6 @@ import eu.pb4.polymer.core.api.block.PolymerBlock;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.block.Block;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -30,12 +14,24 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.level.block.Block;
 
 public class WindChimeItem extends FactoryBlockItem {
 	private static final Int2ObjectOpenHashMap<DyeColor> BY_COLOR = new Int2ObjectOpenHashMap<>(Arrays.stream(DyeColor.values())
-			.collect(Collectors.toMap(DyeColor::getEntityColor, Function.identity())));
+			.collect(Collectors.toMap(DyeColor::getTextureDiffuseColor, Function.identity())));
 
-	public <T extends Block & PolymerBlock> WindChimeItem(T block, Settings settings) {
+	public <T extends Block & PolymerBlock> WindChimeItem(T block, Properties settings) {
 		super(block, settings.component(WIND_CHIME_COLOR, IntList.of()));
 	}
 
@@ -53,22 +49,22 @@ public class WindChimeItem extends FactoryBlockItem {
 			colors.add(color.getInt(i % color.size()));
 		}
 
-		out.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(List.of(), List.of(), List.of(), colors));
+		out.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(), List.of(), colors));
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
-		super.appendTooltip(stack, context, displayComponent, textConsumer, type);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent, Consumer<Component> textConsumer, TooltipFlag type) {
+		super.appendHoverText(stack, context, displayComponent, textConsumer, type);
 		var color = stack.get(WIND_CHIME_COLOR);
 		if (color == null || color.isEmpty()) {
 			return;
 		}
 
-		textConsumer.accept(appendColorsTooltipText(Text.empty().formatted(Formatting.GRAY), color));
+		textConsumer.accept(appendColorsTooltipText(Component.empty().withStyle(ChatFormatting.GRAY), color));
 	}
 
 
-	private static Text appendColorsTooltipText(MutableText text, IntList colors) {
+	private static Component appendColorsTooltipText(MutableComponent text, IntList colors) {
 		for(int i = 0; i < colors.size(); ++i) {
 			if (i > 0) {
 				text.append(", ");
@@ -80,9 +76,9 @@ public class WindChimeItem extends FactoryBlockItem {
 		return text;
 	}
 
-	private static Text getColorText(int color) {
+	private static Component getColorText(int color) {
 		DyeColor dyeColor = BY_COLOR.get(color);
-		return (Text)(dyeColor == null ? Text.translatable("item.minecraft.firework_star.custom_color") : Text.translatable("item.minecraft.firework_star." + dyeColor.getId()));
+		return (Component)(dyeColor == null ? Component.translatable("item.minecraft.firework_star.custom_color") : Component.translatable("item.minecraft.firework_star." + dyeColor.getName()));
 	}
-	public static final ComponentType<IntList> WIND_CHIME_COLOR = ComponentType.<IntList>builder().codec(Codecs.RGB.listOf().xmap(IntArrayList::new, List::copyOf)).cache().build();
+	public static final DataComponentType<IntList> WIND_CHIME_COLOR = DataComponentType.<IntList>builder().persistent(ExtraCodecs.RGB_COLOR_CODEC.listOf().xmap(IntArrayList::new, List::copyOf)).cacheEncoding().build();
 }

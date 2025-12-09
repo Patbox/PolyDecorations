@@ -11,12 +11,11 @@ import eu.pb4.factorytools.api.recipe.OutputStack;
 import eu.pb4.polydecorations.ui.GuiTextures;
 import eu.pb4.polydecorations.ui.GuiUtils;
 import eu.pb4.sgui.api.elements.GuiElement;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.crafting.RecipeType;
 
 public class PolydexCompatImpl {
     public static void register() {
@@ -25,11 +24,11 @@ public class PolydexCompatImpl {
 
     private static void replaceName(HoverDisplayBuilder builder) {
         if (builder.getTarget().blockEntity() instanceof GenericSingleItemBlockEntity be && !be.isEmpty()) {
-            builder.setComponent(HoverDisplayBuilder.NAME, Text.empty()
-                    .append(be.getStack().getName())
-                    .append(Text.literal(" (")
+            builder.setComponent(HoverDisplayBuilder.NAME, Component.empty()
+                    .append(be.getTheItem().getHoverName())
+                    .append(Component.literal(" (")
                             .append(builder.getComponent(HoverDisplayBuilder.NAME))
-                            .append(")").formatted(Formatting.GRAY))
+                            .append(")").withStyle(ChatFormatting.GRAY))
             );
         }
     }
@@ -37,7 +36,7 @@ public class PolydexCompatImpl {
     public static GuiElement getButton(RecipeType<?> type) {
         var category = PolydexCategory.of(type);
         return GuiTextures.POLYDEX_BUTTON.get()
-                .setName(Text.translatable("text.polyfactory.recipes"))
+                .setName(Component.translatable("text.polyfactory.recipes"))
                 .setCallback((index, type1, action, gui) -> {
                     PolydexPageUtils.openCategoryUi(gui.getPlayer(), category, gui::open);
                     GuiUtils.playClickSound(gui.getPlayer());

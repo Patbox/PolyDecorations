@@ -1,10 +1,9 @@
 accessWidener	v1	named
-
-extendable method net/minecraft/entity/decoration/ArmorStandEntity breakAndDropItem (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;)V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity onBreak (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;)V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity updateHealth (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity playBreakSound ()V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity spawnBreakParticles ()V
-extendable method net/minecraft/entity/decoration/ArmorStandEntity setSmall (Z)V
-extendable method net/minecraft/entity/Entity setGlowing (Z)V
-accessible class net/minecraft/datafixer/fix/ItemStackComponentizationFix$StackData
+extendable	method	net/minecraft/world/entity/decoration/ArmorStand	brokenByPlayer	(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V
+extendable	method	net/minecraft/world/entity/decoration/ArmorStand	brokenByAnything	(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V
+extendable	method	net/minecraft/world/entity/decoration/ArmorStand	causeDamage	(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V
+extendable	method	net/minecraft/world/entity/decoration/ArmorStand	playBrokenSound	()V
+extendable	method	net/minecraft/world/entity/decoration/ArmorStand	showBreakingParticles	()V
+extendable	method	net/minecraft/world/entity/decoration/ArmorStand	setSmall	(Z)V
+extendable	method	net/minecraft/world/entity/Entity	setGlowingTag	(Z)V
+accessible	class	net/minecraft/util/datafix/fixes/ItemStackComponentizationFix$ItemStackData

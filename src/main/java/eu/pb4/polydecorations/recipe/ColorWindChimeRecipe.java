@@ -12,50 +12,42 @@ import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.WindChimeItem;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
-import net.minecraft.block.MapColor;
-import net.minecraft.component.ComponentType;
-import net.minecraft.item.DyeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.ShapelessRecipe;
-import net.minecraft.recipe.SpecialCraftingRecipe;
-import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.ShapelessCraftingRecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class ColorWindChimeRecipe extends SpecialCraftingRecipe {
-    public static final MapCodec<ColorWindChimeRecipe> CODEC = CraftingRecipeCategory.CODEC.fieldOf("category")
-            .xmap(ColorWindChimeRecipe::new, ColorWindChimeRecipe::getCategory);
-    private static Optional<ComponentType<Integer>> POLYFACTORY_COLOR;
+public class ColorWindChimeRecipe extends CustomRecipe {
+    public static final MapCodec<ColorWindChimeRecipe> CODEC = CraftingBookCategory.CODEC.fieldOf("category")
+            .xmap(ColorWindChimeRecipe::new, ColorWindChimeRecipe::category);
+    private static Optional<DataComponentType<Integer>> POLYFACTORY_COLOR;
 
-    public ColorWindChimeRecipe(CraftingRecipeCategory category) {
+    public ColorWindChimeRecipe(CraftingBookCategory category) {
         super(category);
     }
 
     @Override
-    public boolean matches(CraftingRecipeInput craftingRecipeInput, World world) {
+    public boolean matches(CraftingInput craftingRecipeInput, Level world) {
         var hasWindChime = false;
         var hasDye = 0;
 
-        for (var stack : craftingRecipeInput.getStacks()) {
-            if (stack.isOf(DecorationsItems.WIND_CHIME)) {
+        for (var stack : craftingRecipeInput.items()) {
+            if (stack.is(DecorationsItems.WIND_CHIME)) {
                 if (hasWindChime) return false;
                 hasWindChime = true;
-            } else if (stack.isIn(ConventionalItemTags.DYES) && getColor(stack) != -1) {
+            } else if (stack.is(ConventionalItemTags.DYES) && getColor(stack) != -1) {
                 hasDye++;
             }
         }
@@ -64,14 +56,14 @@ public class ColorWindChimeRecipe extends SpecialCraftingRecipe {
     }
 
     @Override
-    public ItemStack craft(CraftingRecipeInput recipeInputInventory, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider wrapperLookup) {
         var colors = new IntArrayList();
-        for (var stack : recipeInputInventory.getStacks()) {
-            if (stack.isIn(ConventionalItemTags.DYES)) {
+        for (var stack : inventory.items()) {
+            if (stack.is(ConventionalItemTags.DYES)) {
                 colors.add(getColor(stack));
             }
         }
-        var stack = DecorationsItems.WIND_CHIME.getDefaultStack();
+        var stack = DecorationsItems.WIND_CHIME.getDefaultInstance();
         stack.set(WindChimeItem.WIND_CHIME_COLOR, colors);
         return stack;
     }
@@ -80,11 +72,11 @@ public class ColorWindChimeRecipe extends SpecialCraftingRecipe {
         //noinspection OptionalAssignedToNull
         if (POLYFACTORY_COLOR == null) {
             //noinspection unchecked
-            POLYFACTORY_COLOR = Optional.ofNullable((ComponentType<Integer>) Registries.DATA_COMPONENT_TYPE.get(Identifier.of("polyfactory:color")));
+            POLYFACTORY_COLOR = Optional.ofNullable((DataComponentType<Integer>) BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(Identifier.parse("polyfactory:color")));
         }
         if (stack.getItem() instanceof DyeItem dyeItem) {
-            return dyeItem.getColor().getEntityColor();
-        } else if (POLYFACTORY_COLOR.isPresent() && stack.contains(POLYFACTORY_COLOR.get())) {
+            return dyeItem.getDyeColor().getTextureDiffuseColor();
+        } else if (POLYFACTORY_COLOR.isPresent() && stack.has(POLYFACTORY_COLOR.get())) {
             //noinspection DataFlowIssue
             return stack.get(POLYFACTORY_COLOR.get());
         }
@@ -92,7 +84,7 @@ public class ColorWindChimeRecipe extends SpecialCraftingRecipe {
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         return List.of();
     }
 

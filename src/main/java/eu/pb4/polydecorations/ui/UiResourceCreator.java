@@ -11,18 +11,17 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import it.unimi.dsi.fastutil.chars.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-
 import javax.imageio.ImageIO;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class UiResourceCreator {
     public static final String X32_MODEL = "polydecorations:sgui/button_32";
     public static final String X32_RIGHT_MODEL = "polydecorations:sgui/button_32_right";
 
-    private static final Style STYLE = Style.EMPTY.withColor(0xFFFFFF).withFont(new StyleSpriteSource.Font(id("gui")));
+    private static final Style STYLE = Style.EMPTY.withColor(0xFFFFFF).withFont(new FontDescription.Resource(id("gui")));
     private static final String ITEM_TEMPLATE = """
             {
               "parent": "|BASE|",
@@ -55,10 +54,10 @@ public class UiResourceCreator {
 
     private static final List<SlicedTexture> VERTICAL_PROGRESS = new ArrayList<>();
     private static final List<SlicedTexture> HORIZONTAL_PROGRESS = new ArrayList<>();
-    private static final List<Pair<Identifier, String>> SIMPLE_MODEL = new ArrayList<>();
+    private static final List<Tuple<Identifier, String>> SIMPLE_MODEL = new ArrayList<>();
     private static final Char2IntMap SPACES = new Char2IntOpenHashMap();
     private static final Char2ObjectMap<Identifier> TEXTURES = new Char2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<Pair<Character, Character>, Identifier> TEXTURES_POLYDEX = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<Tuple<Character, Character>, Identifier> TEXTURES_POLYDEX = new Object2ObjectOpenHashMap<>();
     private static final List<String> TEXTURES_NUMBERS = new ArrayList<>();
     private static char character = 'a';
 
@@ -67,19 +66,19 @@ public class UiResourceCreator {
 
     public static Supplier<GuiElementBuilder> icon16(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, BASE_MODEL);
-        return () -> GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
+        return () -> GuiElementBuilder.from(model).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static Supplier<GuiElementBuilder> icon32(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, X32_MODEL);
-        return () -> GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
+        return () -> GuiElementBuilder.from(model).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static IntFunction<GuiElementBuilder> icon32Color(String path) {
         var model = genericIconRaw(Items.LEATHER_LEGGINGS, path, X32_MODEL);
         return (i) -> {
-            var b = GuiElementBuilder.from(model).setName(Text.empty()).hideDefaultTooltip();
-            b.setComponent(DataComponentTypes.DYED_COLOR, new DyedColorComponent(i));
+            var b = GuiElementBuilder.from(model).setName(Component.empty()).hideDefaultTooltip();
+            b.setComponent(DataComponents.DYED_COLOR, new DyedItemColor(i));
             return b;
         };
     }
@@ -90,7 +89,7 @@ public class UiResourceCreator {
         for (var i = 0; i < size; i++) {
             models[i] = genericIconRaw(Items.ALLIUM, path + "_" + i, BASE_MODEL);
         }
-        return (i) -> GuiElementBuilder.from(models[i]).setName(Text.empty()).hideDefaultTooltip();
+        return (i) -> GuiElementBuilder.from(models[i]).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static IntFunction<GuiElementBuilder> horizontalProgress16(String path, int start, int stop, boolean reverse) {
@@ -126,14 +125,14 @@ public class UiResourceCreator {
         for (var i = start; i < stop; i++) {
             models[i - start] = genericIconRaw(Items.ALLIUM,  "gen/" + path + "_" + i, base);
         }
-        return (i) -> GuiElementBuilder.from(models[i]).setName(Text.empty()).hideDefaultTooltip();
+        return (i) -> GuiElementBuilder.from(models[i]).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static ItemStack genericIconRaw(Item item, String path, String base) {
         var id = elementPath(path);
-        var stack = item.getDefaultStack();
-        stack.set(DataComponentTypes.ITEM_MODEL, bridgeModel(id));
-        SIMPLE_MODEL.add(new Pair<>(id, base));
+        var stack = item.getDefaultInstance();
+        stack.set(DataComponents.ITEM_MODEL, bridgeModel(id));
+        SIMPLE_MODEL.add(new Tuple<>(id, base));
         return stack;
     }
 
@@ -141,24 +140,24 @@ public class UiResourceCreator {
         return id("sgui/elements/" + path);
     }
 
-    public static Function<Text, Text> background(String path) {
+    public static Function<Component, Component> background(String path) {
         var builder = new StringBuilder().append(CHEST_SPACE0);
         var c = (character++);
         builder.append(c);
         builder.append(CHEST_SPACE1);
         TEXTURES.put(c, id("sgui/" + path));
 
-        return new TextBuilders(Text.literal(builder.toString()).setStyle(STYLE));
+        return new TextBuilders(Component.literal(builder.toString()).setStyle(STYLE));
     }
 
-    public static Pair<Text, Text> polydexBackground(String path) {
+    public static Tuple<Component, Component> polydexBackground(String path) {
         var c = (character++);
         var d = (character++);
-        TEXTURES_POLYDEX.put(new Pair<>(c, d), id("sgui/polydex/" + path));
+        TEXTURES_POLYDEX.put(new Tuple<>(c, d), id("sgui/polydex/" + path));
 
-        return new Pair<>(
-                Text.literal(Character.toString(c)).setStyle(STYLE),
-                Text.literal(Character.toString(d)).setStyle(STYLE)
+        return new Tuple<>(
+                Component.literal(Character.toString(c)).setStyle(STYLE),
+                Component.literal(Character.toString(d)).setStyle(STYLE)
         );
     }
 
@@ -208,8 +207,8 @@ public class UiResourceCreator {
 
     public static void generateAssets(BiConsumer<String, byte[]> assetWriter) {
         for (var texture : SIMPLE_MODEL) {
-            assetWriter.accept("assets/" + texture.getLeft().getNamespace() + "/models/" + texture.getLeft().getPath() + ".json",
-                    ITEM_TEMPLATE.replace("|ID|", texture.getLeft().toString()).replace("|BASE|", texture.getRight()).getBytes(StandardCharsets.UTF_8));
+            assetWriter.accept("assets/" + texture.getA().getNamespace() + "/models/" + texture.getA().getPath() + ".json",
+                    ITEM_TEMPLATE.replace("|ID|", texture.getA().toString()).replace("|BASE|", texture.getB()).getBytes(StandardCharsets.UTF_8));
         }
 
         generateProgress(assetWriter, VERTICAL_PROGRESS, false);
@@ -240,15 +239,15 @@ public class UiResourceCreator {
             providers.add(bitmap);
         });
 
-        TEXTURES_POLYDEX.entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getLeft())).forEach((entry) -> {
+        TEXTURES_POLYDEX.entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getA())).forEach((entry) -> {
             var bitmap = new JsonObject();
             bitmap.addProperty("type", "bitmap");
             bitmap.addProperty("file", entry.getValue().toString() + ".png");
             bitmap.addProperty("ascent", -4);
             bitmap.addProperty("height", 128);
             var chars = new JsonArray();
-            chars.add(Character.toString(entry.getKey().getLeft()));
-            chars.add(Character.toString(entry.getKey().getRight()));
+            chars.add(Character.toString(entry.getKey().getA()));
+            chars.add(Character.toString(entry.getKey().getB()));
             bitmap.add("chars", chars);
             providers.add(bitmap);
         });
@@ -258,10 +257,10 @@ public class UiResourceCreator {
         assetWriter.accept("assets/polydecorations/font/gui.json", fontBase.toString().getBytes(StandardCharsets.UTF_8));
     }
 
-    private record TextBuilders(Text base) implements Function<Text, Text> {
+    private record TextBuilders(Component base) implements Function<Component, Component> {
         @Override
-        public Text apply(Text text) {
-            return Text.empty().append(base).append(text);
+        public Component apply(Component text) {
+            return Component.empty().append(base).append(text);
         }
     }
 

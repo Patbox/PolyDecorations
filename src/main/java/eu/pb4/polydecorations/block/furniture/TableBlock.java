@@ -10,23 +10,6 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
@@ -34,6 +17,23 @@ import xyz.nucleoid.packettweaker.PacketContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 
 public class TableBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
     public static final Corner NORTH_WEST = Corner.of(Direction.NORTH, Direction.WEST);
@@ -50,48 +50,48 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
     private final Block base;
     private final TableModel model;
 
-    public TableBlock(Identifier identifier, Settings settings, Block planks) {
+    public TableBlock(Identifier identifier, Properties settings, Block planks) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
         this.model = TableModel.of(identifier);
         this.base = planks;
     }
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
-        return this.base.getDefaultState();
+        return this.base.defaultBlockState();
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(NORTH_EAST.property, NORTH_WEST.property, SOUTH_EAST.property, SOUTH_WEST.property, WATERLOGGED);
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        var state = this.getDefaultState();
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        var state = this.defaultBlockState();
 
         for (var corner : CORNERS) {
             var val = true;
             for (var off : corner.offsets) {
-                if (ctx.getWorld().getBlockState(ctx.getBlockPos().add(off)).isOf(this)) {
+                if (ctx.getLevel().getBlockState(ctx.getClickedPos().offset(off)).is(this)) {
                     val = false;
                     break;
                 }
             }
-            state = state.with(corner.property, val);
+            state = state.setValue(corner.property, val);
         }
 
         return waterLog(ctx, state);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         tickWater(state, world, tickView, pos);
 
         var corners = DIR_TO_CORNERS.get(direction);
@@ -103,24 +103,24 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
         for (var corner : corners) {
             var val = true;
             for (var off : corner.offsets) {
-                if (world.getBlockState(pos.add(off)).isOf(this)) {
+                if (world.getBlockState(pos.offset(off)).is(this)) {
                     val = false;
                     break;
                 }
             }
-            state = state.with(corner.property, val);
+            state = state.setValue(corner.property, val);
         }
 
         return state;
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
     }
 
@@ -129,8 +129,8 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
         private static int gId = 0;
 
         private static Corner of(Direction dir, Direction dir2) {
-            return new Corner(gId++, dir.asString() + "_" + dir2.asString(), BooleanProperty.of(dir.asString() + "_" + dir2.asString() + "_corner"), dir, dir2,
-                    List.of(dir.getVector(), dir2.getVector()/*,  dir.getVector().add(dir2.getVector())*/));
+            return new Corner(gId++, dir.getSerializedName() + "_" + dir2.getSerializedName(), BooleanProperty.create(dir.getSerializedName() + "_" + dir2.getSerializedName() + "_corner"), dir, dir2,
+                    List.of(dir.getUnitVec3i(), dir2.getUnitVec3i()/*,  dir.getVector().add(dir2.getVector())*/));
         }
     }
 
@@ -139,10 +139,10 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
 
         private static TableModel of(Identifier identifier) {
             var models = new ItemStack[COUNT];
-            models[0] = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/"));
+            models[0] = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/"));
 
             for (int i = 1; i < COUNT; i++) {
-                models[i] = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_" + i));
+                models[i] = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_" + i));
             }
 
             return new TableModel(models);
@@ -173,7 +173,7 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
         public ItemStack get(BlockState state) {
             int i = 0;
             for (var corner : CORNERS) {
-                if (!state.get(corner.property)) {
+                if (!state.getValue(corner.property)) {
                     i |= 1 << corner.id;
                 }
             }

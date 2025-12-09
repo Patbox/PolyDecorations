@@ -2,9 +2,8 @@ package eu.pb4.polydecorations.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.registry.RegistryWrapper;
-
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.HolderLookup;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -12,12 +11,12 @@ import java.util.function.Consumer;
 class AdvancementsProvider extends FabricAdvancementProvider {
 
 
-    protected AdvancementsProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+    protected AdvancementsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registryLookup) {
         super(output, registryLookup);
     }
 
     //@Override
-    public void generateAdvancement(Consumer<AdvancementEntry> exporter) {
+    public void generateAdvancement(Consumer<AdvancementHolder> exporter) {
         /*var root = Advancement.Builder.create()
                 .display(
                         FactoryItems.WINDMILL_SAIL,
@@ -37,7 +36,7 @@ class AdvancementsProvider extends FabricAdvancementProvider {
     }
 
     @Override
-    public void generateAdvancement(RegistryWrapper.WrapperLookup registryLookup, Consumer<AdvancementEntry> consumer) {
+    public void generateAdvancement(HolderLookup.Provider registryLookup, Consumer<AdvancementHolder> consumer) {
 
     }
 }

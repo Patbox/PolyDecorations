@@ -1,7 +1,5 @@
 package eu.pb4.polydecorations.polydex;
 
-import net.minecraft.text.Text;
-
 import static eu.pb4.polydecorations.ui.UiResourceCreator.polydexBackground;
 
 

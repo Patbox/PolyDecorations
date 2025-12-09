@@ -1,10 +1,10 @@
 package eu.pb4.polydecorations.block;
 
 import eu.pb4.polydecorations.ModInit;
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 
 public class DecorationsBlockTags {
     public static final TagKey<Block> UNCONNECTABLE = of("unconnectable");
@@ -17,9 +17,9 @@ public class DecorationsBlockTags {
     public static final TagKey<Block> SIGN_POSTS = of("sign_posts");
     public static final TagKey<Block> STUMPS = of("stumps");
     public static final TagKey<Block> SLEEPING_BAGS = of("stumps");
-    public static final TagKey<Block> ALLOWED_INTERACTIONS_BLOCKS = TagKey.of(RegistryKeys.BLOCK, Identifier.of("goml", "allowed_interactions"));
+    public static final TagKey<Block> ALLOWED_INTERACTIONS_BLOCKS = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("goml", "allowed_interactions"));
 
     private static TagKey<Block> of(String path) {
-        return TagKey.of(RegistryKeys.BLOCK, ModInit.id(path));
+        return TagKey.create(Registries.BLOCK, ModInit.id(path));
     }
 }

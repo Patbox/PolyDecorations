@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.11.+'
+	id 'fabric-loom' version '1.13.+'
 	id "com.modrinth.minotaur" version "2.+"
 	id 'maven-publish'
 }
@@ -68,22 +68,22 @@ repositories {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation 'eu.pb4:polymer-core:0.14.3+1.21.10'
-	modImplementation 'eu.pb4:polymer-blocks:0.14.3+1.21.10'
-	modImplementation 'eu.pb4:polymer-resource-pack:0.14.3+1.21.10'
-	modImplementation 'eu.pb4:polymer-resource-pack-extras:0.14.3+1.21.10'
-	modImplementation 'eu.pb4:polymer-autohost:0.14.3+1.21.10'
-	modImplementation 'eu.pb4:polymer-virtual-entity:0.14.3+1.21.10'
+	modImplementation 'eu.pb4:polymer-core:0.15.0-beta.4+1.21.11-rc2'
+	modImplementation 'eu.pb4:polymer-blocks:0.15.0-beta.4+1.21.11-rc2'
+	modImplementation 'eu.pb4:polymer-resource-pack:0.15.0-beta.4+1.21.11-rc2'
+	modImplementation 'eu.pb4:polymer-resource-pack-extras:0.15.0-beta.4+1.21.11-rc2'
+	modImplementation 'eu.pb4:polymer-autohost:0.15.0-beta.4+1.21.11-rc2'
+	modImplementation 'eu.pb4:polymer-virtual-entity:0.15.0-beta.4+1.21.11-rc2'
 	modImplementation include('eu.pb4:common-protection-api:1.0.0')
 	modImplementation include('eu.pb4:sgui:1.11.0+1.21.9')
 	modImplementation include('eu.pb4:map-canvas-api:0.6.0+1.21.9')
-	modImplementation include('eu.pb4:factorytools:0.8.2+1.21.10')
+	modImplementation include('eu.pb4:factorytools:0.9.0+1.21.11')
 
 	// Temp hack to allow development
 	//modImplementation include('com.kneelawk:graphlib:1.99.99+1.20.local')

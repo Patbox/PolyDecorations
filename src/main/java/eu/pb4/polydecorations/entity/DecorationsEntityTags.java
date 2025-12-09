@@ -1,12 +1,12 @@
 package eu.pb4.polydecorations.entity;
 
 import eu.pb4.polydecorations.ModInit;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 
 public class DecorationsEntityTags {
 
     private static TagKey<EntityType<?>> of(String path) {
-        return TagKey.of(RegistryKeys.ENTITY_TYPE, ModInit.id(path));
+        return TagKey.create(Registries.ENTITY_TYPE, ModInit.id(path));
     }}

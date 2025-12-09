@@ -4,61 +4,52 @@ import eu.pb4.factorytools.api.item.DefinedPolymerItem;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.SignPostBlockEntity;
 import eu.pb4.polymer.core.api.item.SimplePolymerItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class SignPostItem extends SimplePolymerItem {
     private String translationKey;
 
-    public SignPostItem(Settings settings) {
+    public SignPostItem(Properties settings) {
         super(settings);
     }
 
-    protected String getOrCreateTranslationKey() {
-        if (this.translationKey == null) {
-            this.translationKey = Util.createTranslationKey("block", Registries.ITEM.getId(this));
-        }
-
-        return this.translationKey;
-    }
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        var upper = (context.getHitPos().getY() - (int) context.getHitPos().getY()) >= 0.5;
-        var blockState = context.getWorld().getBlockState(context.getBlockPos());
+    public InteractionResult useOn(UseOnContext context) {
+        var upper = (context.getClickLocation().y() - (int) context.getClickLocation().y()) >= 0.5;
+        var blockState = context.getLevel().getBlockState(context.getClickedPos());
         if (AttachedSignPostBlock.MAP.containsKey(blockState.getBlock())) {
-            context.getWorld().setBlockState(context.getBlockPos(), AttachedSignPostBlock.MAP.get(blockState.getBlock()).getDefaultState().with(Properties.WATERLOGGED, blockState.get(Properties.WATERLOGGED)));
+            context.getLevel().setBlockAndUpdate(context.getClickedPos(), AttachedSignPostBlock.MAP.get(blockState.getBlock()).defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, blockState.getValue(BlockStateProperties.WATERLOGGED)));
         }
 
-        if (context.getWorld().getBlockEntity(context.getBlockPos()) instanceof SignPostBlockEntity be) {
+        if (context.getLevel().getBlockEntity(context.getClickedPos()) instanceof SignPostBlockEntity be) {
             var text = be.getText(upper);
             if (text.item() == Items.AIR) {
-                var rel = context.getHitPos().subtract(context.getBlockPos().toCenterPos());
-                var axis = context.getSide().getAxis();
+                var rel = context.getClickLocation().subtract(context.getClickedPos().getCenter());
+                var axis = context.getClickedFace().getAxis();
                 if (axis == Direction.Axis.Y) {
                     axis = rel.x > rel.z ? Direction.Axis.Z : Direction.Axis.X;
                 } else {
-                    axis = context.getSide().rotateYClockwise().getAxis();
+                    axis = context.getClickedFace().getClockWise().getAxis();
                 }
 
-                var flip = (rel.getComponentAlongAxis(axis) * context.getSide().getDirection().offset() < 0) == (axis == Direction.Axis.X);
+                var flip = (rel.get(axis) * context.getClickedFace().getAxisDirection().getStep() < 0) == (axis == Direction.Axis.X);
 
-                be.setText(upper, SignPostBlockEntity.Sign.of(context.getStack().getItem(), roundAngle(180 + context.getPlayerYaw()), flip));
+                be.setText(upper, SignPostBlockEntity.Sign.of(context.getItemInHand().getItem(), roundAngle(180 + context.getRotation()), flip));
                         //.withFlip(context.getPlayerYaw() > 90 || context.getPlayerYaw() < -90));
-                if (context.getPlayer() instanceof ServerPlayerEntity player) {
+                if (context.getPlayer() instanceof ServerPlayer player) {
                     be.openText(upper, player);
                 }
-                context.getStack().decrement(1);
+                context.getItemInHand().shrink(1);
             }
         }
-        return super.useOnBlock(context);
+        return super.useOn(context);
     }
 
     public static float roundAngle(float v) {

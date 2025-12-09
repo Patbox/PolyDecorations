@@ -2,14 +2,13 @@ package eu.pb4.polydecorations.mixin;
 
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LanternBlock;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,13 +20,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class LanternBlockMixin {
     @Shadow @Final public static BooleanProperty HANGING;
 
-    @Inject(method = "getPlacementState", at = @At("HEAD"), cancellable = true)
-    private void swapByDefault(ItemPlacementContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (!ctx.shouldCancelInteraction() || ctx.getSide().getAxis() == Direction.Axis.Y) {
+    @Inject(method = "getStateForPlacement", at = @At("HEAD"), cancellable = true)
+    private void swapByDefault(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
+        if (!ctx.isSecondaryUseActive() || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
             return;
         }
-        var pos = ctx.getBlockPos().offset(ctx.getSide(), -1);
-        var attachment = WallAttachedLanternBlock.getSupportType(ctx.getWorld(), ctx.getSide(), pos, ctx.getWorld().getBlockState(pos));
+        var pos = ctx.getClickedPos().relative(ctx.getClickedFace(), -1);
+        var attachment = WallAttachedLanternBlock.getSupportType(ctx.getLevel(), ctx.getClickedFace(), pos, ctx.getLevel().getBlockState(pos));
 
 
         if (attachment == null) {
@@ -37,17 +36,17 @@ public abstract class LanternBlockMixin {
         if (block == null) {
             return;
         }
-        cir.setReturnValue(block.waterLog(ctx, block.getDefaultState()).with(WallAttachedLanternBlock.ATTACHED, attachment)
-                .with(WallAttachedLanternBlock.FACING, ctx.getSide().getOpposite()));
+        cir.setReturnValue(block.waterLog(ctx, block.defaultBlockState()).setValue(WallAttachedLanternBlock.ATTACHED, attachment)
+                .setValue(WallAttachedLanternBlock.FACING, ctx.getClickedFace().getOpposite()));
 
     }
-    @Inject(method = "getPlacementState", at = @At("RETURN"), cancellable = true)
-    private void swapNullForWallAttached(ItemPlacementContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (cir.getReturnValue() != null || ctx.getSide().getAxis() == Direction.Axis.Y) {
+    @Inject(method = "getStateForPlacement", at = @At("RETURN"), cancellable = true)
+    private void swapNullForWallAttached(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
+        if (cir.getReturnValue() != null || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
             return;
         }
-        var pos = ctx.getBlockPos().offset(ctx.getSide(), -1);
-        var attachment = WallAttachedLanternBlock.getSupportType(ctx.getWorld(), ctx.getSide(), pos, ctx.getWorld().getBlockState(pos));
+        var pos = ctx.getClickedPos().relative(ctx.getClickedFace(), -1);
+        var attachment = WallAttachedLanternBlock.getSupportType(ctx.getLevel(), ctx.getClickedFace(), pos, ctx.getLevel().getBlockState(pos));
 
 
         if (attachment == null) {
@@ -57,14 +56,14 @@ public abstract class LanternBlockMixin {
         if (block == null) {
             return;
         }
-        cir.setReturnValue(block.waterLog(ctx, block.getDefaultState()).with(WallAttachedLanternBlock.ATTACHED, attachment)
-                .with(WallAttachedLanternBlock.FACING, ctx.getSide().getOpposite()));
+        cir.setReturnValue(block.waterLog(ctx, block.defaultBlockState()).setValue(WallAttachedLanternBlock.ATTACHED, attachment)
+                .setValue(WallAttachedLanternBlock.FACING, ctx.getClickedFace().getOpposite()));
 
     }
 
-    @Inject(method = "canPlaceAt", at = @At("RETURN"), cancellable = true)
-    private void attachToRopes(BlockState state, WorldView world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (state.get(HANGING) && world.getBlockState(pos.offset(Direction.UP)).isOf(DecorationsBlocks.ROPE)) {
+    @Inject(method = "canSurvive", at = @At("RETURN"), cancellable = true)
+    private void attachToRopes(BlockState state, LevelReader world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (state.getValue(HANGING) && world.getBlockState(pos.relative(Direction.UP)).is(DecorationsBlocks.ROPE)) {
             cir.setReturnValue(true);
         }
     }

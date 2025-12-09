@@ -1,10 +1,9 @@
 package eu.pb4.polydecorations.util;
 
-import net.minecraft.block.WoodType;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import net.minecraft.world.level.block.state.properties.WoodType;
 
 public class WoodUtil {
     public static List<WoodType> VANILLA = List.of(
@@ -39,7 +38,7 @@ public class WoodUtil {
     }
 
     public static <T> void forEach(Map<WoodType, T> map, Consumer<T> consumer) {
-        WoodType.stream().forEach(x -> {
+        WoodType.values().forEach(x -> {
             var y = map.get(x);
             if (y != null) {
                 consumer.accept(y);
@@ -48,7 +47,7 @@ public class WoodUtil {
     }
 
     public static <T> void forEach(List<Map<WoodType, ?>> list, Consumer<T> consumer) {
-        WoodType.stream().forEach(x -> {
+        WoodType.values().forEach(x -> {
             for (var map : list) {
                 var y = map.get(x);
                 if (y != null) {
@@ -60,7 +59,7 @@ public class WoodUtil {
 
     public static <T> void forEachByItem(List<Map<WoodType, ?>> list, Consumer<T> consumer) {
         for (var map : list) {
-            WoodType.stream().forEach(x -> {
+            WoodType.values().forEach(x -> {
                 var y = map.get(x);
                 if (y != null) {
                     consumer.accept((T) y);

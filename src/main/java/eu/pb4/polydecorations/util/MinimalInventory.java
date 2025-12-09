@@ -1,20 +1,17 @@
 package eu.pb4.polydecorations.util;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
-
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-public interface MinimalInventory extends Inventory {
+public interface MinimalInventory extends Container {
     List<ItemStack> getStacks();
 
     @Override
-    default int size() {
+    default int getContainerSize() {
         return getStacks().size();
     }
 
@@ -30,43 +27,43 @@ public interface MinimalInventory extends Inventory {
     }
 
     @Override
-    default ItemStack getStack(int slot) {
+    default ItemStack getItem(int slot) {
         return getStacks().get(slot);
     }
 
     @Override
-    default ItemStack removeStack(int slot, int amount) {
-        ItemStack itemStack = Inventories.splitStack(this.getStacks(), slot, amount);
+    default ItemStack removeItem(int slot, int amount) {
+        ItemStack itemStack = ContainerHelper.removeItem(this.getStacks(), slot, amount);
         if (!itemStack.isEmpty()) {
-            this.markDirty();
+            this.setChanged();
         }
 
         return itemStack;
     }
 
     @Override
-    default ItemStack removeStack(int slot) {
-        var itemStack = Inventories.removeStack(this.getStacks(), slot);
+    default ItemStack removeItemNoUpdate(int slot) {
+        var itemStack = ContainerHelper.takeItem(this.getStacks(), slot);
         if (!itemStack.isEmpty()) {
-            this.markDirty();
+            this.setChanged();
         }
         return itemStack;
     }
 
     @Override
-    default void setStack(int slot, ItemStack stack) {
+    default void setItem(int slot, ItemStack stack) {
         this.getStacks().set(slot, stack);
-        this.markDirty();
+        this.setChanged();
     }
 
 
     @Override
-    default boolean canPlayerUse(PlayerEntity player) {
+    default boolean stillValid(Player player) {
         return true;
     }
 
     @Override
-    default void clear() {
+    default void clearContent() {
         this.getStacks().clear();
     }
 }

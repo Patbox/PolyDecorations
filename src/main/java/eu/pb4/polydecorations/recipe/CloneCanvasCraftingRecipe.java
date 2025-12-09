@@ -4,47 +4,46 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.polydecorations.item.CanvasItem;
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
 public record CloneCanvasCraftingRecipe(String group, Item input) implements CraftingRecipe {
     public static final MapCodec<CloneCanvasCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(x -> x.group(
                     Codec.STRING.optionalFieldOf("group", "").forGetter(CloneCanvasCraftingRecipe::group),
-                    Registries.ITEM.getCodec().fieldOf("input").forGetter(CloneCanvasCraftingRecipe::input)
+                    BuiltInRegistries.ITEM.byNameCodec().fieldOf("input").forGetter(CloneCanvasCraftingRecipe::input)
             ).apply(x, CloneCanvasCraftingRecipe::new)
     );
 
 
-    public static RecipeEntry<CloneCanvasCraftingRecipe> of(String id, Item item) {
-        return new RecipeEntry<>(RegistryKey.of(RegistryKeys.RECIPE, id(id)), new CloneCanvasCraftingRecipe("", item));
+    public static RecipeHolder<CloneCanvasCraftingRecipe> of(String id, Item item) {
+        return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, id(id)), new CloneCanvasCraftingRecipe("", item));
     }
 
     @Override
-    public CraftingRecipeCategory getCategory() {
-        return CraftingRecipeCategory.MISC;
+    public CraftingBookCategory category() {
+        return CraftingBookCategory.MISC;
     }
 
     @Override
-    public boolean matches(CraftingRecipeInput inventory, World world) {
+    public boolean matches(CraftingInput inventory, Level world) {
         boolean hasNbt = false;
         int count = 0;
 
-        for (var stack : inventory.getStacks()) {
-            if (stack.isOf(this.input)) {
+        for (var stack : inventory.items()) {
+            if (stack.is(this.input)) {
                 if (hasNbt && stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent()) {
                     return false;
                 }
@@ -56,11 +55,11 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
     }
 
     @Override
-    public ItemStack craft(CraftingRecipeInput inventory, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider wrapperLookup) {
         CanvasItem.Data nbt = null;
         int count = 0;
-        for (var stack : inventory.getStacks()) {
-            if (stack.isOf(this.input)) {
+        for (var stack : inventory.items()) {
+            if (stack.is(this.input)) {
                 if (stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent()) {
                     nbt = stack.get(CanvasItem.DATA_TYPE);
                 }
@@ -79,7 +78,7 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
     }
 
     @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return IngredientPlacement.NONE;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 }

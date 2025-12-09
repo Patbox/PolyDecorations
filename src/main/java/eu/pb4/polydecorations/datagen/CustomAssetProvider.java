@@ -21,17 +21,15 @@ import eu.pb4.polymer.resourcepack.extras.api.format.model.ModelAsset;
 import eu.pb4.polymer.resourcepack.extras.api.format.model.ModelElement;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.block.WoodType;
-import net.minecraft.data.DataOutput;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.DataWriter;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Pair;
+import net.minecraft.data.PackOutput;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.phys.Vec3;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -120,17 +118,17 @@ class CustomAssetProvider implements DataProvider {
             Map.entry("weathered_", "weathered"),
             Map.entry("oxidized_", "oxidized"));
 
-    private final DataOutput output;
+    private final PackOutput output;
 
     public CustomAssetProvider(FabricDataOutput output) {
         this.output = output;
     }
 
     @Override
-    public CompletableFuture<?> run(DataWriter writer) {
+    public CompletableFuture<?> run(CachedOutput writer) {
         BiConsumer<String, byte[]> assetWriter = (path, data) -> {
             try {
-                writer.write(this.output.getPath().resolve(path), data, HashCode.fromBytes(data));
+                writer.writeIfNeeded(this.output.getOutputFolder().resolve(path), data, HashCode.fromBytes(data));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -145,7 +143,7 @@ class CustomAssetProvider implements DataProvider {
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
-        }, Util.getMainWorkerExecutor());
+        }, Util.backgroundExecutor());
     }
 
     private void writeBlocksAndItems(BiConsumer<String, byte[]> writer) {
@@ -279,16 +277,16 @@ class CustomAssetProvider implements DataProvider {
         });
 
         DecorationsItems.SLEEPING_BAG.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.asString() + "_sleeping_bag.json",
+            writer.accept("assets/polydecorations/models/block/" + type.getSerializedName() + "_sleeping_bag.json",
                     BASE_SLEEPING_BAG_JSON
                             .replace("|TYPE|", "base_sleeping_bag")
-                            .replace("|TXT|", "polydecorations:block/sleeping_bag_" + type.asString())
-                            .replace("|PARTICLE|", "minecraft:block/" + type.asString() + "_wool")
+                            .replace("|TXT|", "polydecorations:block/sleeping_bag_" + type.getSerializedName())
+                            .replace("|PARTICLE|", "minecraft:block/" + type.getSerializedName() + "_wool")
                             .getBytes(StandardCharsets.UTF_8)
             );
 
-            writer.accept(AssetPaths.itemAsset(id(type.asString() + "_sleeping_bag")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.asString() + "_sleeping_bag")), ItemAsset.Properties.DEFAULT)
+            writer.accept(AssetPaths.itemAsset(id(type.getSerializedName() + "_sleeping_bag")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.getSerializedName() + "_sleeping_bag")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
@@ -321,8 +319,8 @@ class CustomAssetProvider implements DataProvider {
         //var b = new StringBuilder();
 
         for (var color : DyeColor.values()) {
-            writeStatue(color.asString() + "_terracotta", "block/" + color.asString() + "_terracotta", writer);
-            writeStatue(color.asString() + "_wool", "block/" + color.asString() + "_wool", writer);
+            writeStatue(color.getSerializedName() + "_terracotta", "block/" + color.getSerializedName() + "_terracotta", writer);
+            writeStatue(color.getSerializedName() + "_wool", "block/" + color.getSerializedName() + "_wool", writer);
 
             //b.append('"').append("item.polydecorations.").append(color.getName()).append("_terracotta_statue\": \"")
             //        .append(Character.toUpperCase(color.getName().charAt(0))).append(color.getName().substring(1)).append(" Terracotta Statue\",\n");
@@ -336,16 +334,16 @@ class CustomAssetProvider implements DataProvider {
 
         for (var item : List.of(DecorationsItems.CANVAS, DecorationsItems.ROPE, DecorationsItems.GLOBE, DecorationsItems.GHOST_LIGHT,
                 DecorationsItems.TRASHCAN, DecorationsItems.HAMMER, DecorationsItems.TROWEL, DecorationsItems.COPPER_CAMPFIRE)) {
-            var id = Registries.ITEM.getId(item);
+            var id = BuiltInRegistries.ITEM.getKey(item);
             writer.accept(AssetPaths.itemAsset(id),
-                    new ItemAsset(new BasicItemModel(id.withPrefixedPath("item/")), ItemAsset.Properties.DEFAULT)
+                    new ItemAsset(new BasicItemModel(id.withPrefix("item/")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
         }
 
         for (var item : List.of(DecorationsItems.DISPLAY_CASE, DecorationsItems.BRAZIER, DecorationsItems.SOUL_BRAZIER, DecorationsItems.COPPER_BRAZIER, DecorationsItems.LARGE_FLOWER_POT, DecorationsItems.LONG_FLOWER_POT)) {
-            var id = Registries.ITEM.getId(item);
+            var id = BuiltInRegistries.ITEM.getKey(item);
             writer.accept(AssetPaths.itemAsset(id),
-                    new ItemAsset(new BasicItemModel(id.withPrefixedPath("block/")), ItemAsset.Properties.DEFAULT)
+                    new ItemAsset(new BasicItemModel(id.withPrefix("block/")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
         }
 
@@ -484,13 +482,13 @@ class CustomAssetProvider implements DataProvider {
             var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
 
             for (var color : DyeColor.values()) {
-                var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/entity/bed/" + color.asString() + ".png")));
+                var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/entity/bed/" + color.getSerializedName() + ".png")));
                 for (int i = 0; i < positions.size(); i++) {
                     var pos = positions.get(i);
                     palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
                 }
                 ImageIO.write(palette, "png", b);
-                assetWriter.accept("assets/polydecorations/textures/palette/bed_color/" + color.asString() + ".png", b.toByteArray());
+                assetWriter.accept("assets/polydecorations/textures/palette/bed_color/" + color.getSerializedName() + ".png", b.toByteArray());
                 b.reset();
             }
         }
@@ -536,12 +534,12 @@ class CustomAssetProvider implements DataProvider {
             }
             base.element(el.get(e));
         }
-        var chimeOffset = new ArrayList<Vec3d>();
+        var chimeOffset = new ArrayList<Vec3>();
 
         for (int i = 0; i < 5; i++) {
             chimeOffset.add(chimesElement[i].getFirst().rotation().orElseThrow().origin());
             for (var e : chimesElement[i]) {
-                var offset = e.rotation().orElseThrow().origin().negate().add(8, 8, 8);
+                var offset = e.rotation().orElseThrow().origin().reverse().add(8, 8, 8);
                 var map = new EnumMap<Direction, ModelElement.Face>(Direction.class);
 
                 for (var face : e.faces().entrySet()) {
@@ -562,7 +560,7 @@ class CustomAssetProvider implements DataProvider {
 
         }
 
-        writer.accept("wind_chime_offsets.json", Vec3d.CODEC.listOf().encodeStart(JsonOps.INSTANCE, chimeOffset).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
+        writer.accept("wind_chime_offsets.json", Vec3.CODEC.listOf().encodeStart(JsonOps.INSTANCE, chimeOffset).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
 
         writer.accept(AssetPaths.blockModel(id("wind_chime/base")), base.build().toBytes());
 

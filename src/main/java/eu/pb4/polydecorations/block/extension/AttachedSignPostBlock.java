@@ -12,100 +12,94 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.decoration.Brightness;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Map;
 
-public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlock, BlockWithElementHolder, QuickWaterloggable {
+public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlock, BlockWithElementHolder, QuickWaterloggable {
     public static final Map<Block, AttachedSignPostBlock> MAP = new Reference2ObjectOpenHashMap<>();
 
     private final Block baseBlock;
     private final float radius;
 
-    public AttachedSignPostBlock(AbstractBlock.Settings settings, Block block, int pixelSideLength) {
-        super(settings.nonOpaque().lootTable(block.getLootTableKey()));
+    public AttachedSignPostBlock(BlockBehaviour.Properties settings, Block block, int pixelSideLength) {
+        super(settings.noOcclusion().overrideLootTable(block.getLootTable()));
         this.baseBlock = block;
         this.radius = pixelSideLength / 16f / 2f;
         MAP.put(block, this);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
     }
 
     @Override
-    public MutableText getName() {
-        return Text.translatable("block.polydecorations.sign_post_typed", this.baseBlock.getName());
+    public MutableComponent getName() {
+        return Component.translatable("block.polydecorations.sign_post_typed", this.baseBlock.getName());
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(WATERLOGGED);
     }
     @Override
     public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
-        return this.baseBlock.getDefaultState().withIfExists(WATERLOGGED, state.get(WATERLOGGED));
+        return this.baseBlock.defaultBlockState().trySetValue(WATERLOGGED, state.getValue(WATERLOGGED));
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be && player.canModifyBlocks()) {
-            return be.onUse(player, hit.getPos().getY() - (int) hit.getPos().getY() >= 0.5, hit);
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be && player.mayBuild()) {
+            return be.onUse(player, hit.getLocation().y() - (int) hit.getLocation().y() >= 0.5, hit);
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         tickWater(state, world, tickView, pos);
-        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+        return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new SignPostBlockEntity(pos, state);
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model();
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     public Block getBacking() {
@@ -150,11 +144,11 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
         }
 
         public void updateUpper(SignPostBlockEntity.Sign upperText) {
-            var cos = MathHelper.abs(MathHelper.cos(upperText.yaw() * MathHelper.RADIANS_PER_DEGREE));
-            var sin = MathHelper.abs(MathHelper.sin(upperText.yaw() * MathHelper.RADIANS_PER_DEGREE));
+            var cos = Mth.abs(Mth.cos(upperText.yaw() * Mth.DEG_TO_RAD));
+            var sin = Mth.abs(Mth.sin(upperText.yaw() * Mth.DEG_TO_RAD));
             var max = Math.min(cos, sin);
 
-            var r = MathHelper.sqrt(MathHelper.square(radius * max) + MathHelper.square(radius));
+            var r = Mth.sqrt(Mth.square(radius * max) + Mth.square(radius));
 
             var zOffset = (upperText.flip() ? -1 : 1) * (r + 0.5f / 16f);
             var zOffsetText = (r + 1.05f / 16f);
@@ -174,11 +168,11 @@ public class AttachedSignPostBlock extends BlockWithEntity implements PolymerBlo
 
         }
         public void updateLower(SignPostBlockEntity.Sign lowerText) {
-            var cos = MathHelper.abs(MathHelper.cos(lowerText.yaw() * MathHelper.RADIANS_PER_DEGREE));
-            var sin = MathHelper.abs(MathHelper.sin(lowerText.yaw() * MathHelper.RADIANS_PER_DEGREE));
+            var cos = Mth.abs(Mth.cos(lowerText.yaw() * Mth.DEG_TO_RAD));
+            var sin = Mth.abs(Mth.sin(lowerText.yaw() * Mth.DEG_TO_RAD));
             var max = Math.min(cos, sin);
 
-            var r = MathHelper.sqrt(MathHelper.square(radius * max) + MathHelper.square(radius));
+            var r = Mth.sqrt(Mth.square(radius * max) + Mth.square(radius));
 
             var zOffset = (lowerText.flip() ? -1 : 1) * (r + 0.5f / 16f);
             var zOffsetText = (r + 1.05f / 16f);

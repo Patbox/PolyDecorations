@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.block.item;
 
+import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
@@ -10,86 +11,85 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable {
-    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
-    public static final EnumProperty<SlabType> TYPE = Properties.SLAB_TYPE;
+public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable {
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<SlabType> TYPE = BlockStateProperties.SLAB_TYPE;
     private final Block base;
     private final ItemStack topModel;
     private final ItemStack doubleModel;
 
-    public PlainShelfBlock(Settings settings, Block base, Identifier identifier) {
+    public PlainShelfBlock(Properties settings, Block base, Identifier identifier) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(TYPE, SlabType.BOTTOM));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(TYPE, SlabType.BOTTOM));
         this.base = base;
-        this.topModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_top"));
-        this.doubleModel = ItemDisplayElementUtil.getModel(identifier.withPrefixedPath("block/").withSuffixedPath("_double"));
+        this.topModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_top"));
+        this.doubleModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_double"));
     }
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
-        return this.base.getDefaultState();
+        return this.base.defaultBlockState();
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, TYPE, WATERLOGGED);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockPos blockPos = ctx.getBlockPos();
-        BlockState blockState = ctx.getWorld().getBlockState(blockPos);
-        if (blockState.isOf(this)) {
-            return blockState.with(TYPE, SlabType.DOUBLE);
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        BlockPos blockPos = ctx.getClickedPos();
+        BlockState blockState = ctx.getLevel().getBlockState(blockPos);
+        if (blockState.is(this)) {
+            return blockState.setValue(TYPE, SlabType.DOUBLE);
         } else {
-            BlockState blockState2 = waterLog(ctx, this.getDefaultState().with(FACING,
-                    ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite()));
-            Direction direction = ctx.getSide();
-            return direction != Direction.DOWN && (direction == Direction.UP || !(ctx.getHitPos().y - (double) blockPos.getY() > 0.5)) ? blockState2 : blockState2.with(TYPE, SlabType.TOP);
+            BlockState blockState2 = waterLog(ctx, this.defaultBlockState().setValue(FACING,
+                    ctx.getClickedFace().getAxis() != Direction.Axis.Y ? ctx.getClickedFace() : ctx.getHorizontalDirection().getOpposite()));
+            Direction direction = ctx.getClickedFace();
+            return direction != Direction.DOWN && (direction == Direction.UP || !(ctx.getClickLocation().y - (double) blockPos.getY() > 0.5)) ? blockState2 : blockState2.setValue(TYPE, SlabType.TOP);
         }
     }
 
     @Override
-    public boolean canReplace(BlockState state, ItemPlacementContext context) {
-        ItemStack itemStack = context.getStack();
-        SlabType slabType = state.get(TYPE);
-        if (slabType != SlabType.DOUBLE && itemStack.isOf(this.asItem())) {
-            if (context.canReplaceExisting()) {
-                boolean bl = context.getHitPos().y - (double) context.getBlockPos().getY() > 0.5;
-                Direction direction = context.getSide();
+    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+        ItemStack itemStack = context.getItemInHand();
+        SlabType slabType = state.getValue(TYPE);
+        if (slabType != SlabType.DOUBLE && itemStack.is(this.asItem())) {
+            if (context.replacingClickedOnBlock()) {
+                boolean bl = context.getClickLocation().y - (double) context.getClickedPos().getY() > 0.5;
+                Direction direction = context.getClickedFace();
                 if (slabType == SlabType.BOTTOM) {
                     return direction == Direction.UP || bl && direction.getAxis().isHorizontal();
                 } else {
@@ -104,44 +104,44 @@ public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, Ba
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
-            be.openGui((ServerPlayerEntity) player);
-            return ActionResult.SUCCESS_SERVER;
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof ShelfBlockEntity be) {
+            be.openGui((ServerPlayer) player);
+            return InteractionResult.SUCCESS_SERVER;
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        ItemScatterer.onStateReplaced(state, world, pos);
-        super.onStateReplaced(state, world, pos, moved);
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
+        Containers.updateNeighboursAfterDestroy(state, world, pos);
+        super.affectNeighborsAfterRemoval(state, world, pos, moved);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         tickWater(state, world, tickView, pos);
-        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+        return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ShelfBlockEntity(pos, state);
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
     }
 
@@ -154,7 +154,7 @@ public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, Ba
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
-            var yaw = state.get(FACING).getPositiveHorizontalDegrees();
+            var yaw = state.getValue(FACING).toYRot();
             this.main.setYaw(yaw);
             this.addElement(this.main);
             for (int i = 0; i < 6; i++) {
@@ -168,7 +168,7 @@ public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, Ba
                 item.setItemDisplayContext(ItemDisplayContext.NONE);
                 item.setTranslation(new Vector3f(-5 / 16f + x * (5 / 16f), -4f / 16f + y * 8 / 16f, -2 / 16f));
                 item.setScale(new Vector3f(4.5f / 16f));
-                item.setLeftRotation(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+                item.setLeftRotation(Axis.YN.rotationDegrees(180));
                 item.setYaw(yaw);
                 items[i] = item;
                 this.addElement(item);
@@ -176,7 +176,7 @@ public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, Ba
         }
 
         private ItemStack getModel(BlockState state) {
-            return switch (state.get(TYPE)) {
+            return switch (state.getValue(TYPE)) {
                 case BOTTOM -> ItemDisplayElementUtil.getModel(state.getBlock().asItem());
                 case DOUBLE -> doubleModel;
                 case TOP -> topModel;
@@ -187,7 +187,7 @@ public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, Ba
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var yaw = state.get(FACING).getPositiveHorizontalDegrees();
+                var yaw = state.getValue(FACING).toYRot();
                 this.main.setYaw(yaw);
                 this.main.setItem(getModel(state));
                 for (int i = 0; i < 6; i++) {
@@ -199,14 +199,14 @@ public class PlainShelfBlock extends BlockWithEntity implements FactoryBlock, Ba
 
         public void setItem(int i, ItemStack stack) {
             this.items[i].setItem(stack.copy());
-            this.items[i].setItemDisplayContext(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL) ? ItemDisplayContext.FIXED : ItemDisplayContext.NONE);
-            this.items[i].setLeftRotation(stack.isIn(DecorationsItemTags.FORCE_FIXED_MODEL)
-                    ? Direction.UP.getRotationQuaternion()
-                    : RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+            this.items[i].setItemDisplayContext(stack.is(DecorationsItemTags.FORCE_FIXED_MODEL) ? ItemDisplayContext.FIXED : ItemDisplayContext.NONE);
+            this.items[i].setLeftRotation(stack.is(DecorationsItemTags.FORCE_FIXED_MODEL)
+                    ? Direction.UP.getRotation()
+                    : Axis.YN.rotationDegrees(180));
             this.items[i].tick();
         }
 
-        public void updateItems(DefaultedList<ItemStack> stacks) {
+        public void updateItems(NonNullList<ItemStack> stacks) {
             for (int i = 0; i < 6; i++) {
                 setItem(i, stacks.get(i));
             }

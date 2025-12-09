@@ -8,20 +8,19 @@ import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.polydecorations.entity.CanvasEntity;
 import eu.pb4.polydecorations.item.CanvasItem;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.ShapelessRecipe;
-import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.ShapelessCraftingRecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +29,9 @@ import java.util.Optional;
 public class CanvasTransformRecipe extends ShapelessRecipe {
     public static MapCodec<CanvasTransformRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
         return instance.group(
-                        Codec.STRING.optionalFieldOf("group", "").forGetter(CanvasTransformRecipe::getGroup),
+                        Codec.STRING.optionalFieldOf("group", "").forGetter(CanvasTransformRecipe::group),
                         Codec.STRING.optionalFieldOf("action", "wax").forGetter(CanvasTransformRecipe::action),
-                        CraftingRecipeCategory.CODEC.fieldOf("category").orElse(CraftingRecipeCategory.MISC).forGetter(CanvasTransformRecipe::getCategory),
+                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(CanvasTransformRecipe::category),
                         ItemStack.CODEC.fieldOf("result").forGetter(t -> t.result),
                         Ingredient.CODEC.fieldOf("source").forGetter(t -> t.source),
                         Ingredient.CODEC.listOf().fieldOf("ingredients").flatXmap((ingredients) -> {
@@ -47,7 +46,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     private final Ingredient source;
     private final List<Ingredient> ingredientsOg;
 
-    public CanvasTransformRecipe(String group, String action, CraftingRecipeCategory category, ItemStack result, Ingredient source, List<Ingredient> ingredients) {
+    public CanvasTransformRecipe(String group, String action, CraftingBookCategory category, ItemStack result, Ingredient source, List<Ingredient> ingredients) {
         super(group, category, result, merge(ingredients, source));
         this.ingredientsOg = ingredients;
         this.action = action;
@@ -67,8 +66,8 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public boolean matches(CraftingRecipeInput craftingRecipeInput, World world) {
-        for (var tmp : craftingRecipeInput.getStacks()) {
+    public boolean matches(CraftingInput craftingRecipeInput, Level world) {
+        for (var tmp : craftingRecipeInput.items()) {
             if (this.source.test(tmp)) {
                 var data = tmp.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT);
 
@@ -77,7 +76,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
                     case "glow" -> data.glowing();
                     case "unglow" -> !data.glowing();
                     case "dye" -> {
-                        var x = CanvasEntity.getColor(craftingRecipeInput.getStacks().stream().filter(tmp2 -> tmp2.isIn(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY));
+                        var x = CanvasEntity.getColor(craftingRecipeInput.items().stream().filter(tmp2 -> tmp2.is(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY));
                         yield x.isEmpty() && data.background().isEmpty() || x.isPresent() && data.background().orElse(null) == x.get();
                     }
                     case "cut" -> data.cut();
@@ -93,13 +92,13 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack craft(CraftingRecipeInput recipeInputInventory, RegistryWrapper.WrapperLookup wrapperLookup) {
-        var stack = super.craft(recipeInputInventory, wrapperLookup);
-        ItemStack dye = recipeInputInventory.getStacks().stream().filter(tmp -> tmp.isIn(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY);
-        for (var tmp : recipeInputInventory.getStacks()) {
+    public ItemStack assemble(CraftingInput recipeInputInventory, HolderLookup.Provider wrapperLookup) {
+        var stack = super.assemble(recipeInputInventory, wrapperLookup);
+        ItemStack dye = recipeInputInventory.items().stream().filter(tmp -> tmp.is(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY);
+        for (var tmp : recipeInputInventory.items()) {
             if (this.source.test(tmp)) {
-                stack.applyComponentsFrom(tmp.getComponents());
-                stack.apply(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
+                stack.applyComponents(tmp.getComponents());
+                stack.update(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
                     case "wax" -> new CanvasItem.Data(x.image(), x.background(), x.glowing(), true, x.cut());
                     case "glow" -> new CanvasItem.Data(x.image(), x.background(), true, x.waxed(), x.cut());
                     case "unglow" -> new CanvasItem.Data(x.image(), x.background(), false, x.waxed(), x.cut());
@@ -156,19 +155,19 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public DefaultedList<ItemStack> getRecipeRemainders(CraftingRecipeInput input) {
-        DefaultedList<ItemStack> defaultedList = DefaultedList.ofSize(input.size(), ItemStack.EMPTY);
+    public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
+        NonNullList<ItemStack> defaultedList = NonNullList.withSize(input.size(), ItemStack.EMPTY);
 
         for (int i = 0; i < defaultedList.size(); ++i) {
-            var stack = input.getStackInSlot(i);
-            var remainer = stack.getItem().getRecipeRemainder();
-            if (remainer.isEmpty() && stack.isDamageable()) {
+            var stack = input.getItem(i);
+            var remainer = stack.getItem().getCraftingRemainder();
+            if (remainer.isEmpty() && stack.isDamageableItem()) {
                 remainer = stack.copy();
-                remainer.setDamage(remainer.getDamage() + 1);
-                if (remainer.getDamage() >= remainer.getMaxDamage()) {
+                remainer.setDamageValue(remainer.getDamageValue() + 1);
+                if (remainer.getDamageValue() >= remainer.getMaxDamage()) {
                     remainer = ItemStack.EMPTY;
                 }
-            } else if (stack.isOf(Items.WATER_BUCKET)) {
+            } else if (stack.is(Items.WATER_BUCKET)) {
                 remainer = stack.copy();
             }
             defaultedList.set(i, remainer);
@@ -178,16 +177,16 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public List<RecipeDisplay> getDisplays() {
+    public List<RecipeDisplay> display() {
         var list = new ArrayList<SlotDisplay>();
-        list.add(this.source.toDisplay());
+        list.add(this.source.display());
         for (var ing : this.ingredientsOg) {
-            list.add(ing.toDisplay());
+            list.add(ing.display());
         }
         var res = this.result.copy();
 
         var fakeImage = Optional.of(new byte[0]);
-        res.apply(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
+        res.update(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
             case "wax" -> new CanvasItem.Data(fakeImage, x.background(), x.glowing(), true, x.cut());
             case "glow" -> new CanvasItem.Data(fakeImage, x.background(), true, x.waxed(), x.cut());
             case "unglow" -> new CanvasItem.Data(fakeImage, x.background(), false, x.waxed(), x.cut());
@@ -197,7 +196,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
             default -> x;
         });
 
-        return List.of(new ShapelessCraftingRecipeDisplay(list, new SlotDisplay.StackSlotDisplay(res), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
+        return List.of(new ShapelessCraftingRecipeDisplay(list, new SlotDisplay.ItemStackSlotDisplay(res), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
     }
 
     @SuppressWarnings("rawtypes")

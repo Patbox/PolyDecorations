@@ -4,20 +4,19 @@ import eu.pb4.polydecorations.block.DecorationsBlockTags;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.BlockTags;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 import java.util.concurrent.CompletableFuture;
 
 class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
-    public BlockTagsProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+    public BlockTagsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup arg) {
-        this.valueLookupBuilder(BlockTags.AXE_MINEABLE)
+    protected void addTags(HolderLookup.Provider arg) {
+        this.valueLookupBuilder(BlockTags.MINEABLE_WITH_AXE)
                 .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]))
@@ -30,11 +29,11 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.BASKET)
         ;
 
-        this.valueLookupBuilder(BlockTags.PICKAXE_MINEABLE)
+        this.valueLookupBuilder(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(DecorationsBlocks.WALL_SIGN_POST.values().toArray(new Block[0]))
                 .add(DecorationsBlocks.WALL_LANTERN)
                 .add(DecorationsBlocks.WALL_SOUL_LANTERN)
-                .add(DecorationsBlocks.WALL_COPPER_LANTERNS.getAll())
+                .addAll(DecorationsBlocks.WALL_COPPER_LANTERNS.asList())
                 .add(DecorationsBlocks.BRAZIER)
                 .add(DecorationsBlocks.SOUL_BRAZIER)
                 .add(DecorationsBlocks.COPPER_BRAZIER)

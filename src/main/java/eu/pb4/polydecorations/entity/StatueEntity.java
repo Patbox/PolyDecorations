@@ -10,45 +10,41 @@ import eu.pb4.polymer.virtualentity.api.VirtualEntityUtils;
 import eu.pb4.polymer.virtualentity.api.attachment.EntityAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.network.PlayerAssociatedNetworkHandler;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Rotations;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayerConnection;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.EulerAngle;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -60,46 +56,46 @@ import java.util.function.Consumer;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
-    private static final EulerAngle DEFAULT_HEAD_ROTATION = new EulerAngle(0.0F, 0.0F, 0.0F);
-    private static final EulerAngle DEFAULT_BODY_ROTATION = new EulerAngle(0.0F, 0.0F, 0.0F);
-    private static final EulerAngle DEFAULT_LEFT_ARM_ROTATION = new EulerAngle(-10.0F, 0.0F, -10.0F);
-    private static final EulerAngle DEFAULT_RIGHT_ARM_ROTATION = new EulerAngle(-15.0F, 0.0F, 10.0F);
-    private static final EulerAngle DEFAULT_LEFT_LEG_ROTATION = new EulerAngle(-1.0F, 0.0F, -1.0F);
-    private static final EulerAngle DEFAULT_RIGHT_LEG_ROTATION = new EulerAngle(1.0F, 0.0F, 1.0F);
+public class StatueEntity extends ArmorStand implements PolymerEntity {
+    private static final Rotations DEFAULT_HEAD_ROTATION = new Rotations(0.0F, 0.0F, 0.0F);
+    private static final Rotations DEFAULT_BODY_ROTATION = new Rotations(0.0F, 0.0F, 0.0F);
+    private static final Rotations DEFAULT_LEFT_ARM_ROTATION = new Rotations(-10.0F, 0.0F, -10.0F);
+    private static final Rotations DEFAULT_RIGHT_ARM_ROTATION = new Rotations(-15.0F, 0.0F, 10.0F);
+    private static final Rotations DEFAULT_LEFT_LEG_ROTATION = new Rotations(-1.0F, 0.0F, -1.0F);
+    private static final Rotations DEFAULT_RIGHT_LEG_ROTATION = new Rotations(1.0F, 0.0F, 1.0F);
 
     private final Model model;
     private ItemStack stack;
     private StatueItem item;
 
-    public StatueEntity(EntityType<? extends ArmorStandEntity> entityType, World world) {
+    public StatueEntity(EntityType<? extends ArmorStand> entityType, Level world) {
         super(entityType, world);
         this.model = new Model(this);
-        this.setStack(DecorationsItems.OTHER_STATUE.get(Type.STONE).getDefaultStack());
+        this.setStack(DecorationsItems.OTHER_STATUE.get(Type.STONE).getDefaultInstance());
         EntityAttachment.of(this.model, this);
         this.setShowArms(true);
         this.setNoGravity(true);
     }
 
     @Override
-    public void onEntityTrackerTick(Set<PlayerAssociatedNetworkHandler> listeners) {
+    public void onEntityTrackerTick(Set<ServerPlayerConnection> listeners) {
         this.model.tick();
     }
 
     @Override
-    public ItemStack getPickBlockStack() {
+    public ItemStack getPickResult() {
         return this.stack.copy();
     }
 
     @Override
-    protected void breakAndDropItem(ServerWorld world, DamageSource damageSource) {
+    protected void brokenByPlayer(ServerLevel world, DamageSource damageSource) {
         ItemStack itemStack = this.stack.copy();
         if (this.hasCustomName()) {
-            itemStack.set(DataComponentTypes.CUSTOM_NAME, this.getCustomName());
+            itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
         }
 
-        Block.dropStack(world, this.getBlockPos(), itemStack);
-        this.onBreak(world, damageSource);
+        Block.popResource(world, this.blockPosition(), itemStack);
+        this.brokenByAnything(world, damageSource);
     }
 
     @Override
@@ -109,98 +105,98 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    protected void spawnBreakParticles() {
-        if (this.getEntityWorld() instanceof ServerWorld) {
-            ((ServerWorld)this.getEntityWorld()).spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, this.item.getType().block().getDefaultState()), this.getX(), this.getBodyY(0.6666666666666666), this.getZ(), 10, (double)(this.getWidth() / 4.0F), (double)(this.getHeight() / 4.0F), (double)(this.getWidth() / 4.0F), 0.05);
+    protected void showBreakingParticles() {
+        if (this.level() instanceof ServerLevel) {
+            ((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, this.item.getType().block().defaultBlockState()), this.getX(), this.getY(0.6666666666666666), this.getZ(), 10, (double)(this.getBbWidth() / 4.0F), (double)(this.getBbHeight() / 4.0F), (double)(this.getBbWidth() / 4.0F), 0.05);
         }
     }
 
     @Override
-    public void writeCustomData(WriteView view) {
-        super.writeCustomData(view);
+    public void addAdditionalSaveData(ValueOutput view) {
+        super.addAdditionalSaveData(view);
         if (!this.stack.isEmpty()) {
-            view.put("stack", ItemStack.OPTIONAL_CODEC, this.stack);
+            view.store("stack", ItemStack.OPTIONAL_CODEC, this.stack);
         }
     }
 
     @Override
-    public void readCustomData(ReadView view) {
-        super.readCustomData(view);
+    public void readAdditionalSaveData(ValueInput view) {
+        super.readAdditionalSaveData(view);
         setStack(view.read("stack", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
     }
 
     @Override
-    public void setYaw(float yaw) {
-        super.setYaw(yaw);
+    public void setYRot(float yaw) {
+        super.setYRot(yaw);
         if (this.model != null) {
             this.model.setYaw(yaw);
         }
     }
 
     @Override
-    public void setGlowing(boolean glowing) {
-        super.setGlowing(glowing);
+    public void setGlowingTag(boolean glowing) {
+        super.setGlowingTag(glowing);
         this.model.setGlowing(glowing);
     }
 
     @Override
-    protected void setFlag(int index, boolean value) {
-        super.setFlag(index, value);
+    protected void setSharedFlag(int index, boolean value) {
+        super.setSharedFlag(index, value);
 
-        if (index == GLOWING_FLAG_INDEX) {
+        if (index == FLAG_GLOWING) {
             this.model.setGlowing(value);
         }
     }
 
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         if (!this.isRemoved()) {
-            if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                 this.kill(world);
                 return false;
             } else if (!this.isInvulnerableTo(world, source) && !this.isInvisible() && !this.isMarker()) {
-                if (source.isIn(DamageTypeTags.IS_EXPLOSION)) {
-                    this.onBreak(world, source);
+                if (source.is(DamageTypeTags.IS_EXPLOSION)) {
+                    this.brokenByAnything(world, source);
                     this.kill(world);
                     return false;
-                } else if (source.isIn(DamageTypeTags.IGNITES_ARMOR_STANDS) && !this.item.getType().fireproof()) {
+                } else if (source.is(DamageTypeTags.IGNITES_ARMOR_STANDS) && !this.item.getType().fireproof()) {
                     if (this.isOnFire()) {
-                        this.updateHealth(world, source, 0.15F);
+                        this.causeDamage(world, source, 0.15F);
                     } else {
-                        this.setOnFireFor(5);
+                        this.igniteForSeconds(5);
                     }
 
                     return false;
-                } else if (source.isIn(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F && !this.item.getType().fireproof()) {
-                    this.updateHealth(world, source, 4.0F);
+                } else if (source.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F && !this.item.getType().fireproof()) {
+                    this.causeDamage(world, source, 4.0F);
                     return false;
                 } else {
-                    boolean bl = source.isIn(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
-                    boolean bl2 = source.isIn(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
+                    boolean bl = source.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
+                    boolean bl2 = source.is(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
                     if (!bl && !bl2) {
                         return false;
                     } else {
-                        Entity var6 = source.getAttacker();
-                        if (var6 instanceof PlayerEntity) {
-                            PlayerEntity playerEntity = (PlayerEntity)var6;
-                            if (!playerEntity.getAbilities().allowModifyWorld) {
+                        Entity var6 = source.getEntity();
+                        if (var6 instanceof Player) {
+                            Player playerEntity = (Player)var6;
+                            if (!playerEntity.getAbilities().mayBuild) {
                                 return false;
                             }
                         }
 
-                        if (source.isSourceCreativePlayer()) {
-                            this.playBreakSound();
-                            this.spawnBreakParticles();
+                        if (source.isCreativePlayer()) {
+                            this.playBrokenSound();
+                            this.showBreakingParticles();
                             this.kill(world);
                             return true;
                         } else {
-                            long l = this.getEntityWorld().getTime();
-                            if (l - this.lastHitTime > 5L && !bl2) {
-                                this.getEntityWorld().sendEntityStatus(this, (byte)32);
-                                this.emitGameEvent(GameEvent.ENTITY_DAMAGE, source.getAttacker());
-                                this.lastHitTime = l;
+                            long l = this.level().getGameTime();
+                            if (l - this.lastHit > 5L && !bl2) {
+                                this.level().broadcastEntityEvent(this, (byte)32);
+                                this.gameEvent(GameEvent.ENTITY_DAMAGE, source.getEntity());
+                                this.lastHit = l;
                             } else {
-                                this.breakAndDropItem(world, source);
-                                this.spawnBreakParticles();
+                                this.brokenByPlayer(world, source);
+                                this.showBreakingParticles();
                                 this.kill(world);
                             }
 
@@ -217,8 +213,8 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    protected Text getDefaultName() {
-        return this.stack.getName();
+    protected Component getTypeName() {
+        return this.stack.getHoverName();
     }
 
     @Override
@@ -227,29 +223,29 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    public void modifyRawTrackedData(List<DataTracker.SerializedEntry<?>> data, ServerPlayerEntity player, boolean initial) {
+    public void modifyRawTrackedData(List<SynchedEntityData.DataValue<?>> data, ServerPlayer player, boolean initial) {
         var sendFlags = initial;
         for (var i = 0; i < data.size(); i++) {
             var x = data.get(i);
             if (x.id() == EntityTrackedData.FLAGS.id()) {
-                data.set(i, DataTracker.SerializedEntry.of(EntityTrackedData.FLAGS, (byte) (((byte) x.value()) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
+                data.set(i, SynchedEntityData.DataValue.create(EntityTrackedData.FLAGS, (byte) (((byte) x.value()) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
                 sendFlags = false;
             }
         }
 
         if (initial && sendFlags) {
-            data.add(DataTracker.SerializedEntry.of(EntityTrackedData.FLAGS, (byte) (((byte) this.dataTracker.get(FLAGS)) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
+            data.add(SynchedEntityData.DataValue.create(EntityTrackedData.FLAGS, (byte) (((byte) this.entityData.get(DATA_SHARED_FLAGS_ID)) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
         }
     }
 
     @Override
-    protected void playBreakSound() {
-        this.getEntityWorld().playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), this.item.getType().soundGroup().getBreakSound(), this.getSoundCategory(), 1.0F, 1.0F);
+    protected void playBrokenSound() {
+        this.level().playSound((Player)null, this.getX(), this.getY(), this.getZ(), this.item.getType().soundGroup().getBreakSound(), this.getSoundSource(), 1.0F, 1.0F);
     }
 
     @Override
-    public FallSounds getFallSounds() {
-        return new FallSounds(this.item.getType().soundGroup().getStepSound(), this.item.getType().soundGroup().getFallSound());
+    public Fallsounds getFallSounds() {
+        return new Fallsounds(this.item.getType().soundGroup().getStepSound(), this.item.getType().soundGroup().getFallSound());
     }
 
     @Nullable
@@ -263,38 +259,38 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
     }
 
     @Override
-    public void setHeadRotation(EulerAngle angle) {
-        super.setHeadRotation(angle);
+    public void setHeadPose(Rotations angle) {
+        super.setHeadPose(angle);
         this.model.head.updateAngle(angle);
     }
 
     @Override
-    public void setLeftArmRotation(EulerAngle angle) {
-        super.setLeftArmRotation(angle);
+    public void setLeftArmPose(Rotations angle) {
+        super.setLeftArmPose(angle);
         this.model.leftArm.updateAngle(angle);
     }
 
     @Override
-    public void setRightArmRotation(EulerAngle angle) {
-        super.setRightArmRotation(angle);
+    public void setRightArmPose(Rotations angle) {
+        super.setRightArmPose(angle);
         this.model.rightArm.updateAngle(angle);
     }
 
     @Override
-    public void setLeftLegRotation(EulerAngle angle) {
-        super.setLeftLegRotation(angle);
+    public void setLeftLegPose(Rotations angle) {
+        super.setLeftLegPose(angle);
         this.model.leftLeg.updateAngle(angle);
     }
 
     @Override
-    public void setRightLegRotation(EulerAngle angle) {
-        super.setRightLegRotation(angle);
+    public void setRightLegPose(Rotations angle) {
+        super.setRightLegPose(angle);
         this.model.rightLeg.updateAngle(angle);
     }
 
     @Override
-    public void setBodyRotation(EulerAngle angle) {
-        super.setBodyRotation(angle);
+    public void setBodyPose(Rotations angle) {
+        super.setBodyPose(angle);
         this.model.body.updateAngle(angle);
     }
 
@@ -332,12 +328,12 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         public static final Type TERRACOTTA = nonWood("terracotta", Blocks.TERRACOTTA);
         public static final Map<DyeColor, Type> COLORED_TERRACOTTA = Util.make(new HashMap<>(), (x) -> {
             for (var color : DecorationsUtil.COLORS_CREATIVE) {
-                x.put(color, nonWood(color.asString() + "_terracotta", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_terracotta"))));
+                x.put(color, nonWood(color.getSerializedName() + "_terracotta", BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(color.getSerializedName() + "_terracotta"))));
             }
         });
         public static final Map<DyeColor, Type> COLORED_WOOL = Util.make(new HashMap<>(), (x) -> {
             for (var color : DecorationsUtil.COLORS_CREATIVE) {
-                x.put(color, burnableNonWood(color.asString() + "_wool", Registries.BLOCK.get(Identifier.ofVanilla(color.asString() + "_wool"))));
+                x.put(color, burnableNonWood(color.getSerializedName() + "_wool", BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(color.getSerializedName() + "_wool"))));
             }
         });
 
@@ -362,18 +358,18 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
             return ItemDisplayElementUtil.getModel(id("block/statue/" + type + "/" + head));
         }
 
-        public BlockSoundGroup soundGroup() {
-            return block.getDefaultState().getSoundGroup();
+        public SoundType soundGroup() {
+            return block.defaultBlockState().getSoundType();
         }
     }
 
     public static final class Model extends ElementHolder {
-        public final Bone head = Bone.from(new Vector3f(0, (24 / 16f), 0), StatueEntity.DEFAULT_HEAD_ROTATION);
-        public final Bone body = Bone.from(new Vector3f(0, (24 / 16f), 0), StatueEntity.DEFAULT_BODY_ROTATION);
-        public final Bone leftArm = Bone.from(new Vector3f(5/16f, (22 / 16f), 0), StatueEntity.DEFAULT_LEFT_ARM_ROTATION);
-        public final Bone rightArm = Bone.from(new Vector3f(-5/16f, (22 / 16f), 0), StatueEntity.DEFAULT_RIGHT_ARM_ROTATION);
-        public final Bone leftLeg = Bone.from(new Vector3f(2/16f, (12 / 16f), 0), StatueEntity.DEFAULT_LEFT_LEG_ROTATION);
-        public final Bone rightLeg = Bone.from(new Vector3f(-2/16f, (12 / 16f), 0), StatueEntity.DEFAULT_RIGHT_LEG_ROTATION);
+        public final Bone head = Bone.from(new Vector3f(0, (24 / 16f), 0), StatueEntity.DEFAULT_HEAD_POSE);
+        public final Bone body = Bone.from(new Vector3f(0, (24 / 16f), 0), StatueEntity.DEFAULT_BODY_POSE);
+        public final Bone leftArm = Bone.from(new Vector3f(5/16f, (22 / 16f), 0), StatueEntity.DEFAULT_LEFT_ARM_POSE);
+        public final Bone rightArm = Bone.from(new Vector3f(-5/16f, (22 / 16f), 0), StatueEntity.DEFAULT_RIGHT_ARM_POSE);
+        public final Bone leftLeg = Bone.from(new Vector3f(2/16f, (12 / 16f), 0), StatueEntity.DEFAULT_LEFT_LEG_POSE);
+        public final Bone rightLeg = Bone.from(new Vector3f(-2/16f, (12 / 16f), 0), StatueEntity.DEFAULT_RIGHT_LEG_POSE);
         private final StatueEntity entity;
         private boolean small = false;
         private float baseScale = 1f;
@@ -438,13 +434,13 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
         }
 
         @Override
-        protected void startWatchingExtraPackets(ServerPlayNetworkHandler player, Consumer<Packet<ClientPlayPacketListener>> packetConsumer) {
+        protected void startWatchingExtraPackets(ServerGamePacketListenerImpl player, Consumer<Packet<ClientGamePacketListener>> packetConsumer) {
             super.startWatchingExtraPackets(player, packetConsumer);
-            packetConsumer.accept(new EntityPassengersSetS2CPacket(this.entity));
+            packetConsumer.accept(new ClientboundSetPassengersPacket(this.entity));
         }
 
         @Override
-        protected void notifyElementsOfPositionUpdate(Vec3d newPos, Vec3d delta) {}
+        protected void notifyElementsOfPositionUpdate(Vec3 newPos, Vec3 delta) {}
 
         public void setGlowing(boolean glowing) {
             this.head.display.setGlowing(glowing);
@@ -455,27 +451,27 @@ public class StatueEntity extends ArmorStandEntity implements PolymerEntity {
             this.rightLeg.display.setGlowing(glowing);
         }
 
-        public record Bone(ItemDisplayElement display, Vector3f offset, MutableObject<EulerAngle> angle) {
-            public static Bone from(Vector3f offset, EulerAngle angle) {
+        public record Bone(ItemDisplayElement display, Vector3f offset, MutableObject<Rotations> angle) {
+            public static Bone from(Vector3f offset, Rotations angle) {
                 var d = new ItemDisplayElement();
                 d.setItemDisplayContext(ItemDisplayContext.GUI);
-                d.setOffset(new Vec3d(0, EntityType.ARMOR_STAND.getHeight(), 0));
+                d.setOffset(new Vec3(0, EntityType.ARMOR_STAND.getHeight(), 0));
                 d.setInvisible(true);
                 d.setSendPositionUpdates(false);
                 d.setTeleportDuration(2);
                 d.setTranslation(offset.sub(0, EntityType.ARMOR_STAND.getHeight(), 0));
-                d.setLeftRotation(new Quaternionf().rotationZYX(-angle.roll() * MathHelper.RADIANS_PER_DEGREE,
-                        -angle.yaw()  * MathHelper.RADIANS_PER_DEGREE, angle.pitch() * MathHelper.RADIANS_PER_DEGREE));
+                d.setLeftRotation(new Quaternionf().rotationZYX(-angle.z() * Mth.DEG_TO_RAD,
+                        -angle.y()  * Mth.DEG_TO_RAD, angle.x() * Mth.DEG_TO_RAD));
                 return new Bone(d, offset, new MutableObject<>(angle));
             }
 
-            public boolean updateAngle(EulerAngle angle) {
+            public boolean updateAngle(Rotations angle) {
                 if (this.angle.getValue().equals(angle)) {
                     return false;
                 }
                 this.angle.setValue(angle);
-                display.setLeftRotation(new Quaternionf().rotationZYX(-angle.roll() * MathHelper.RADIANS_PER_DEGREE,
-                        -angle.yaw()  * MathHelper.RADIANS_PER_DEGREE, angle.pitch() * MathHelper.RADIANS_PER_DEGREE));
+                display.setLeftRotation(new Quaternionf().rotationZYX(-angle.z() * Mth.DEG_TO_RAD,
+                        -angle.y()  * Mth.DEG_TO_RAD, angle.x() * Mth.DEG_TO_RAD));
                 display.tick();
                 return true;
             }

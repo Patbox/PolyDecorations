@@ -2,7 +2,7 @@ package eu.pb4.polydecorations.polydex;
 
 import eu.pb4.sgui.api.elements.GuiElement;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.recipe.RecipeType;
+import net.minecraft.world.item.crafting.RecipeType;
 
 import static eu.pb4.polydecorations.ModInit.LOGGER;
 

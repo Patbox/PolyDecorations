@@ -4,24 +4,24 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.elements.AbstractElement;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.entity.decoration.Brightness;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
 import java.util.function.Consumer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Brightness;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.phys.Vec3;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class SignLikeText extends AbstractElement {
     private static final int CENTER = 4;
     private final TextDisplayElement[] displayText = new TextDisplayElement[9];
 
-    private Text text = Text.empty();
+    private Component text = Component.empty();
 
     private boolean glow = false;
     private float viewRange = 1;
@@ -38,14 +38,14 @@ public class SignLikeText extends AbstractElement {
         }
     }
 
-    public void setText(Text text, DyeColor color, boolean glow) {
+    public void setText(Component text, DyeColor color, boolean glow) {
         this.text = text;
         var brightness = glow ? new Brightness(15, 15) : null;
-        this.displayText[CENTER].setText(Text.empty().append(text).withColor(color.getSignColor()));
+        this.displayText[CENTER].setText(Component.empty().append(text).withColor(color.getTextColor()));
         this.displayText[CENTER].setBrightness(brightness);
 
         if (glow) {
-            var background = Text.empty().append(text).withColor(getOutlineColor(color));
+            var background = Component.empty().append(text).withColor(getOutlineColor(color));
             for (int i = 0; i < this.displayText.length; i++) {
                 if (i != CENTER) {
                     this.displayText[i].setText(background);
@@ -69,11 +69,11 @@ public class SignLikeText extends AbstractElement {
         if (color == DyeColor.BLACK) {
             return -988212;
         } else {
-            int i = color.getSignColor();
-            int j = (int)((double) ColorHelper.getRed(i) * 0.4);
-            int k = (int)((double)ColorHelper.getGreen(i) * 0.4);
-            int l = (int)((double)ColorHelper.getBlue(i) * 0.4);
-            return ColorHelper.getArgb(0, j, k, l);
+            int i = color.getTextColor();
+            int j = (int)((double) ARGB.red(i) * 0.4);
+            int k = (int)((double)ARGB.green(i) * 0.4);
+            int l = (int)((double)ARGB.blue(i) * 0.4);
+            return ARGB.color(0, j, k, l);
         }
     }
 
@@ -153,13 +153,13 @@ public class SignLikeText extends AbstractElement {
     }
 
     @Override
-    public void startWatching(ServerPlayerEntity player, Consumer<Packet<ClientPlayPacketListener>> packetConsumer) {}
+    public void startWatching(ServerPlayer player, Consumer<Packet<ClientGamePacketListener>> packetConsumer) {}
 
     @Override
-    public void stopWatching(ServerPlayerEntity player, Consumer<Packet<ClientPlayPacketListener>> packetConsumer) {}
+    public void stopWatching(ServerPlayer player, Consumer<Packet<ClientGamePacketListener>> packetConsumer) {}
 
     @Override
-    public void notifyMove(Vec3d oldPos, Vec3d currentPos, Vec3d delta) {
+    public void notifyMove(Vec3 oldPos, Vec3 currentPos, Vec3 delta) {
 
     }
 }

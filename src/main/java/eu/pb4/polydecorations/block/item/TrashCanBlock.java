@@ -11,144 +11,144 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ItemStackParticleEffect;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, BarrierBasedWaterloggable, CustomBreakingParticleBlock {
-    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
-    public static final BooleanProperty OPEN = Properties.OPEN;
-    public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.of("force_open", OpenState.class);
-    private final ParticleEffect breakingParticle = new ItemStackParticleEffect(ParticleTypes.ITEM, ItemDisplayElementUtil.getModel(id("block/trashcan_bin")));
+public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable, CustomBreakingParticleBlock {
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+    public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.create("force_open", OpenState.class);
+    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getModel(id("block/trashcan_bin")));
 
-    public TrashCanBlock(Settings settings) {
+    public TrashCanBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(OPEN, false).with(FORCE_OPEN, OpenState.FALSE));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(OPEN, false).setValue(FORCE_OPEN, OpenState.FALSE));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATERLOGGED, OPEN, FORCE_OPEN);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return waterLog(ctx, this.getDefaultState().with(FACING, ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite()));
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return waterLog(ctx, this.defaultBlockState().setValue(FACING, ctx.getClickedFace().getAxis() != Direction.Axis.Y ? ctx.getClickedFace() : ctx.getHorizontalDirection().getOpposite()));
     }
 
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
-        return Blocks.IRON_BLOCK.getDefaultState();
+        return Blocks.IRON_BLOCK.defaultBlockState();
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof TrashCanBlockEntity be) {
-            be.openGui((ServerPlayerEntity) player);
-            return ActionResult.SUCCESS_SERVER;
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof TrashCanBlockEntity be) {
+            be.openGui((ServerPlayer) player);
+            return InteractionResult.SUCCESS_SERVER;
         }
 
-        if (player.isSneaking() && player.getStackInHand(Hand.MAIN_HAND).isEmpty() && player.canModifyBlocks()) {
-            if (!state.get(OPEN)) {
+        if (player.isShiftKeyDown() && player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.mayBuild()) {
+            if (!state.getValue(OPEN)) {
                 var x = pos.getX() + 0.5;
                 var z = pos.getY() + 1;
                 var y = pos.getZ() + 0.5;
                 //noinspection DataFlowIssue
-                world.playSound(null, x, z, y, state.get(FORCE_OPEN) == OpenState.LIDLESS ? DecorationSoundEvents.TRASHCAN_CLOSE : DecorationSoundEvents.TRASHCAN_OPEN,
-                        SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+                world.playSound(null, x, z, y, state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? DecorationSoundEvents.TRASHCAN_CLOSE : DecorationSoundEvents.TRASHCAN_OPEN,
+                        SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
             }
 
-            world.setBlockState(pos, state.cycle(FORCE_OPEN));
-            return ActionResult.SUCCESS_SERVER;
+            world.setBlockAndUpdate(pos, state.cycle(FORCE_OPEN));
+            return InteractionResult.SUCCESS_SERVER;
         }
 
-        return super.onUse(state, world, pos, player, hit);
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
-    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (world.getBlockEntity(pos) instanceof TrashCanBlockEntity be) {
             be.tick();
         }
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        ItemScatterer.onStateReplaced(state, world, pos);
-        super.onStateReplaced(state, world, pos, moved);
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
+        Containers.updateNeighboursAfterDestroy(state, world, pos);
+        super.affectNeighborsAfterRemoval(state, world, pos, moved);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         tickWater(state, world, tickView, pos);
-        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+        return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TrashCanBlockEntity(pos, state);
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
     }
 
     @Override
-    public ParticleEffect getBreakingParticle(BlockState blockState) {
+    public ParticleOptions getBreakingParticle(BlockState blockState) {
         return this.breakingParticle;
     }
 
-    public enum OpenState implements StringIdentifiable {
+    public enum OpenState implements StringRepresentable {
         FALSE("false", true),
         TRUE("true", false),
         LIDLESS("lidless", false);
@@ -162,7 +162,7 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
         }
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return this.id;
         }
 
@@ -192,14 +192,14 @@ public class TrashCanBlock extends BlockWithEntity implements FactoryBlock, Barr
         }
 
         private void updateState(BlockState state) {
-            var direction = state.get(FACING).getPositiveHorizontalDegrees();
+            var direction = state.getValue(FACING).toYRot();
             this.main.setYaw(direction);
             this.lid.setYaw(direction);
-            this.lid.setItem(state.get(FORCE_OPEN) == OpenState.LIDLESS ? ItemStack.EMPTY : LID);
+            this.lid.setItem(state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? ItemStack.EMPTY : LID);
 
-            if (state.get(OPEN) || state.get(FORCE_OPEN) == OpenState.TRUE) {
+            if (state.getValue(OPEN) || state.getValue(FORCE_OPEN) == OpenState.TRUE) {
                 this.lid.setTranslation(new Vector3f(0, 0.25f, 0));
-                this.lid.setRightRotation(new Quaternionf().rotateX(-MathHelper.PI / 6));
+                this.lid.setRightRotation(new Quaternionf().rotateX(-Mth.PI / 6));
             } else {
                 this.lid.setTranslation(new Vector3f());
                 this.lid.setRightRotation(new Quaternionf());

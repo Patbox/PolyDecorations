@@ -1,8 +1,8 @@
 package eu.pb4.polydecorations.util;
 
-import net.minecraft.sound.SoundEvent;
-
 import static eu.pb4.polydecorations.ModInit.id;
+
+import net.minecraft.sounds.SoundEvent;
 
 public interface DecorationSoundEvents {
     SoundEvent CANVAS_PLACE = of("entity.canvas.place");
@@ -14,10 +14,10 @@ public interface DecorationSoundEvents {
     SoundEvent BASKET_CLOSE = of("block.basket.close");
 
     static SoundEvent of(String string) {
-        return SoundEvent.of(id(string));
+        return SoundEvent.createVariableRangeEvent(id(string));
     }
 
     static SoundEvent of(String string, float distanceToTravel) {
-        return SoundEvent.of(id(string), distanceToTravel);
+        return SoundEvent.createFixedRangeEvent(id(string), distanceToTravel);
     }
 }

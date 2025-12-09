@@ -2,62 +2,61 @@ package eu.pb4.polydecorations.item;
 
 
 import eu.pb4.polymer.core.api.item.SimplePolymerItem;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-
 import java.util.ArrayList;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class TrowelItem extends SimplePolymerItem {
-    public TrowelItem(Settings settings) {
+    public TrowelItem(Properties settings) {
         super(settings);
     }
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
+    public InteractionResult useOn(UseOnContext context) {
         if (context.getPlayer() == null) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
-        if (context.getPlayer().getStackInHand(Hand.OFF_HAND).getItem() instanceof BlockItem) {
-            return ActionResult.SUCCESS_SERVER;
+        if (context.getPlayer().getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof BlockItem) {
+            return InteractionResult.SUCCESS_SERVER;
         }
 
         var stacks = new ArrayList<ItemStack>(9);
         for (var i = 0; i < 9; i++) {
-            var x = context.getPlayer().getInventory().getStack(i);
+            var x = context.getPlayer().getInventory().getItem(i);
             if (x.getItem() instanceof BlockItem) {
                 stacks.add(x);
             }
         }
         if (stacks.isEmpty()) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
         var stack = stacks.get(context.getPlayer().getRandom().nextInt(stacks.size()));
 
         var blockItem = ((BlockItem) stack.getItem());
-        var ctx = new ItemPlacementContext(context.getPlayer(), context.getHand(), stack,
-                new BlockHitResult(context.getHitPos(), context.getSide(), context.getBlockPos(), context.hitsInsideBlock()));
+        var ctx = new BlockPlaceContext(context.getPlayer(), context.getHand(), stack,
+                new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside()));
 
         var x = blockItem.place(ctx);
 
-        if (x.isAccepted() && ctx.getPlayer() instanceof ServerPlayerEntity player) {
-            ctx = blockItem.getPlacementContext(ctx);
+        if (x.consumesAction() && ctx.getPlayer() instanceof ServerPlayer player) {
+            ctx = blockItem.updatePlacementContext(ctx);
             if (ctx != null) {
-                BlockState blockState = ctx.getWorld().getBlockState(ctx.getBlockPos());
-                var group = blockState.getSoundGroup();
-                player.networkHandler.sendPacket(new PlaySoundS2CPacket(Registries.SOUND_EVENT.getEntry(group.getPlaceSound()),
-                        SoundCategory.BLOCKS, ctx.getBlockPos().getX() + 0.5, ctx.getBlockPos().getY() + 0.5, ctx.getBlockPos().getZ() + 0.5,
+                BlockState blockState = ctx.getLevel().getBlockState(ctx.getClickedPos());
+                var group = blockState.getSoundType();
+                player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(group.getPlaceSound()),
+                        SoundSource.BLOCKS, ctx.getClickedPos().getX() + 0.5, ctx.getClickedPos().getY() + 0.5, ctx.getClickedPos().getZ() + 0.5,
                         (group.getVolume() + 1.0F) / 2.0F, group.getPitch() * 0.8F, player.getRandom().nextLong()));
 
-                return ActionResult.SUCCESS_SERVER;
+                return InteractionResult.SUCCESS_SERVER;
             }
         }
 

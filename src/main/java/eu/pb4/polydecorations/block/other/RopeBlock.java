@@ -15,87 +15,89 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.*;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.particle.ItemStackParticleEffect;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.SupportType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Map;
 
 public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlock, CustomBreakingParticleBlock {
-    public static final BooleanProperty NORTH = Properties.NORTH;
-    public static final BooleanProperty EAST = Properties.EAST;
-    public static final BooleanProperty SOUTH = Properties.SOUTH;
-    public static final BooleanProperty WEST = Properties.WEST;
-    public static final BooleanProperty UP = Properties.UP;
-    public static final BooleanProperty DOWN = Properties.DOWN;
-    public static final IntProperty DISTANCE = Properties.DISTANCE_0_7;
+    public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
+    public static final BooleanProperty EAST = BlockStateProperties.EAST;
+    public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
+    public static final BooleanProperty WEST = BlockStateProperties.WEST;
+    public static final BooleanProperty UP = BlockStateProperties.UP;
+    public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
+    public static final IntegerProperty DISTANCE = BlockStateProperties.STABILITY_DISTANCE;
     public static final Map<Direction, BooleanProperty> FACING_PROPERTIES = ImmutableMap.copyOf(Util.make(Maps.newEnumMap(Direction.class), (directions) -> {
-        directions.put(Direction.NORTH, Properties.NORTH);
-        directions.put(Direction.EAST, Properties.EAST);
-        directions.put(Direction.SOUTH, Properties.SOUTH);
-        directions.put(Direction.WEST, Properties.WEST);
-        directions.put(Direction.UP, Properties.UP);
-        directions.put(Direction.DOWN, Properties.DOWN);
+        directions.put(Direction.NORTH, BlockStateProperties.NORTH);
+        directions.put(Direction.EAST, BlockStateProperties.EAST);
+        directions.put(Direction.SOUTH, BlockStateProperties.SOUTH);
+        directions.put(Direction.WEST, BlockStateProperties.WEST);
+        directions.put(Direction.UP, BlockStateProperties.UP);
+        directions.put(Direction.DOWN, BlockStateProperties.DOWN);
     }));
     private static final BlockState STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.VINES_BLOCK);
-    private static final ParticleEffect BREAKING_PARTICLE = new ItemStackParticleEffect(ParticleTypes.ITEM, DecorationsModels.ROPE.get(0));
-    public RopeBlock(Settings settings) {
+    private static final ParticleOptions BREAKING_PARTICLE = new ItemParticleOption(ParticleTypes.ITEM, DecorationsModels.ROPE.get(0));
+    public RopeBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(NORTH, false).with(SOUTH, false)
-                .with(EAST, false).with(WEST, false).with(UP, false).with(DOWN, false).with(DISTANCE, 0)
+        this.registerDefaultState(this.defaultBlockState().setValue(NORTH, false).setValue(SOUTH, false)
+                .setValue(EAST, false).setValue(WEST, false).setValue(UP, false).setValue(DOWN, false).setValue(DISTANCE, 0)
         );
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
         builder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, DISTANCE);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        var state = this.getDefaultState();
-        var distance = getDistanceAt(ctx.getWorld(), ctx.getBlockPos());
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        var state = this.defaultBlockState();
+        var distance = getDistanceAt(ctx.getLevel(), ctx.getClickedPos());
         if (distance > 7) {
             return null;
         }
 
         for (var direction : Direction.values()) {
-            var neighborPos = ctx.getBlockPos().offset(direction);
-            var neighbor = ctx.getWorld().getBlockState(neighborPos);
-            if (direction != Direction.DOWN && (canConnect(ctx.getWorld(), neighborPos, neighbor, direction.getOpposite()) || canSupport(ctx.getWorld(), neighborPos, neighbor, direction.getOpposite()))) {
-                state = state.with(FACING_PROPERTIES.get(direction), true);
+            var neighborPos = ctx.getClickedPos().relative(direction);
+            var neighbor = ctx.getLevel().getBlockState(neighborPos);
+            if (direction != Direction.DOWN && (canConnect(ctx.getLevel(), neighborPos, neighbor, direction.getOpposite()) || canSupport(ctx.getLevel(), neighborPos, neighbor, direction.getOpposite()))) {
+                state = state.setValue(FACING_PROPERTIES.get(direction), true);
             }
         }
-        return state.with(DISTANCE, distance);
+        return state.setValue(DISTANCE, distance);
     }
 
-    private boolean canConnect(WorldView world, BlockPos neighborPos, BlockState neighbor, Direction opposite) {
-        if (neighbor.isOf(this)) {
+    private boolean canConnect(LevelReader world, BlockPos neighborPos, BlockState neighbor, Direction opposite) {
+        if (neighbor.is(this)) {
             return true;
         } else if (opposite == Direction.UP &&
                 (neighbor.getBlock() instanceof LanternBlock
-                        || neighbor.isOf(DecorationsBlocks.WIND_CHIME)
-                        || neighbor.getBlock() instanceof HangingSignBlock hangingSignBlock
+                        || neighbor.is(DecorationsBlocks.WIND_CHIME)
+                        || neighbor.getBlock() instanceof CeilingHangingSignBlock hangingSignBlock
                 )) {
             return true;
         }
@@ -103,22 +105,22 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
     }
 
     @Override
-    protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
+    protected boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
         return getDistanceAt(world, pos) <= 7;
     }
 
-    public int getDistanceAt(WorldView world, BlockPos pos) {
+    public int getDistanceAt(LevelReader world, BlockPos pos) {
         int distance = 8;
         for (var direction : Direction.values()) {
             if (direction == Direction.DOWN) {
                 continue;
             }
-            var neighborPos = pos.offset(direction);
+            var neighborPos = pos.relative(direction);
             var neighbor = world.getBlockState(neighborPos);
-            if (direction == Direction.UP && neighbor.isOf(this)) {
-                distance = Math.min(neighbor.get(DISTANCE), distance);
-            } else if (neighbor.isOf(this)) {
-                distance = Math.min(neighbor.get(DISTANCE) + 1, distance);
+            if (direction == Direction.UP && neighbor.is(this)) {
+                distance = Math.min(neighbor.getValue(DISTANCE), distance);
+            } else if (neighbor.is(this)) {
+                distance = Math.min(neighbor.getValue(DISTANCE) + 1, distance);
             } else if (canSupport(world, neighborPos, neighbor, direction.getOpposite())) {
                 distance = 0;
             }
@@ -127,22 +129,22 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        tickView.scheduleBlockTick(pos, state.getBlock(), 1);
-        return state.with(FACING_PROPERTIES.get(direction), canConnect(world, neighborPos, neighborState, direction.getOpposite()) || canSupport(world, neighborPos, neighborState, direction.getOpposite()));
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+        tickView.scheduleTick(pos, state.getBlock(), 1);
+        return state.setValue(FACING_PROPERTIES.get(direction), canConnect(world, neighborPos, neighborState, direction.getOpposite()) || canSupport(world, neighborPos, neighborState, direction.getOpposite()));
     }
 
-    private static boolean canSupport(WorldView world, BlockPos neighborPos, BlockState blockState, Direction opposite) {
-        return !blockState.isAir() && (!Block.cannotConnect(blockState) && blockState.isSideSolid(world, neighborPos, opposite, SideShapeType.CENTER));
+    private static boolean canSupport(LevelReader world, BlockPos neighborPos, BlockState blockState, Direction opposite) {
+        return !blockState.isAir() && (!Block.isExceptionForConnection(blockState) && blockState.isFaceSturdy(world, neighborPos, opposite, SupportType.CENTER));
     }
 
     @Override
-    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         var d = getDistanceAt(world, pos);
         if (d > 7) {
-            world.breakBlock(pos, true);
-        } else if (d != state.get(DISTANCE)) {
-            world.setBlockState(pos, state.with(DISTANCE, d));
+            world.destroyBlock(pos, true);
+        } else if (d != state.getValue(DISTANCE)) {
+            world.setBlockAndUpdate(pos, state.setValue(DISTANCE, d));
         }
     }
 
@@ -153,20 +155,20 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
-        return Blocks.OAK_FENCE.getDefaultState();
+        return Blocks.OAK_FENCE.defaultBlockState();
     }
 
     public static boolean checkModelDirection(BlockState state, Direction direction) {
-        return state.get(FACING_PROPERTIES.get(direction));
+        return state.getValue(FACING_PROPERTIES.get(direction));
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(initialBlockState);
     }
 
     @Override
-    public ParticleEffect getBreakingParticle(BlockState blockState) {
+    public ParticleOptions getBreakingParticle(BlockState blockState) {
         return BREAKING_PARTICLE;
     }
 

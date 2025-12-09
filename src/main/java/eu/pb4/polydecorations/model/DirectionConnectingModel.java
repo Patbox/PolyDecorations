@@ -5,14 +5,13 @@ import com.google.gson.JsonObject;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
-
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class DirectionConnectingModel {
     public static final int SIZE = (int) Math.pow(2, 6);
@@ -23,7 +22,7 @@ public class DirectionConnectingModel {
         this.baseModel = baseModel;
 
         for (var i = 0; i < SIZE; i++) {
-            this.models[i] = ItemDisplayElementUtil.getModel(baseModel.withSuffixedPath("/" + i));
+            this.models[i] = ItemDisplayElementUtil.getModel(baseModel.withSuffix("/" + i));
         }
     }
 
@@ -34,8 +33,8 @@ public class DirectionConnectingModel {
             int dirCount = 0;
             int axisCount = 0;
             for (var axis : Direction.Axis.values()) {
-                var a = hasDirection(i, Direction.from(axis, Direction.AxisDirection.POSITIVE));
-                var b = hasDirection(i, Direction.from(axis, Direction.AxisDirection.NEGATIVE));
+                var a = hasDirection(i, Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE));
+                var b = hasDirection(i, Direction.fromAxisAndDirection(axis, Direction.AxisDirection.NEGATIVE));
                 if (a && b) {
                     axisCount += 1;
                     dirCount += 2;
@@ -63,7 +62,7 @@ public class DirectionConnectingModel {
                         elements.add(element);
                     }
                 } else if (name != null && name.getAsString().startsWith("rp_")) {
-                    var dir = Direction.byId(name.getAsString().substring("rp_".length()));
+                    var dir = Direction.byName(name.getAsString().substring("rp_".length()));
                     if (dir == null || dirCount == 0) {
                         elements.add(element);
                     } else if (dirCount == 1 && hasDirection(i, dir.getOpposite())) {
@@ -72,14 +71,14 @@ public class DirectionConnectingModel {
                         elements.add(element);
                     }
                 } else if (name != null && name.getAsString().startsWith("tuft_")) {
-                    var dir = Direction.byId(name.getAsString().substring("tuft_".length()));
+                    var dir = Direction.byName(name.getAsString().substring("tuft_".length()));
                     if (dir == null || dirCount == 0) {
                         elements.add(element);
                     } else if (dirCount == 1 && hasDirection(i, dir.getOpposite())) {
                         elements.add(element);
                     }
-                } else if (name != null && Direction.byId(name.getAsString()) != null) {
-                    if (hasDirection(i, Direction.byId(name.getAsString()))) {
+                } else if (name != null && Direction.byName(name.getAsString()) != null) {
+                    if (hasDirection(i, Direction.byName(name.getAsString()))) {
                         elements.add(element);
                     }
                 } else {
@@ -88,7 +87,7 @@ public class DirectionConnectingModel {
             }
             base.add("elements", elements);
 
-            dataWriter.accept(AssetPaths.model(this.baseModel.withSuffixedPath("/" + i + ".json")), base.toString().getBytes(StandardCharsets.UTF_8));
+            dataWriter.accept(AssetPaths.model(this.baseModel.withSuffix("/" + i + ".json")), base.toString().getBytes(StandardCharsets.UTF_8));
         }
     }
 

@@ -4,23 +4,20 @@ import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.util.SingleItemInventory;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.item.ItemStack;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class LongFlowerPotBlockEntity extends BlockEntity implements BlockEntityExtraListener {
-    private final DefaultedList<ItemStack> items = DefaultedList.ofSize(3, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
     private ItemSetter model;
 
     public LongFlowerPotBlockEntity(BlockPos pos, BlockState state) {
@@ -32,7 +29,7 @@ public class LongFlowerPotBlockEntity extends BlockEntity implements BlockEntity
         if (this.model != null) {
             this.model.setItem(slot, item);
         }
-        this.markDirty();
+        this.setChanged();
     }
 
     public ItemStack getItem(int slot) {
@@ -40,22 +37,22 @@ public class LongFlowerPotBlockEntity extends BlockEntity implements BlockEntity
     }
 
     @Override
-    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
-        super.onBlockReplaced(pos, oldState);
-        assert world != null;
-        ItemScatterer.spawn(world, pos, this.items);
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        assert level != null;
+        Containers.dropContents(level, pos, this.items);
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
-        Inventories.writeData(view, this.items);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
+        ContainerHelper.saveAllItems(view, this.items);
     }
 
     @Override
-    public void readData(ReadView view) {
-        super.readData(view);
-        Inventories.readData(view, this.items);
+    public void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
+        ContainerHelper.loadAllItems(view, this.items);
         if (this.model != null) {
             for (int i = 0; i < this.items.size(); i++) {
                 this.model.setItem(i, this.items.get(i));
@@ -64,8 +61,8 @@ public class LongFlowerPotBlockEntity extends BlockEntity implements BlockEntity
     }
 
     @Override
-    public void onListenerUpdate(WorldChunk chunk) {
-        this.model = (ItemSetter) BlockAwareAttachment.get(chunk, this.pos).holder();
+    public void onListenerUpdate(LevelChunk chunk) {
+        this.model = (ItemSetter) BlockAwareAttachment.get(chunk, this.worldPosition).holder();
         for (int i = 0; i < this.items.size(); i++) {
             this.model.setItem(i, this.items.get(i));
         }

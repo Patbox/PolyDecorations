@@ -4,20 +4,17 @@ import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.util.SingleItemInventory;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEntityExtraListener, SingleItemInventory {
@@ -41,65 +38,65 @@ public class GenericSingleItemBlockEntity extends BlockEntity implements BlockEn
         if (this.model != null) {
             this.model.setItem(this.item.copy());
         }
-        this.markDirty();
+        this.setChanged();
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
         if (!this.item.isEmpty()) {
-            view.put("item", ItemStack.OPTIONAL_CODEC, this.item);
+            view.store("item", ItemStack.OPTIONAL_CODEC, this.item);
         }
     }
 
     @Override
-    public void readData(ReadView view) {
-        super.readData(view);
+    public void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
         setItem(view.read("item", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
     }
 
     @Override
-    public void onListenerUpdate(WorldChunk chunk) {
-        this.model = (ItemSetter) BlockAwareAttachment.get(chunk, this.pos).holder();
+    public void onListenerUpdate(LevelChunk chunk) {
+        this.model = (ItemSetter) BlockAwareAttachment.get(chunk, this.worldPosition).holder();
         this.model.setItem(this.item.copy());
     }
 
-    public void dropReplaceItem(PlayerEntity player, ItemStack stack, @Nullable Hand hand) {
+    public void dropReplaceItem(Player player, ItemStack stack, @Nullable InteractionHand hand) {
         if (!this.item.isEmpty()) {
             var out = this.item;
             this.item = ItemStack.EMPTY;
-            ItemScatterer.spawn(this.world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, out);
+            Containers.dropItemStack(this.level, worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, out);
         }
 
         var cpy = stack.copyWithCount(1);
 
         if (!stack.isEmpty() && !player.isCreative() && hand != null) {
-            stack.decrement(1);
-            player.setStackInHand(hand, stack);
+            stack.shrink(1);
+            player.setItemInHand(hand, stack);
         }
 
         this.setItem(cpy);
     }
 
     @Override
-    public ItemStack getStack() {
+    public ItemStack getTheItem() {
         return this.item;
     }
 
     @Override
-    public ItemStack decreaseStack(int count) {
+    public ItemStack splitTheItem(int count) {
         var item = this.item;
         setItem(ItemStack.EMPTY);
         return item;
     }
 
     @Override
-    public void setStack(ItemStack stack) {
+    public void setTheItem(ItemStack stack) {
         setItem(stack);
     }
 
     @Override
-    public boolean canPlayerUse(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return true;
     }
 

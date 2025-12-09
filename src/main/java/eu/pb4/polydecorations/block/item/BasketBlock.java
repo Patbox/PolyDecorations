@@ -13,33 +13,38 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ShulkerBoxBlockEntity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootWorldContext;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChainBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
@@ -48,41 +53,41 @@ import java.util.List;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
-public class BasketBlock extends BlockWithEntity implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
-    public static final Identifier CONTENTS_DYNAMIC_DROP_ID = ShulkerBoxBlock.CONTENTS_DYNAMIC_DROP_ID;
+public class BasketBlock extends BaseEntityBlock implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
+    public static final Identifier CONTENTS_DYNAMIC_DROP_ID = ShulkerBoxBlock.CONTENTS;
 
-    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
-    public static final BooleanProperty OPEN = Properties.OPEN;
-    public static final BooleanProperty HANGING = Properties.HANGING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+    public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
 
-    public BasketBlock(Settings settings) {
+    public BasketBlock(Properties settings) {
         super(settings);
-        this.setDefaultState(this.getDefaultState().with(WATERLOGGED, false).with(OPEN, false).with(HANGING, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(OPEN, false).setValue(HANGING, false));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(WATERLOGGED, FACING, OPEN, HANGING);
     }
 
     @Nullable
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return waterLog(ctx, this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(HANGING, canHangingOn(ctx.getWorld(), ctx.getBlockPos().up())));
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return waterLog(ctx, this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite()).setValue(HANGING, canHangingOn(ctx.getLevel(), ctx.getClickedPos().above())));
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!player.isSneaking() && world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
-            be.openGui((ServerPlayerEntity) player);
-            return ActionResult.SUCCESS_SERVER;
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
+            be.openGui((ServerPlayer) player);
+            return InteractionResult.SUCCESS_SERVER;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         if (world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
             be.tick();
         }
@@ -90,86 +95,86 @@ public class BasketBlock extends BlockWithEntity implements FactoryBlock, QuickW
 
 
     @Override
-    public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
         if (world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
-            if (!world.isClient() && player.shouldSkipBlockDrops() && !be.isEmpty()) {
-                var itemStack = this.asItem().getDefaultStack();
-                itemStack.applyComponentsFrom(be.createComponentMap());
+            if (!world.isClientSide() && player.preventsBlockDrops() && !be.isEmpty()) {
+                var itemStack = this.asItem().getDefaultInstance();
+                itemStack.applyComponents(be.collectComponents());
                 ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
-                itemEntity.setToDefaultPickupDelay();
-                world.spawnEntity(itemEntity);
+                itemEntity.setDefaultPickUpDelay();
+                world.addFreshEntity(itemEntity);
             } else {
                 //be.generateLoot(player);
             }
         }
 
-        return super.onBreak(world, pos, state, player);
+        return super.playerWillDestroy(world, pos, state, player);
     }
 
     @Override
-    protected List<ItemStack> getDroppedStacks(BlockState state, LootWorldContext.Builder builder) {
-        BlockEntity blockEntity = builder.getOptional(LootContextParameters.BLOCK_ENTITY);
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         if (blockEntity instanceof ShulkerBoxBlockEntity be) {
-            builder = builder.addDynamicDrop(CONTENTS_DYNAMIC_DROP_ID, (lootConsumer) -> {
-                for (int i = 0; i < be.size(); ++i) {
-                    lootConsumer.accept(be.getStack(i));
+            builder = builder.withDynamicDrop(CONTENTS_DYNAMIC_DROP_ID, (lootConsumer) -> {
+                for (int i = 0; i < be.getContainerSize(); ++i) {
+                    lootConsumer.accept(be.getItem(i));
                 }
 
             });
         }
 
-        return super.getDroppedStacks(state, builder);
+        return super.getDrops(state, builder);
     }
 
     @Override
     public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
-        return blockState.get(WATERLOGGED) ? DecorationsUtil.CAMPFIRE_WATERLOGGED_STATE : DecorationsUtil.CAMPFIRE_STATE;
+        return blockState.getValue(WATERLOGGED) ? DecorationsUtil.CAMPFIRE_WATERLOGGED_STATE : DecorationsUtil.CAMPFIRE_STATE;
     }
 
     @Override
     public BlockState getPolymerBreakEventBlockState(BlockState state, PacketContext context) {
-        return Blocks.OAK_PLANKS.getDefaultState();
+        return Blocks.OAK_PLANKS.defaultBlockState();
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         tickWater(state, world, tickView, pos);
-        state = super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+        state = super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
         if (direction == Direction.UP) {
-            state = state.with(HANGING, canHangingOn(world, pos.up()));
+            state = state.setValue(HANGING, canHangingOn(world, pos.above()));
         }
         return state;
     }
 
-    private boolean canHangingOn(WorldView world, BlockPos up) {
+    private boolean canHangingOn(LevelReader world, BlockPos up) {
         var state = world.getBlockState(up);
 
-        return state.isOf(DecorationsBlocks.ROPE) || state.getBlock() instanceof ChainBlock && state.get(ChainBlock.AXIS) == Direction.Axis.Y;
+        return state.is(DecorationsBlocks.ROPE) || state.getBlock() instanceof ChainBlock && state.getValue(ChainBlock.AXIS) == Direction.Axis.Y;
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        ItemScatterer.onStateReplaced(state, world, pos);
-        super.onStateReplaced(state, world, pos, moved);
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
+        Containers.updateNeighboursAfterDestroy(state, world, pos);
+        super.affectNeighborsAfterRemoval(state, world, pos, moved);
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return null;
     }
 
     @Override
-    public @Nullable ElementHolder createElementHolder(ServerWorld world, BlockPos pos, BlockState initialBlockState) {
+    public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
         return new Model(world, initialBlockState);
     }
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BasketBlockEntity(pos, state);
     }
 
@@ -178,12 +183,12 @@ public class BasketBlock extends BlockWithEntity implements FactoryBlock, QuickW
         public static final ItemStack BASKET_CLOSE = ItemDisplayElementUtil.getModel(id("block/basket_closed"));
         private final ItemDisplayElement main;
 
-        public Model(ServerWorld world, BlockState state) {
-            var direction = state.get(FACING).getPositiveHorizontalDegrees();
+        public Model(ServerLevel world, BlockState state) {
+            var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(state.get(OPEN) ? BASKET_OPEN : BASKET_CLOSE);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) ? BASKET_OPEN : BASKET_CLOSE);
             this.main.setScale(new Vector3f(2));
-            this.main.setTranslation(new Vector3f(0, state.get(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
+            this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
             this.main.setYaw(direction);
             this.addElement(this.main);
         }
@@ -192,10 +197,10 @@ public class BasketBlock extends BlockWithEntity implements FactoryBlock, QuickW
         public void notifyUpdate(HolderAttachment.UpdateType updateType) {
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
-                var direction = state.get(FACING).getPositiveHorizontalDegrees();
+                var direction = state.getValue(FACING).toYRot();
                 this.main.setYaw(direction);
-                this.main.setTranslation(new Vector3f(0, state.get(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
-                this.main.setItem(state.get(OPEN) ? BASKET_OPEN : BASKET_CLOSE);
+                this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
+                this.main.setItem(state.getValue(OPEN) ? BASKET_OPEN : BASKET_CLOSE);
                 this.tick();
             }
         }
