@@ -83,6 +83,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.BASKET)
                 .add(DecorationsBlocks.LONG_FLOWER_POT)
                 .add(DecorationsBlocks.WIND_CHIME)
+                .add(DecorationsBlocks.CARDBOARD_BOX)
         ;
 
         this.valueLookupBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)

@@ -3,7 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import eu.pb4.factorytools.api.block.entity.LockableBlockEntity;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.ui.GuiTextures;
-import eu.pb4.polydecorations.util.DecorationSoundEvents;
+import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polydecorations.util.MinimalInventory;
 import eu.pb4.sgui.api.GuiHelpers;
 import eu.pb4.sgui.api.gui.SimpleGui;
@@ -41,14 +41,14 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
     private final ContainerOpenersCounter stateManager = new ContainerOpenersCounter() {
         protected void onOpen(Level world, BlockPos pos, BlockState state) {
             if (state.getValue(TrashCanBlock.FORCE_OPEN).playSound()) {
-                TrashCanBlockEntity.this.playSound(DecorationSoundEvents.TRASHCAN_OPEN);
+                TrashCanBlockEntity.this.playSound(DecorationsSoundEvents.TRASHCAN_OPEN);
             }
             TrashCanBlockEntity.this.setOpen(state, true);
         }
 
         protected void onClose(Level world, BlockPos pos, BlockState state) {
             if (state.getValue(TrashCanBlock.FORCE_OPEN).playSound()) {
-                TrashCanBlockEntity.this.playSound(DecorationSoundEvents.TRASHCAN_CLOSE);
+                TrashCanBlockEntity.this.playSound(DecorationsSoundEvents.TRASHCAN_CLOSE);
             }
             TrashCanBlockEntity.this.setOpen(state, false);
         }
@@ -132,7 +132,7 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
         }
 
         if (this.level != null && this.lastClearTick != (int) this.level.getGameTime()) {
-            playSound(DecorationSoundEvents.TRASHCAN_CLEAR);
+            playSound(DecorationsSoundEvents.TRASHCAN_CLEAR);
             this.lastClearTick = (int) this.level.getGameTime();
         }
     }

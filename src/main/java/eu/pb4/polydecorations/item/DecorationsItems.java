@@ -66,6 +66,8 @@ public class DecorationsItems {
     public static final Map<DyeColor, Item> SLEEPING_BAG = register(DecorationsBlocks.SLEEPING_BAG, DyeColor::name, x -> x.stacksTo(1));
 
     public static final Item GHOST_LIGHT = register(DecorationsBlocks.GHOST_LIGHT);
+    public static final Item BURNING_GHOST_LIGHT = register(DecorationsBlocks.BURNING_GHOST_LIGHT);
+    public static final Item COPPER_GHOST_LIGHT = register(DecorationsBlocks.COPPER_GHOST_LIGHT);
     public static final Item DISPLAY_CASE = register(DecorationsBlocks.DISPLAY_CASE);
     public static final Item ROPE = register("rope", (settings) -> new RopeItem(DecorationsBlocks.ROPE, settings.useBlockDescriptionPrefix()));
     public static final Item LARGE_FLOWER_POT = register(DecorationsBlocks.LARGE_FLOWER_POT);
@@ -97,9 +99,6 @@ public class DecorationsItems {
     }
 
     public static void register() {
-        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(ModInit.ID, "canvas_data"), CanvasItem.DATA_TYPE);
-        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Identifier.fromNamespaceAndPath(ModInit.ID, "wind_chime_color"), WindChimeItem.WIND_CHIME_COLOR);
-        PolymerComponent.registerDataComponent(CanvasItem.DATA_TYPE, WindChimeItem.WIND_CHIME_COLOR);
         PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.fromNamespaceAndPath(ModInit.ID, "a_group"), PolymerItemGroupUtils.builder()
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultInstance())
                 .title(Component.translatable("itemgroup." + ModInit.ID))
@@ -111,6 +110,8 @@ public class DecorationsItems {
                     entries.accept(COPPER_BRAZIER);
                     entries.accept(COPPER_CAMPFIRE);
                     entries.accept(GHOST_LIGHT);
+                    entries.accept(BURNING_GHOST_LIGHT);
+                    entries.accept(COPPER_GHOST_LIGHT);
                     entries.accept(LARGE_FLOWER_POT);
                     entries.accept(LONG_FLOWER_POT);
                     entries.accept(DISPLAY_CASE);

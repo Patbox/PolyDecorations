@@ -8,6 +8,7 @@ import eu.pb4.mapcanvas.api.core.CanvasColor;
 import eu.pb4.mapcanvas.api.utils.CanvasUtils;
 import eu.pb4.polydecorations.entity.CanvasEntity;
 import eu.pb4.polydecorations.item.CanvasItem;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.WindChimeItem;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -64,7 +65,7 @@ public class ColorWindChimeRecipe extends CustomRecipe {
             }
         }
         var stack = DecorationsItems.WIND_CHIME.getDefaultInstance();
-        stack.set(WindChimeItem.WIND_CHIME_COLOR, colors);
+        stack.set(DecorationsDataComponents.WIND_CHIME_COLOR, colors);
         return stack;
     }
 

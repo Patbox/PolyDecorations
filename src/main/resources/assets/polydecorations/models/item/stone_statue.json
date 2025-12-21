@@ -1,7 +1,9 @@
 {
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "block/stone",
-		"particle": "#0"
+		"particle": "block/stone"
 	},
 	"elements": [
 		{
@@ -36,7 +38,7 @@
 			"name": "left_arm",
 			"from": [3.52, 6.72, 6.88],
 			"to": [5.76, 13.44, 9.12],
-			"rotation": {"angle": 0, "axis": "z", "origin": [4.64, 12.32, 8]},
+			"rotation": {"angle": 0, "axis": "x", "origin": [4.64, 12.32, 8]},
 			"faces": {
 				"north": {"uv": [9, 4, 13, 16], "texture": "#0"},
 				"east": {"uv": [8, 4, 12, 16], "texture": "#0"},
@@ -105,7 +107,7 @@
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"firstperson_lefthand": {
-			"rotation": [0, 225, 0],
+			"rotation": [0, -135, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"ground": {
@@ -113,7 +115,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, 225, 0],
+			"rotation": [30, -135, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {
@@ -125,42 +127,36 @@
 			"name": "head",
 			"origin": [8, 13.44, 8],
 			"color": 0,
-			"nbt": "{}",
 			"children": [0]
 		},
 		{
 			"name": "body",
 			"origin": [8, 13.44, 8],
 			"color": 0,
-			"nbt": "{}",
 			"children": [1]
 		},
 		{
 			"name": "left_arm",
 			"origin": [10.8, 12.32, 8],
 			"color": 0,
-			"nbt": "{}",
 			"children": [2]
 		},
 		{
 			"name": "right_arm",
 			"origin": [5.2, 12.32, 8],
 			"color": 0,
-			"nbt": "{}",
 			"children": [3]
 		},
 		{
 			"name": "left_leg",
 			"origin": [9.12, 6.72, 8],
 			"color": 0,
-			"nbt": "{}",
 			"children": [4]
 		},
 		{
 			"name": "right_leg",
 			"origin": [6.88, 6.72, 8],
 			"color": 0,
-			"nbt": "{}",
 			"children": [5]
 		}
 	]

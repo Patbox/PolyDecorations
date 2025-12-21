@@ -16,6 +16,7 @@
     "ShulkerBoxBlockEntityMixin",
     "SignBlockEntityMixin",
     "TagValueInputAccessor",
+    "ItemContainerContentsMixin",
     "datafixer.ItemStackComponentizationFixMixin",
     "datafixer.V100Accessor",
     "datafixer.V1460Mixin",

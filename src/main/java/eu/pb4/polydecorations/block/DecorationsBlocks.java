@@ -8,7 +8,7 @@ import eu.pb4.polydecorations.block.furniture.*;
 import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
 import eu.pb4.polydecorations.block.other.RopeBlock;
-import eu.pb4.polydecorations.util.DecorationSoundEvents;
+import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -96,7 +96,7 @@ public class DecorationsBlocks {
     public static final PickableItemContainerBlock CARDBOARD_BOX = register("cardboard_box", settings -> new PickableItemContainerBlock(settings
             .mapColor(MapColor.WOOD).strength(0.4F)
             .ignitedByLava()
-            .sound(SoundType.SCAFFOLDING).noOcclusion(), DecorationSoundEvents.BASKET_OPEN, DecorationSoundEvents.BASKET_CLOSE));
+            .sound(DecorationsSoundEvents.CARDBOARD).noOcclusion(), DecorationsSoundEvents.CARDBOARD_BOX_OPEN, DecorationsSoundEvents.CARDBOARD_BOX_CLOSE));
 
     public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", settings -> new LargeFlowerPotBlock(settings
             .mapColor(MapColor.COLOR_ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).noOcclusion()));
@@ -107,6 +107,12 @@ public class DecorationsBlocks {
     public static final GhostLightBlock GHOST_LIGHT = register("ghost_light",
             settings -> new GhostLightBlock(settings.noOcclusion()
                     .noCollision().instabreak().lightLevel(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
+
+    public static final GhostLightBlock BURNING_GHOST_LIGHT = register("burning_ghost_light", BlockBehaviour.Properties.ofFullCopy(GHOST_LIGHT),
+            settings -> new GhostLightBlock(settings.lightLevel(x -> 9), 5, 1, 0.001f, ParticleTypes.FLAME));
+
+    public static final GhostLightBlock COPPER_GHOST_LIGHT = register("copper_ghost_light", BlockBehaviour.Properties.ofFullCopy(GHOST_LIGHT),
+            settings -> new GhostLightBlock(settings.lightLevel(x -> 9), 5, 1, 0.001f, ParticleTypes.COPPER_FIRE_FLAME));
 
     public static final Map<WoodType, PlainShelfBlock> SHELF = registerWood("shelf", (x, id, settings) -> {
         var planks = Identifier.parse(x.name() + "_planks");

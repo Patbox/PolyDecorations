@@ -1,0 +1,35 @@
+{
+    "sources": [
+        {
+            "type": "directory",
+            "source": "sgui/elements",
+            "prefix": "sgui/elements/"
+        },
+        {
+            "type": "paletted_permutations",
+            "textures": [
+                "polydecorations:block/sleeping_bag"
+            ],
+            "palette_key": "polydecorations:palette/bed_color/red",
+            "permutations": {
+                "white": "polydecorations:palette/bed_color/white",
+                "orange": "polydecorations:palette/bed_color/orange",
+                "magenta": "polydecorations:palette/bed_color/magenta",
+                "light_blue": "polydecorations:palette/bed_color/light_blue",
+                "yellow": "polydecorations:palette/bed_color/yellow",
+                "lime": "polydecorations:palette/bed_color/lime",
+                "pink": "polydecorations:palette/bed_color/pink",
+                "gray": "polydecorations:palette/bed_color/gray",
+                "light_gray": "polydecorations:palette/bed_color/light_gray",
+                "cyan": "polydecorations:palette/bed_color/cyan",
+                "purple": "polydecorations:palette/bed_color/purple",
+                "blue": "polydecorations:palette/bed_color/blue",
+                "brown": "polydecorations:palette/bed_color/brown",
+                "green": "polydecorations:palette/bed_color/green",
+                "red": "polydecorations:palette/bed_color/red",
+                "black": "polydecorations:palette/bed_color/black"
+            }
+        }
+
+    ]
+}

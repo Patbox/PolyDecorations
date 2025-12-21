@@ -5,8 +5,12 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
+import eu.pb4.mapcanvas.api.core.CanvasImage;
+import eu.pb4.polydecorations.canvas.CanvasData;
+import eu.pb4.polydecorations.canvas.CanvasPixels;
 import eu.pb4.polydecorations.entity.CanvasEntity;
 import eu.pb4.polydecorations.item.CanvasItem;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -69,7 +73,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     public boolean matches(CraftingInput craftingRecipeInput, Level world) {
         for (var tmp : craftingRecipeInput.items()) {
             if (this.source.test(tmp)) {
-                var data = tmp.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT);
+                var data = tmp.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT);
 
                 if (switch (this.action) {
                     case "wax" -> data.waxed();
@@ -98,19 +102,19 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
         for (var tmp : recipeInputInventory.items()) {
             if (this.source.test(tmp)) {
                 stack.applyComponents(tmp.getComponents());
-                stack.update(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
-                    case "wax" -> new CanvasItem.Data(x.image(), x.background(), x.glowing(), true, x.cut());
-                    case "glow" -> new CanvasItem.Data(x.image(), x.background(), true, x.waxed(), x.cut());
-                    case "unglow" -> new CanvasItem.Data(x.image(), x.background(), false, x.waxed(), x.cut());
+                stack.update(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT, (x) -> switch (this.action) {
+                    case "wax" -> new CanvasData(x.image(), x.background(), x.glowing(), true, x.cut());
+                    case "glow" -> new CanvasData(x.image(), x.background(), true, x.waxed(), x.cut());
+                    case "unglow" -> new CanvasData(x.image(), x.background(), false, x.waxed(), x.cut());
                     case "dye" ->
-                            new CanvasItem.Data(x.image(), CanvasEntity.getColor(dye), x.glowing(), x.waxed(), x.cut());
+                            new CanvasData(x.image(), CanvasEntity.getColor(dye), x.glowing(), x.waxed(), x.cut());
                     case "cut" -> {
                         byte[] image;
                         if (x.image().isPresent()) {
                             var source = x.image().get();
-                            image = new byte[source.length];
-                            for (var i = 0; i < source.length; i++) {
-                                var c = source[i];
+                            image = new byte[source.data().length];
+                            for (var i = 0; i < source.data().length; i++) {
+                                var c = source.data()[i];
                                 if (c == 0) {
                                     c = 1;
                                 }
@@ -120,16 +124,16 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
                             image = new byte[16 * 16];
                             Arrays.fill(image, (byte) 1);
                         }
-                        yield new CanvasItem.Data(Optional.ofNullable(image), x.background(), x.glowing(), x.waxed(), true);
+                        yield new CanvasData(Optional.ofNullable(new CanvasPixels(image)), x.background(), x.glowing(), x.waxed(), true);
                     }
                     case "uncut" -> {
                         byte[] image;
                         if (x.image().isPresent()) {
                             boolean isEmpty = true;
                             var source = x.image().get();
-                            image = new byte[source.length];
-                            for (var i = 0; i < source.length; i++) {
-                                var c = source[i];
+                            image = new byte[source.data().length];
+                            for (var i = 0; i < source.data().length; i++) {
+                                var c = source.data()[i];
                                 if (c == 1) {
                                     c = 0;
                                 } else if (c != 0) {
@@ -144,7 +148,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
                         } else {
                             image = null;
                         }
-                        yield new CanvasItem.Data(Optional.ofNullable(image), x.background(), x.glowing(), x.waxed(), false);
+                        yield new CanvasData(Optional.ofNullable(new CanvasPixels(image)), x.background(), x.glowing(), x.waxed(), false);
                     }
                     default -> x;
                 });
@@ -185,14 +189,14 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
         }
         var res = this.result.copy();
 
-        var fakeImage = Optional.of(new byte[0]);
-        res.update(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT, (x) -> switch (this.action) {
-            case "wax" -> new CanvasItem.Data(fakeImage, x.background(), x.glowing(), true, x.cut());
-            case "glow" -> new CanvasItem.Data(fakeImage, x.background(), true, x.waxed(), x.cut());
-            case "unglow" -> new CanvasItem.Data(fakeImage, x.background(), false, x.waxed(), x.cut());
-            case "dye" -> new CanvasItem.Data(fakeImage, Optional.of(CanvasColor.OFF_WHITE_NORMAL), x.glowing(), x.waxed(), x.cut());
-            case "cut" -> new CanvasItem.Data(fakeImage, x.background(), x.glowing(), x.waxed(), true);
-            case "uncut" -> new CanvasItem.Data(fakeImage, x.background(), x.glowing(), x.waxed(), false);
+        var fakeImage = Optional.of(new CanvasPixels(new byte[0]));
+        res.update(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT, (x) -> switch (this.action) {
+            case "wax" -> new CanvasData(fakeImage, x.background(), x.glowing(), true, x.cut());
+            case "glow" -> new CanvasData(fakeImage, x.background(), true, x.waxed(), x.cut());
+            case "unglow" -> new CanvasData(fakeImage, x.background(), false, x.waxed(), x.cut());
+            case "dye" -> new CanvasData(fakeImage, Optional.of(CanvasColor.OFF_WHITE_NORMAL), x.glowing(), x.waxed(), x.cut());
+            case "cut" -> new CanvasData(fakeImage, x.background(), x.glowing(), x.waxed(), true);
+            case "uncut" -> new CanvasData(fakeImage, x.background(), x.glowing(), x.waxed(), false);
             default -> x;
         });
 

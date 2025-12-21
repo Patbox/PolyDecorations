@@ -126,6 +126,8 @@
   "block.polydecorations.large_flower_pot": "Large Flower Pot",
   "block.polydecorations.long_flower_pot": "Long Flower Pot",
   "block.polydecorations.ghost_light": "Ghost Light",
+  "block.polydecorations.burning_ghost_light": "Burning Ghost Light",
+  "block.polydecorations.copper_ghost_light": "Copper Ghost Light",
   "block.polydecorations.trashcan": "Trash Can",
   "block.polydecorations.basket": "Basket",
   "block.polydecorations.cardboard_box": "Cardboard Box",
@@ -139,7 +141,7 @@
   "item.polydecorations.sandstone_statue": "Sandstone Statue",
   "item.polydecorations.red_sandstone_statue": "Red Sandstone Statue",
   "item.polydecorations.quartz_statue": "Quartz Statue",
-  "item.polydecorations.andesite_statue": "Antesite Statue",
+  "item.polydecorations.andesite_statue": "Andesite Statue",
   "item.polydecorations.diorite_statue": "Diorite Statue",
   "item.polydecorations.granite_statue": "Granite Statue",
   "item.polydecorations.tuff_statue": "Tuff Statue",
@@ -216,6 +218,8 @@
   "text.polydecorations.your": "Your %s",
   "text.polydecorations.tooltip.any_dye": "Any Dye",
   "text.polydecorations.tooltip.coal_and_bone_meal": "Coal and Bone Meal",
+
+  "text.polydecorations.tied": "Tied",
 
   "subtitles.polydecorations.entity.canvas.break": "Canvas breaks",
   "subtitles.polydecorations.entity.canvas.place": "Canvas placed",

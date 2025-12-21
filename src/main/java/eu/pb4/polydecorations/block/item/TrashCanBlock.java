@@ -6,7 +6,7 @@ import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
-import eu.pb4.polydecorations.util.DecorationSoundEvents;
+import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -16,7 +16,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -93,7 +92,7 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
                 var z = pos.getY() + 1;
                 var y = pos.getZ() + 0.5;
                 //noinspection DataFlowIssue
-                world.playSound(null, x, z, y, state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? DecorationSoundEvents.TRASHCAN_CLOSE : DecorationSoundEvents.TRASHCAN_OPEN,
+                world.playSound(null, x, z, y, state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? DecorationsSoundEvents.TRASHCAN_CLOSE : DecorationsSoundEvents.TRASHCAN_OPEN,
                         SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
             }
 

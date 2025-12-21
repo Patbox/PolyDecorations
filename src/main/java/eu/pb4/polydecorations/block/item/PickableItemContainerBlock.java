@@ -7,6 +7,7 @@ import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.mixin.PropertiesAccessor;
+import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -19,8 +20,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -57,6 +60,8 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+    public static final BooleanProperty FORCE_OPEN = BooleanProperty.create("force_open");
+
 
     public final SoundEvent openSoundEvent;
     public final SoundEvent closeSoundEvent;
@@ -65,7 +70,8 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
 
     public PickableItemContainerBlock(Properties settings, SoundEvent openSoundEvent, SoundEvent closeSoundEvent) {
         super(settings);
-        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(OPEN, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false)
+                .setValue(OPEN, false).setValue(FORCE_OPEN, false));
         this.openSoundEvent = openSoundEvent;
         this.closeSoundEvent = closeSoundEvent;
 
@@ -77,7 +83,7 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(WATERLOGGED, FACING, OPEN);
+        builder.add(WATERLOGGED, FACING, OPEN, FORCE_OPEN);
     }
 
     @Nullable
@@ -90,6 +96,20 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
     public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof PickableItemContainerBlockEntity be) {
             be.openGui((ServerPlayer) player);
+            return InteractionResult.SUCCESS_SERVER;
+        }
+
+        if (player.isShiftKeyDown() && player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() && player.mayBuild()) {
+            if (!state.getValue(OPEN)) {
+                var x = pos.getX() + 0.5;
+                var y = pos.getY() + 0.8;
+                var z = pos.getZ() + 0.5;
+                //noinspection DataFlowIssue
+                world.playSound(null, x, y, z, state.getValue(FORCE_OPEN) && !state.getValue(OPEN) ? closeSoundEvent : openSoundEvent,
+                        SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+            }
+
+            world.setBlockAndUpdate(pos, state.cycle(FORCE_OPEN));
             return InteractionResult.SUCCESS_SERVER;
         }
 
@@ -191,7 +211,7 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
         public Model(ServerLevel world, BlockState state) {
             var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) ? modelOpen : modelClosed);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen : modelClosed);
             this.main.setTranslation(new Vector3f(0, 1 / 64f, 0));
             this.main.setScale(new Vector3f(2));
             this.main.setYaw(direction);
@@ -204,7 +224,7 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
                 var state = this.blockState();
                 var direction = state.getValue(FACING).toYRot();
                 this.main.setYaw(direction);
-                this.main.setItem(state.getValue(OPEN) ? modelOpen : modelClosed);
+                this.main.setItem(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen : modelClosed);
                 this.tick();
             }
         }

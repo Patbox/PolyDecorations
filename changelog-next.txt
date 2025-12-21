@@ -1,3 +1,11 @@
 - Added Cardboard Box:
   - Similar block to existing Basket (Shulker Box like with only 5 slots).
   - Crafted with 4 Planks, 4 Papers and 1 Slime Ball.
+- You can now tie container items (like Shulker Boxes, Cardboard Boxes, itp) to hide their contents.
+  - This only hides to item list in tooltip.
+  - You can do it by crafting the container item with a String.
+  - The "Tied" effect is removed once container is opened.
+- Added Burning Ghost Light and Copper Ghost Light:
+  - Crafted with Coal / Copper Nugged and regular Ghost Light.
+- Right-clicking Basket (and Cardboard Box) allows to force it to be open (similar to Trash Can).
+- Using Brush on edge of the canvas will now draw on neighboring canvases.

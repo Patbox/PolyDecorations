@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import eu.pb4.mapcanvas.api.core.CanvasColor;
+import eu.pb4.polydecorations.canvas.CanvasData;
 import eu.pb4.polydecorations.entity.CanvasEntity;
 import eu.pb4.polymer.core.api.item.SimplePolymerItem;
 import net.minecraft.ChatFormatting;
@@ -31,7 +32,7 @@ import static eu.pb4.polydecorations.ModInit.id;
 
 public class CanvasItem extends SimplePolymerItem {
     public CanvasItem(Properties settings) {
-        super(settings.component(DATA_TYPE, Data.DEFAULT));
+        super(settings.component(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT));
     }
 
     @Override
@@ -65,11 +66,11 @@ public class CanvasItem extends SimplePolymerItem {
 
     public String getTranslationKey(ItemStack stack) {
 
-        if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isPresent()) {
+        if (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image().isPresent()) {
             return super.descriptionId +
-                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).glowing() ? ".glowing" : "") +
-                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).waxed() ? ".waxed" : "") +
-                    (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).cut() ? ".cut" : "")
+                    (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).glowing() ? ".glowing" : "") +
+                    (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).waxed() ? ".waxed" : "") +
+                    (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).cut() ? ".cut" : "")
                     ;
         }
         return super.descriptionId + ".empty";
@@ -86,7 +87,7 @@ public class CanvasItem extends SimplePolymerItem {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent, Consumer<Component> tooltip, TooltipFlag type) {
-        if (stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image.isEmpty()) {
+        if (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image().isEmpty()) {
                 tooltip.accept(Component.empty().append(Component.literal("| ").withStyle(ChatFormatting.DARK_GRAY))
                         .append(Component.translatable(super.getDescriptionId() + ".tooltip.1",
                                         Component.translatable("text.polydecorations.tooltip.any_dye").withStyle(ChatFormatting.WHITE))
@@ -105,13 +106,13 @@ public class CanvasItem extends SimplePolymerItem {
                             .withStyle(ChatFormatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             return;
         }
-        var background = stack.getOrDefault(DATA_TYPE, Data.DEFAULT).background().orElse(CanvasColor.OFF_WHITE_NORMAL);
-        var datac = stack.getOrDefault(DATA_TYPE, Data.DEFAULT).image();
-        if (datac.isPresent() && datac.get().length != 16 * 16) {
+        var background = stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).background().orElse(CanvasColor.OFF_WHITE_NORMAL);
+        var datac = stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image();
+        if (datac.isPresent() && datac.get().data().length != 16 * 16) {
             return;
         }
         //noinspection OptionalGetWithoutIsPresent
-        var data = datac.get();
+        var data = datac.get().data();
 
 
         for (var y = 0; y < 16 * 16; y += 32) {
@@ -135,35 +136,5 @@ public class CanvasItem extends SimplePolymerItem {
             tooltip.accept(text);
         }
         tooltip.accept(Component.empty());
-    }
-    public static final DataComponentType<Data> DATA_TYPE = DataComponentType.<Data>builder().persistent(Data.CODEC).cacheEncoding().build();
-    public record Data(Optional<byte[]> image, Optional<CanvasColor> background, boolean glowing, boolean waxed, boolean cut) {
-        private static final byte[] EMPTY_IMAGE = new byte[0];
-        public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.BYTE_BUFFER.xmap(ByteBuffer::array, ByteBuffer::wrap).optionalFieldOf("image").forGetter(Data::image),
-                Codec.BYTE.xmap(CanvasColor::getFromRaw, CanvasColor::getRenderColor).optionalFieldOf("background").forGetter(Data::background),
-                Codec.BOOL.optionalFieldOf("glowing", false).forGetter(Data::glowing),
-                Codec.BOOL.optionalFieldOf("waxed", false).forGetter(Data::waxed),
-                Codec.BOOL.optionalFieldOf("cut", false).forGetter(Data::cut)
-        ).apply(instance, Data::new));
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) return true;
-            if (object == null || getClass() != object.getClass()) return false;
-            Data data = (Data) object;
-
-
-            return glowing == data.glowing && waxed == data.waxed && cut == data.cut
-                    && Arrays.equals(image.orElse(EMPTY_IMAGE), data.image.orElse(EMPTY_IMAGE))
-                    && Objects.equals(background, data.background);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(image, background, glowing, waxed, cut);
-        }
-
-        public static final Data DEFAULT = new Data(Optional.empty(),  Optional.empty(), false, false, false);
     }
 }

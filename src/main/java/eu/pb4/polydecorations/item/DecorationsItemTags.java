@@ -16,6 +16,7 @@ public class DecorationsItemTags {
     public static final TagKey<Item> CANVAS_CLEAR_PIXELS = of("canvas/clear_pixels");
     public static final TagKey<Item> CANVAS_DARKEN_PIXELS = of("canvas/darken_pixels");
     public static final TagKey<Item> CANVAS_LIGHTEN_PIXELS = of("canvas/lighten_pixels");
+    public static final TagKey<Item> TIEABLE_CONTAINERS = of("tieable_containers");
 
     private static TagKey<Item> of(String path) {
         return TagKey.create(Registries.ITEM, ModInit.id(path));

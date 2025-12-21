@@ -12,6 +12,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 public class DecorationsRecipeSerializers {
     public static final LazyRecipeSerializer<CanvasTransformRecipe> CANVAS_TRANSFORM = register("crafting/canvas_transform", CanvasTransformRecipe.CODEC);
     public static final LazyRecipeSerializer<CloneCanvasCraftingRecipe> CANVAS_CLONE = register("crafting/canvas_cloning", CloneCanvasCraftingRecipe.CODEC);
+    public static final LazyRecipeSerializer<ComponentApplyCraftingRecipe> COMPONENT_APPLY = register("crafting/components_apply", ComponentApplyCraftingRecipe.CODEC);
     public static final LazyRecipeSerializer<ColorWindChimeRecipe> WIND_CHIME_COLORING = register("crafting/wind_chime_coloring", ColorWindChimeRecipe.CODEC);
 
     public static void register() {

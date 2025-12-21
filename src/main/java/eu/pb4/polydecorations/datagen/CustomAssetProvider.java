@@ -333,6 +333,7 @@ class CustomAssetProvider implements DataProvider {
         generateWindChimeModels(writer);
 
         for (var item : List.of(DecorationsItems.CANVAS, DecorationsItems.ROPE, DecorationsItems.GLOBE, DecorationsItems.GHOST_LIGHT,
+                DecorationsItems.BURNING_GHOST_LIGHT, DecorationsItems.COPPER_GHOST_LIGHT,
                 DecorationsItems.TRASHCAN, DecorationsItems.HAMMER, DecorationsItems.TROWEL, DecorationsItems.COPPER_CAMPFIRE)) {
             var id = BuiltInRegistries.ITEM.getKey(item);
             writer.accept(AssetPaths.itemAsset(id),

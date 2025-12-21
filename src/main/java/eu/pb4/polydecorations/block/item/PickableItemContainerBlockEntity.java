@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.block.item;
 
 import eu.pb4.factorytools.api.block.entity.LockableBlockEntity;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.util.MinimalInventory;
 import eu.pb4.sgui.api.GuiHelpers;
 import eu.pb4.sgui.api.gui.SimpleGui;
@@ -99,6 +100,9 @@ public class PickableItemContainerBlockEntity extends LockableBlockEntity implem
     @Override
     public void startOpen(ContainerUser user) {
         if (!this.remove && !user.getLivingEntity().isSpectator()) {
+            if (this.components().has(DecorationsDataComponents.TIED)) {
+                this.setComponents(DataComponentMap.builder().addAll(this.components()).set(DecorationsDataComponents.TIED, null).build());
+            }
             this.stateManager.incrementOpeners(user.getLivingEntity(), this.getLevel(), this.getBlockPos(), this.getBlockState(), user.getContainerInteractionRange());
         }
     }
@@ -126,11 +130,14 @@ public class PickableItemContainerBlockEntity extends LockableBlockEntity implem
     }
 
     private void playSound(SoundEvent soundEvent) {
+        if (this.getBlockState().getValue(PickableItemContainerBlock.FORCE_OPEN)) {
+            return;
+        }
         var x = this.worldPosition.getX() + 0.5;
-        var z = this.worldPosition.getY() + 1;
-        var y = this.worldPosition.getZ() + 0.5;
+        var y = this.worldPosition.getY() + 0.8;
+        var z = this.worldPosition.getZ() + 0.5;
         //noinspection DataFlowIssue
-        this.level.playSound(null, x, z, y, soundEvent, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+        this.level.playSound(null, x, y, z, soundEvent, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
     }
 
     @Override

@@ -6,6 +6,7 @@ import eu.pb4.polydecorations.block.item.GlobeBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import eu.pb4.polydecorations.entity.DecorationsEntities;
 import eu.pb4.polydecorations.model.DecorationsModels;
+import eu.pb4.polydecorations.patch.DecorationsLootTablePatches;
 import eu.pb4.polydecorations.polydex.PolydexCompat;
 import eu.pb4.polydecorations.recipe.DecorationsRecipeSerializers;
 import eu.pb4.polydecorations.recipe.DecorationsRecipeTypes;
@@ -55,6 +56,7 @@ public class ModInit implements ModInitializer {
 		DecorationsRecipeSerializers.register();
 		DecorationsUtil.register();
 		DecorationsGamerules.register();
+		DecorationsLootTablePatches.register();
 
 		UiResourceCreator.setup();
 		GuiTextures.register();

@@ -1,12 +1,15 @@
 package eu.pb4.polydecorations.datagen;
 
 import eu.pb4.polydecorations.block.DecorationsBlocks;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.WindChimeItem;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -45,6 +48,8 @@ class LootTables extends FabricBlockLootTableProvider {
         });
         this.dropSelf(DecorationsBlocks.GLOBE);
         this.dropSelf(DecorationsBlocks.GHOST_LIGHT);
+        this.dropSelf(DecorationsBlocks.BURNING_GHOST_LIGHT);
+        this.dropSelf(DecorationsBlocks.COPPER_GHOST_LIGHT);
         this.dropSelf(DecorationsBlocks.DISPLAY_CASE);
         this.dropSelf(DecorationsBlocks.LARGE_FLOWER_POT);
         this.dropSelf(DecorationsBlocks.LONG_FLOWER_POT);
@@ -53,6 +58,6 @@ class LootTables extends FabricBlockLootTableProvider {
         this.add(DecorationsBlocks.WIND_CHIME, (drop) -> LootTable.lootTable().withPool(
                 this.applyExplosionCondition(drop, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(drop).apply(CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY)
-                                .include(WindChimeItem.WIND_CHIME_COLOR))))));
+                                .include(DecorationsDataComponents.WIND_CHIME_COLOR))))));
     }
 }

@@ -159,6 +159,58 @@
     "subtitle": "subtitles.polydecorations.block.basket.open"
   },
 
+  "block.cardboard_box.close": {
+    "sounds": [
+      {
+        "name": "dig/wood1",
+        "volume": 0.6,
+        "pitch": 1.5
+      },
+      {
+        "name": "dig/wood2",
+        "volume": 0.6,
+        "pitch": 1.5
+      },
+      {
+        "name": "dig/wood3",
+        "volume": 0.6,
+        "pitch": 1.5
+      },
+      {
+        "name": "dig/wood4",
+        "volume": 0.6,
+        "pitch": 1.5
+      }
+    ],
+    "subtitle": "subtitles.polydecorations.block.cardboard_box.close"
+  },
+
+  "block.cardboard_box.open": {
+    "sounds": [
+      {
+        "name": "dig/wood1",
+        "volume": 0.6,
+        "pitch": 1.5
+      },
+      {
+        "name": "dig/wood2",
+        "volume": 0.6,
+        "pitch": 1.5
+      },
+      {
+        "name": "dig/wood3",
+        "volume": 0.6,
+        "pitch": 1.5
+      },
+      {
+        "name": "dig/wood4",
+        "volume": 0.6,
+        "pitch": 1.5
+      }
+    ],
+    "subtitle": "subtitles.polydecorations.block.cardboard_box.open"
+  },
+
   "block.wind_chime.chime": {
     "sounds": [
       {

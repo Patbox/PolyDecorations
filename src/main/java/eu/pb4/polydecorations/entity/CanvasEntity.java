@@ -8,11 +8,13 @@ import eu.pb4.mapcanvas.api.core.PlayerCanvas;
 import eu.pb4.mapcanvas.api.font.DefaultFonts;
 import eu.pb4.mapcanvas.api.utils.CanvasUtils;
 import eu.pb4.mapcanvas.api.utils.VirtualDisplay;
-import eu.pb4.polydecorations.item.CanvasItem;
+import eu.pb4.polydecorations.canvas.CanvasData;
+import eu.pb4.polydecorations.canvas.CanvasPixels;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.mixin.TagValueInputAccessor;
-import eu.pb4.polydecorations.util.DecorationSoundEvents;
+import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.BlockPos;
@@ -37,6 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -46,7 +49,6 @@ import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -59,7 +61,8 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
     private static final Codec<Direction> LEGACY_DIRECTION_CODEC = Codec.withAlternative(Direction.CODEC, Codec.INT, Direction::from2DDataValue);
     private final PlayerCanvas canvas;
     private final Set<ServerPlayer> players = new HashSet<>();
-    private byte[] data = new byte[16 * 16];
+    private final DrawableCanvas selfCanvas = new WrappingCanvas(this);
+    private CanvasPixels data = new CanvasPixels();
     private VirtualDisplay display;
     private boolean glowing;
     private boolean waxed;
@@ -169,14 +172,15 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
         }
     }
 
-    private void fromByteArray(byte[] data) {
-        if (data.length == 0) {
+    private void fromCanvasPixels(CanvasPixels canvasPixels) {
+        byte[] data;
+        if (canvasPixels.data().length == 0) {
             data = new byte[16 * 16];
         } else {
-            data = Arrays.copyOf(data, data.length);
+            data = Arrays.copyOf(canvasPixels.data(), canvasPixels.data().length);
         }
 
-        this.data = data;
+        this.data = new CanvasPixels(data);
         if (data.length == 16 * 16) {
             for (var x = 0; x < 16; x++) {
                 for (var y = 0; y < 16; y++) {
@@ -195,14 +199,15 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
         return CanvasColor.getFromRaw(color);
     }
 
-    private void onUsed(ServerPlayer serverPlayerEntity, VirtualDisplay.ClickType clickType, int x, int y) {
+    private void onUsed(ServerPlayer serverPlayer, VirtualDisplay.ClickType clickType, int x, int y) {
         if (clickType.isLeft()) {
-            if (CommonProtection.canDamageEntity(this.level(), this, serverPlayerEntity.getGameProfile(), serverPlayerEntity)) {
-                serverPlayerEntity.attack(this);
+            if (CommonProtection.canDamageEntity(this.level(), this, serverPlayer.getGameProfile(), serverPlayer)) {
+                serverPlayer.attack(this);
             }
             return;
         }
-        if (this.waxed || !CommonProtection.canInteractEntity(this.level(), this, serverPlayerEntity.getGameProfile(), serverPlayerEntity)) {
+
+        if (this.waxed || !CommonProtection.canInteractEntity(this.level(), this, serverPlayer.getGameProfile(), serverPlayer)) {
             return;
         }
 
@@ -212,14 +217,78 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
         int radius = 0;
 
         CanvasColor color = null;
-        var stack = serverPlayerEntity.getMainHandItem();
+        var stack = serverPlayer.getMainHandItem();
 
         if (stack.is(Items.BRUSH)) {
             radius = 1;
-            stack = serverPlayerEntity.getOffhandItem();
+            stack = serverPlayer.getOffhandItem();
         }
+        DrawableCanvas canvas;
 
-        var raw = CanvasColor.getFromRaw(this.data[x + y * 16]);
+        if (x - radius >= 0 && x + radius < 16 && y - radius >= 0 && y + radius < 16) {
+            canvas = this.selfCanvas;
+        } else {
+            x += 16;
+            y += 16;
+
+            var arr = new DrawableCanvas[9];
+            var direction = this.getDirection();
+            int i = 0;
+            for (int yOffset = -1; yOffset <= 1; yOffset++) {
+                for (int xOffset = -1; xOffset <= 1; xOffset++) {
+                    int xa, ya, za;
+                    if (direction.getAxis().isHorizontal()) {
+                        xa = xOffset * direction.getStepZ();
+                        ya = -yOffset;
+                        za = -xOffset * direction.getStepX();
+                    } else {
+                        xa = xOffset;
+                        ya = 0;
+                        za = yOffset * direction.getStepY();
+
+                        if (this.rotation == Rotation.CLOCKWISE_180) {
+                            xa = -xa;
+                            za = -za;
+                        } else if (this.rotation == Rotation.CLOCKWISE_90) {
+                            var tmp = xa;
+                            xa = -za * direction.getStepY();
+                            za = tmp * direction.getStepY();
+                        } else if (this.rotation == Rotation.COUNTERCLOCKWISE_90) {
+                            var tmp = xa;
+                            xa = za * direction.getStepY();
+                            za = -tmp * direction.getStepY();
+                        }
+                    }
+
+                    var ents = this.level().getEntities(EntityTypeTest.forExactClass(CanvasEntity.class),
+                            this.getBoundingBox().deflate(0.1f).move(xa, ya, za), c -> c.getDirection() == direction && c.rotation == this.rotation);
+
+                    if (ents.isEmpty()) {
+                        arr[i++] = VoidCanvas.INSTANCE;
+                    } else {
+                        arr[i++] = ents.getFirst().selfCanvas;
+                    }
+                }
+            }
+            canvas = new MergedCanvas(arr, 3, 3);
+        }
+        /*{
+            var g = CanvasUtils.getGraphics(canvas);
+            g.clearRect(0, 0, 16 * 3, 16 * 3);
+            g.setColor(Color.CYAN);
+            g.drawLine(0, 0, 16 * 3, 16 * 3);
+            g.setColor(Color.GREEN);
+            g.drawLine(0, 16 * 3, 16 * 3, 0);
+            g.setColor(Color.RED);
+            g.drawLine(8, 8, 8, 8 * 5);
+            g.drawLine(8 * 5, 8, 8 * 5, 8 * 5);
+            g.setColor(Color.YELLOW);
+            g.drawLine(8, 8, 8 * 5, 8);
+            g.drawLine(8, 8 * 5, 8 * 5, 8 * 5);
+            g.dispose();
+        }*/
+
+        var raw = canvas.get(x, y);
 
         if (this.cut && raw == CanvasColor.CLEAR_FORCE) {
             return;
@@ -253,28 +322,21 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
         if (color == null) {
             return;
         }
-        var tColor = getColor(color.getRenderColor());
 
         for (var xi = x - radius; xi <= x + radius; xi++) {
             for (var yi = y - radius; yi <= y + radius; yi++) {
-                if (xi < 0 || xi >= 16 || yi < 0 || yi >= 16) {
+                if (xi < 0 || xi >= canvas.getWidth() || yi < 0 || yi >= canvas.getHeight()) {
                     continue;
                 }
-                if (this.data[xi + yi * 16] == 1) {
+                if (canvas.getRaw(xi, yi) == 1) {
                     continue;
                 }
 
-                CanvasUtils.fill(this.canvas, xi * 8, yi * 8, (xi + 1) * 8, (yi + 1) * 8, tColor);
-                this.data[xi + yi * 16] = color.getRenderColor();
+                canvas.set(xi, yi, color);
             }
         }
 
-
-        serverPlayerEntity.swing(InteractionHand.MAIN_HAND, true);
-
-        if (this.display != null) {
-            this.canvas.sendUpdates();
-        }
+        serverPlayer.swing(InteractionHand.MAIN_HAND, true);
     }
 
     @Override
@@ -297,23 +359,38 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
     }
 
     public void loadFromStack(ItemStack stack) {
-        if (!stack.has(CanvasItem.DATA_TYPE)) {
+        if (!stack.has(DecorationsDataComponents.CANVAS_DATA)) {
             return;
         }
-        var comp = stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT);
+        var comp = stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT);
 
+        this.loadFromComponent(comp);
+        this.name = stack.get(DataComponents.CUSTOM_NAME);
+    }
+
+    private void loadFromComponent(CanvasData comp) {
         this.background = comp.background();
         this.glowing = comp.glowing();
         this.waxed = comp.waxed();
         this.cut = comp.cut();
         if (comp.image().isPresent()) {
-            this.fromByteArray(comp.image().get());
+            this.fromCanvasPixels(comp.image().get());
         } else {
             CanvasUtils.clear(this.canvas, this.background.orElse(CanvasColor.OFF_WHITE_NORMAL));
         }
-
-        this.name = stack.get(DataComponents.CUSTOM_NAME);
         this.rebuildDisplay();
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.canvas.isDirty()) {
+            this.canvas.sendUpdates();
+        }
+    }
+
+    private CanvasData getCanvasData() {
+        return new CanvasData(data.isColored() ? Optional.of(data) : Optional.empty(), this.background, this.glowing, this.waxed, this.cut);
     }
 
     @Override
@@ -335,7 +412,7 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
         var backgroundByte = view.getByteOr("background", (byte) 0);
         this.background = backgroundByte == 0 ? Optional.empty() : Optional.ofNullable(CanvasColor.getFromRaw(backgroundByte));
 
-        fromByteArray(view.read("image", Codec.BYTE_BUFFER).map(ByteBuffer::array).orElse(new byte[0]));
+        fromCanvasPixels(view.read("image", CanvasPixels.CODEC).orElseGet(CanvasPixels::new));
 
         this.name = view.read("name", ComponentSerialization.CODEC).orElse(null);
 
@@ -353,7 +430,7 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
     public void addAdditionalSaveData(ValueOutput view) {
         super.addAdditionalSaveData(view);
         view.store("facing", LEGACY_DIRECTION_CODEC, this.getDirection());
-        view.store("image", Codec.BYTE_BUFFER, ByteBuffer.wrap(Arrays.copyOf(this.data, this.data.length)));
+        view.store("image", CanvasPixels.CODEC, this.data);
         view.putBoolean("glowing", this.glowing);
         view.putBoolean("waxed", this.waxed);
         view.putBoolean("cut", this.cut);
@@ -366,16 +443,16 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
 
     @Override
     public void playPlacementSound() {
-        this.playSound(DecorationSoundEvents.CANVAS_PLACE, 1.0F, 1.0F);
+        this.playSound(DecorationsSoundEvents.CANVAS_PLACE, 1.0F, 1.0F);
     }
 
     @Override
     public void dropItem(ServerLevel serverWorld, @Nullable Entity entity) {
-        this.playSound(DecorationSoundEvents.CANVAS_BREAK, 1.0F, 1.0F);
+        this.playSound(DecorationsSoundEvents.CANVAS_BREAK, 1.0F, 1.0F);
 
         var stack = this.toStack();
         if (entity instanceof Player player && player.isCreative()
-                && (stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isEmpty())) {
+                && (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image().isEmpty())) {
             return;
         }
 
@@ -390,15 +467,7 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
 
     private ItemStack toStack() {
         var stack = new ItemStack(DecorationsItems.CANVAS);
-        byte[] data = null;
-        for (byte b : this.data) {
-            if (b != 0) {
-                data = Arrays.copyOf(this.data, this.data.length);
-                break;
-            }
-        }
-
-        stack.set(CanvasItem.DATA_TYPE, new CanvasItem.Data(Optional.ofNullable(data), this.background, this.glowing, this.waxed, this.cut));
+        stack.set(DecorationsDataComponents.CANVAS_DATA, getCanvasData());
 
         if (this.name != null) {
             stack.set(DataComponents.CUSTOM_NAME, this.name);
@@ -411,5 +480,79 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
         return EntityType.MARKER;
+    }
+
+    private record VoidCanvas() implements DrawableCanvas {
+        public static final VoidCanvas INSTANCE = new VoidCanvas();
+
+        @Override
+        public byte getRaw(int x, int y) {
+            return 1;
+        }
+
+        @Override
+        public void setRaw(int x, int y, byte color) {
+
+        }
+
+        @Override
+        public int getHeight() {
+            return 16;
+        }
+
+        @Override
+        public int getWidth() {
+            return 16;
+        }
+    }
+
+    private record WrappingCanvas(CanvasEntity entity) implements DrawableCanvas {
+        @Override
+        public byte getRaw(int x, int y) {
+            return entity.data.getRaw(x, y);
+        }
+
+        @Override
+        public void setRaw(int x, int y, byte color) {
+            entity.data.setRaw(x, y, color);
+            CanvasUtils.fill(entity.canvas, x * 8, y * 8, (x + 1) * 8, (y + 1) * 8, entity.getColor(color));
+        }
+
+        @Override
+        public int getHeight() {
+            return 16;
+        }
+
+        @Override
+        public int getWidth() {
+            return 16;
+        }
+    }
+
+    private record MergedCanvas(DrawableCanvas[] canvas, int width, int height) implements DrawableCanvas {
+        @Override
+        public byte getRaw(int x, int y) {
+            return getCanvas(x, y).getRaw(x % 16, y % 16);
+        }
+
+        private DrawableCanvas getCanvas(int x, int y) {
+            var i = x / 16 + y / 16 * width;
+            return this.canvas[i];
+        }
+
+        @Override
+        public void setRaw(int x, int y, byte color) {
+            getCanvas(x, y).setRaw(x % 16, y % 16, color);
+        }
+
+        @Override
+        public int getHeight() {
+            return 16 * height;
+        }
+
+        @Override
+        public int getWidth() {
+            return 16 * width;
+        }
     }
 }

@@ -3,7 +3,9 @@ package eu.pb4.polydecorations.recipe;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import eu.pb4.polydecorations.canvas.CanvasData;
 import eu.pb4.polydecorations.item.CanvasItem;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -44,10 +46,10 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
 
         for (var stack : inventory.items()) {
             if (stack.is(this.input)) {
-                if (hasNbt && stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent()) {
+                if (hasNbt && stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image().isPresent()) {
                     return false;
                 }
-                hasNbt |= stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent();
+                hasNbt |= stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image().isPresent();
                 count++;
             }
         }
@@ -56,18 +58,18 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
 
     @Override
     public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider wrapperLookup) {
-        CanvasItem.Data nbt = null;
+        CanvasData nbt = null;
         int count = 0;
         for (var stack : inventory.items()) {
             if (stack.is(this.input)) {
-                if (stack.getOrDefault(CanvasItem.DATA_TYPE, CanvasItem.Data.DEFAULT).image().isPresent()) {
-                    nbt = stack.get(CanvasItem.DATA_TYPE);
+                if (stack.getOrDefault(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT).image().isPresent()) {
+                    nbt = stack.get(DecorationsDataComponents.CANVAS_DATA);
                 }
                 count++;
             }
         }
         var stack = new ItemStack(this.input, count);
-        stack.set(CanvasItem.DATA_TYPE, nbt);
+        stack.set(DecorationsDataComponents.CANVAS_DATA, nbt);
         return stack;
     }
 

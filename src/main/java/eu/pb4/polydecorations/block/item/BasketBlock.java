@@ -1,61 +1,36 @@
 package eu.pb4.polydecorations.block.item;
 
-import com.mojang.serialization.MapCodec;
-import eu.pb4.factorytools.api.block.FactoryBlock;
-import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
-import eu.pb4.polydecorations.util.DecorationSoundEvents;
+import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polydecorations.util.DecorationsUtil;
-import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
-
-import java.util.List;
-
-import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
 public class BasketBlock extends PickableItemContainerBlock {
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
 
 
     public BasketBlock(Properties settings) {
-        super(settings, DecorationSoundEvents.BASKET_OPEN, DecorationSoundEvents.BASKET_CLOSE);
+        super(settings, DecorationsSoundEvents.BASKET_OPEN, DecorationsSoundEvents.BASKET_CLOSE);
         this.registerDefaultState(this.defaultBlockState().setValue(HANGING, false));
     }
 
@@ -107,7 +82,7 @@ public class BasketBlock extends PickableItemContainerBlock {
         public Model(ServerLevel world, BlockState state) {
             var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) ? modelOpen : modelClosed);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen : modelClosed);
             this.main.setScale(new Vector3f(2));
             this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
             this.main.setYaw(direction);
@@ -121,7 +96,7 @@ public class BasketBlock extends PickableItemContainerBlock {
                 var direction = state.getValue(FACING).toYRot();
                 this.main.setYaw(direction);
                 this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
-                this.main.setItem(state.getValue(OPEN) ?  modelOpen : modelClosed);
+                this.main.setItem(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ?  modelOpen : modelClosed);
                 this.tick();
             }
         }

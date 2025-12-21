@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.block.furniture;
 
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.WindChimeItem;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -25,13 +26,13 @@ public class WindChimeBlockEntity extends BlockEntity implements BlockEntityExtr
     @Override
     protected void saveAdditional(ValueOutput view) {
         super.saveAdditional(view);
-        view.store("colors", WindChimeItem.WIND_CHIME_COLOR.codec(), this.colors);
+        view.store("colors", DecorationsDataComponents.WIND_CHIME_COLOR.codec(), this.colors);
     }
 
     @Override
     public void loadAdditional(ValueInput view) {
         super.loadAdditional(view);
-        this.colors = view.read("colors", WindChimeItem.WIND_CHIME_COLOR.codec()).orElse(IntList.of());
+        this.colors = view.read("colors", DecorationsDataComponents.WIND_CHIME_COLOR.codec()).orElse(IntList.of());
         if (this.model != null) {
             this.model.setColors(this.colors);
         }
@@ -40,7 +41,7 @@ public class WindChimeBlockEntity extends BlockEntity implements BlockEntityExtr
     @Override
     protected void applyImplicitComponents(DataComponentGetter components) {
         super.applyImplicitComponents(components);
-        this.colors = components.getOrDefault(WindChimeItem.WIND_CHIME_COLOR, this.colors);
+        this.colors = components.getOrDefault(DecorationsDataComponents.WIND_CHIME_COLOR, this.colors);
         if (this.model != null) {
             this.model.setColors(this.colors);
         }
@@ -49,7 +50,7 @@ public class WindChimeBlockEntity extends BlockEntity implements BlockEntityExtr
     @Override
     protected void collectImplicitComponents(DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        builder.set(WindChimeItem.WIND_CHIME_COLOR, this.colors);
+        builder.set(DecorationsDataComponents.WIND_CHIME_COLOR, this.colors);
     }
 
     @Override

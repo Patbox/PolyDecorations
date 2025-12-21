@@ -124,8 +124,11 @@
   "block.polydecorations.large_flower_pot": "Duża donica",
   "block.polydecorations.long_flower_pot": "Długa doniczka",
   "block.polydecorations.ghost_light": "Duchowe światło",
+  "block.polydecorations.burning_ghost_light": "Ogniste duchowe światło",
+  "block.polydecorations.copper_ghost_light": "Miedziane duchowe światło",
   "block.polydecorations.trashcan": "Kosz na śmieci",
   "block.polydecorations.basket": "Koszyk",
+  "block.polydecorations.cardboard_box": "Kartonowe pudełko",
   "block.polydecorations.rope": "Lina",
   "block.polydecorations.wind_chime": "Dzwoneczek wietrzny",
   "item.polydecorations.stone_statue": "Kamienna posąg",
@@ -208,6 +211,7 @@
   "text.polydecorations.your": "Twoja %s",
   "text.polydecorations.tooltip.any_dye": "Barwnik",
   "text.polydecorations.tooltip.coal_and_bone_meal": "Węgiel oraz Mączkę kostną",
+  "text.polydecorations.tied": "Zawiązany",
   "subtitles.polydecorations.entity.canvas.break": "Niszczenie płótna",
   "subtitles.polydecorations.entity.canvas.place": "Umieszczenie płótna",
   "subtitles.polydecorations.block.trashcan.open": "Kosz na śmieci otworzył się",
@@ -215,5 +219,7 @@
   "subtitles.polydecorations.block.trashcan.clear": "Kosz na śmieci opróżnił się",
   "subtitles.polydecorations.block.basket.open": "Koszyk otwiera się",
   "subtitles.polydecorations.block.basket.close": "Koszyk zamyka się",
+  "subtitles.polydecorations.block.cardboard_box.open": "Kartonowe pudełko otworzyło się",
+  "subtitles.polydecorations.block.cardboard_box.close": "Kartonowe pudełko zamknęło się",
   "subtitles.polydecorations.block.wind_chime.chime": "Dzwoneczek wietrzny dzwoni"
 }

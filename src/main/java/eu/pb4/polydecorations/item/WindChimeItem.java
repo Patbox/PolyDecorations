@@ -32,13 +32,13 @@ public class WindChimeItem extends FactoryBlockItem {
 			.collect(Collectors.toMap(DyeColor::getTextureDiffuseColor, Function.identity())));
 
 	public <T extends Block & PolymerBlock> WindChimeItem(T block, Properties settings) {
-		super(block, settings.component(WIND_CHIME_COLOR, IntList.of()));
+		super(block, settings.component(DecorationsDataComponents.WIND_CHIME_COLOR, IntList.of()));
 	}
 
 	@Override
 	public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context) {
 		super.modifyBasePolymerItemStack(out, stack, context);
-		var color = stack.get(WIND_CHIME_COLOR);
+		var color = stack.get(DecorationsDataComponents.WIND_CHIME_COLOR);
 		if (color == null || color.isEmpty()) {
 			return;
 		}
@@ -55,7 +55,7 @@ public class WindChimeItem extends FactoryBlockItem {
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay displayComponent, Consumer<Component> textConsumer, TooltipFlag type) {
 		super.appendHoverText(stack, context, displayComponent, textConsumer, type);
-		var color = stack.get(WIND_CHIME_COLOR);
+		var color = stack.get(DecorationsDataComponents.WIND_CHIME_COLOR);
 		if (color == null || color.isEmpty()) {
 			return;
 		}
@@ -80,5 +80,4 @@ public class WindChimeItem extends FactoryBlockItem {
 		DyeColor dyeColor = BY_COLOR.get(color);
 		return (Component)(dyeColor == null ? Component.translatable("item.minecraft.firework_star.custom_color") : Component.translatable("item.minecraft.firework_star." + dyeColor.getName()));
 	}
-	public static final DataComponentType<IntList> WIND_CHIME_COLOR = DataComponentType.<IntList>builder().persistent(ExtraCodecs.RGB_COLOR_CODEC.listOf().xmap(IntArrayList::new, List::copyOf)).cacheEncoding().build();
 }
