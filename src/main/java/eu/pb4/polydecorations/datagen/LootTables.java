@@ -33,6 +33,7 @@ class LootTables extends FabricBlockLootTableProvider {
         DecorationsBlocks.STRIPPED_STUMP.forEach((t, b) -> this.dropSelf(b));
         DecorationsBlocks.SLEEPING_BAG.forEach((t, b) -> this.add(b, this.createSinglePropConditionTable(b, BedBlock.PART, BedPart.HEAD)));
         this.add(DecorationsBlocks.BASKET, this.createShulkerBoxDrop(DecorationsBlocks.BASKET));
+        this.add(DecorationsBlocks.CARDBOARD_BOX, this.createShulkerBoxDrop(DecorationsBlocks.CARDBOARD_BOX));
         this.dropSelf(DecorationsBlocks.BRAZIER);
         this.dropSelf(DecorationsBlocks.SOUL_BRAZIER);
         this.dropSelf(DecorationsBlocks.COPPER_BRAZIER);

@@ -4,7 +4,7 @@ import eu.pb4.factorytools.api.item.FactoryBlockItem;
 import eu.pb4.factorytools.api.item.MultiBlockItem;
 import eu.pb4.factorytools.api.block.MultiBlock;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
-import eu.pb4.polydecorations.block.item.BasketBlock;
+import eu.pb4.polydecorations.block.item.PickableItemContainerBlock;
 import eu.pb4.polydecorations.entity.StatueEntity;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polydecorations.util.WoodUtil;
@@ -29,7 +29,6 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -51,6 +50,7 @@ public class DecorationsItems {
     public static final Item WIND_CHIME = register("wind_chime", (s) -> new WindChimeItem(DecorationsBlocks.WIND_CHIME, s.useBlockDescriptionPrefix()));
     public static final Item TRASHCAN = register(DecorationsBlocks.TRASHCAN);
     public static final Item BASKET = register(DecorationsBlocks.BASKET, s -> s.stacksTo(1));
+    public static final Item CARDBOARD_BOX = register(DecorationsBlocks.CARDBOARD_BOX, s -> s.stacksTo(1));
     public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF, WoodType::name);
     public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH, WoodType::name);
     public static final Map<WoodType, Item> TABLE = register(DecorationsBlocks.TABLE, WoodType::name);
@@ -118,6 +118,7 @@ public class DecorationsItems {
                     entries.accept(WIND_CHIME);
                     entries.accept(TRASHCAN);
                     entries.accept(BASKET);
+                    entries.accept(CARDBOARD_BOX);
                     entries.accept(ROPE);
                     entries.accept(CANVAS);
                     entries.accept(Items.LANTERN);
@@ -172,7 +173,7 @@ public class DecorationsItems {
         settingsConsumer.accept(settings);
         if (block instanceof MultiBlock multiBlock) {
             item = new MultiBlockItem(multiBlock, settings);
-        } else if (block instanceof BasketBlock) {
+        } else if (block instanceof PickableItemContainerBlock) {
             item = new FactoryBlockItem(block, settings) {
                 @Override
                 public boolean canFitInsideContainerItems() {

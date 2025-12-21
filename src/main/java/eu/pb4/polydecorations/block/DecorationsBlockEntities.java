@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import java.util.ArrayList;
 
+import static eu.pb4.polydecorations.ModInit.id;
+
 public class DecorationsBlockEntities {
     public static final BlockEntityType<?> SHELF = register("shelf", ShelfBlockEntity::new, DecorationsBlocks.SHELF.values().toArray(new PlainShelfBlock[0]));
     public static final BlockEntityType<?> SIGN_POST = register("sign_post", SignPostBlockEntity::new,
@@ -31,7 +33,8 @@ public class DecorationsBlockEntities {
             DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
     public static final BlockEntityType<?> GLOBE = register("globe", GenericSingleItemBlockEntity::globe, DecorationsBlocks.GLOBE);
     public static final BlockEntityType<?> TRASHCAN = register("trashcan", TrashCanBlockEntity::new, DecorationsBlocks.TRASHCAN);
-    public static final BlockEntityType<?> BASKET = register("basket", BasketBlockEntity::new, DecorationsBlocks.BASKET);
+    public static final BlockEntityType<?> GENERIC_PICKABLE_STORAGE = register("generic_pickable_storage", PickableItemContainerBlockEntity::new,
+            DecorationsBlocks.BASKET, DecorationsBlocks.CARDBOARD_BOX);
     public static final BlockEntityType<?> WIND_CHIME = register("wind_chime", WindChimeBlockEntity::new, DecorationsBlocks.WIND_CHIME);
 
     public static final BlockEntityType<?> DISPLAY_CASE = register("display_case",
@@ -62,5 +65,6 @@ public class DecorationsBlockEntities {
     }
 
     public static void register() {
+        BuiltInRegistries.BLOCK_ENTITY_TYPE.addAlias(id("basket"), id("generic_pickable_storage"));
     }
 }

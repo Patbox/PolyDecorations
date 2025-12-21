@@ -27,6 +27,7 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
                 .add(DecorationsBlocks.STRIPPED_STUMP.values().toArray(Block[]::new))
                 .add(DecorationsBlocks.COPPER_CAMPFIRE)
                 .add(DecorationsBlocks.BASKET)
+                .add(DecorationsBlocks.CARDBOARD_BOX)
         ;
 
         this.valueLookupBuilder(BlockTags.MINEABLE_WITH_PICKAXE)

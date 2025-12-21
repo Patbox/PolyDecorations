@@ -8,6 +8,7 @@ import eu.pb4.polydecorations.block.furniture.*;
 import eu.pb4.polydecorations.block.item.*;
 import eu.pb4.polydecorations.block.other.GhostLightBlock;
 import eu.pb4.polydecorations.block.other.RopeBlock;
+import eu.pb4.polydecorations.util.DecorationSoundEvents;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -87,10 +88,15 @@ public class DecorationsBlocks {
     public static final TrashCanBlock TRASHCAN = register("trashcan", settings -> new TrashCanBlock(settings
             .mapColor(MapColor.METAL).strength(3.5F).sound(SoundType.LANTERN).noOcclusion()));
 
-    public static final BasketBlock BASKET = register("basket", settings -> new BasketBlock(settings
+    public static final PickableItemContainerBlock BASKET = register("basket", settings -> new BasketBlock(settings
             .mapColor(MapColor.WOOD).strength(0.5F)
             .ignitedByLava()
             .sound(SoundType.SCAFFOLDING).noOcclusion()));
+
+    public static final PickableItemContainerBlock CARDBOARD_BOX = register("cardboard_box", settings -> new PickableItemContainerBlock(settings
+            .mapColor(MapColor.WOOD).strength(0.4F)
+            .ignitedByLava()
+            .sound(SoundType.SCAFFOLDING).noOcclusion(), DecorationSoundEvents.BASKET_OPEN, DecorationSoundEvents.BASKET_CLOSE));
 
     public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", settings -> new LargeFlowerPotBlock(settings
             .mapColor(MapColor.COLOR_ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).noOcclusion()));

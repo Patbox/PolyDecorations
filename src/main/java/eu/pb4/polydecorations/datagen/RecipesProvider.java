@@ -264,6 +264,16 @@ class RecipesProvider extends FabricRecipeProvider {
                         .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.ROPE, Items.STICK))
                         .save(output);
 
+                ShapedRecipeBuilder.shaped(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.CARDBOARD_BOX, 1)
+                        .pattern("pwp")
+                        .pattern("wsw")
+                        .pattern("pwp")
+                        .define('p', Items.PAPER)
+                        .define('w', ItemTags.PLANKS)
+                        .define('s', Items.SLIME_BALL)
+                        .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(Items.PAPER))
+                        .save(output);
+
                 ShapelessRecipeBuilder.shapeless(itemWrap, RecipeCategory.DECORATIONS, DecorationsBlocks.ROPE, 4)
                         .requires(Items.WHEAT)
                         .requires(Items.STRING, 4)

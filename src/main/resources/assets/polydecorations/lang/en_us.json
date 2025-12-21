@@ -128,6 +128,7 @@
   "block.polydecorations.ghost_light": "Ghost Light",
   "block.polydecorations.trashcan": "Trash Can",
   "block.polydecorations.basket": "Basket",
+  "block.polydecorations.cardboard_box": "Cardboard Box",
   "block.polydecorations.rope": "Rope",
   "block.polydecorations.wind_chime": "Wind Chime",
 
@@ -223,6 +224,8 @@
   "subtitles.polydecorations.block.trashcan.clear": "Trash Can empties",
   "subtitles.polydecorations.block.basket.open": "Basket opens",
   "subtitles.polydecorations.block.basket.close": "Basket closes",
+  "subtitles.polydecorations.block.cardboard_box.open": "Cardboard Box opens",
+  "subtitles.polydecorations.block.cardboard_box.close": "Cardboard Box closes",
   "subtitles.polydecorations.block.wind_chime.chime": "Wind Chime chimes"
 
 }

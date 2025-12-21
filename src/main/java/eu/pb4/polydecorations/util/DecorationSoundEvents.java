@@ -12,6 +12,8 @@ public interface DecorationSoundEvents {
     SoundEvent TRASHCAN_CLEAR = of("block.trashcan.clear");
     SoundEvent BASKET_OPEN = of("block.basket.open");
     SoundEvent BASKET_CLOSE = of("block.basket.close");
+    SoundEvent CARDBOARD_BOX_OPEN = of("block.cardboard_box.open");
+    SoundEvent CARDBOARD_BOX_CLOSE = of("block.cardboard_box.close");
 
     static SoundEvent of(String string) {
         return SoundEvent.createVariableRangeEvent(id(string));

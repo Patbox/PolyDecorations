@@ -350,6 +350,9 @@ class CustomAssetProvider implements DataProvider {
         writer.accept(AssetPaths.itemAsset(id("basket")),
                 new ItemAsset(new BasicItemModel(id("block/basket_open")), ItemAsset.Properties.DEFAULT)
                         .toJson().getBytes(StandardCharsets.UTF_8));
+        writer.accept(AssetPaths.itemAsset(id("cardboard_box")),
+                new ItemAsset(new BasicItemModel(id("block/cardboard_box_closed")), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
     }
 
     private void createWoodTextures(BiConsumer<String, byte[]> assetWriter) throws Exception {

@@ -36,6 +36,7 @@ public abstract class V1460Mixin extends Schema {
         registerInventory(schema, map, mod("trashcan"));
         registerInventory(schema, map, mod("long_flower_pot"));
         registerInventory(schema, map, mod("basket"));
+        registerInventory(schema, map, mod("generic_pickable_storage"));
 
 
         schema.register(map, mod("sign_post"), (n) -> DSL.optionalFields("upper", DSL.optionalFields("item", References.ITEM_NAME.in(schema)),

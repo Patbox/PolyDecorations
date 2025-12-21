@@ -1,4 +1,3 @@
-- Added Copper Campfire and Copper Brazier.
-- Copper Lanterns can now be placed on walls.
-- Changed hitbox of Long Flower Pot, Basket and Benches to be half block high.
-- Fixed Plain Shelf loosing items when placing additional one in block.
+- Added Cardboard Box:
+  - Similar block to existing Basket (Shulker Box like with only 5 slots).
+  - Crafted with 4 Planks, 4 Papers and 1 Slime Ball.

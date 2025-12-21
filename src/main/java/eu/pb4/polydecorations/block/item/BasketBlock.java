@@ -1,12 +1,12 @@
 package eu.pb4.polydecorations.block.item;
 
 import com.mojang.serialization.MapCodec;
-import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
+import eu.pb4.polydecorations.util.DecorationSoundEvents;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
@@ -28,11 +29,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ChainBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,77 +50,25 @@ import java.util.List;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
-public class BasketBlock extends BaseEntityBlock implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
-    public static final Identifier CONTENTS_DYNAMIC_DROP_ID = ShulkerBoxBlock.CONTENTS;
-
-    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+public class BasketBlock extends PickableItemContainerBlock {
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
 
+
     public BasketBlock(Properties settings) {
-        super(settings);
-        this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(OPEN, false).setValue(HANGING, false));
+        super(settings, DecorationSoundEvents.BASKET_OPEN, DecorationSoundEvents.BASKET_CLOSE);
+        this.registerDefaultState(this.defaultBlockState().setValue(HANGING, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(WATERLOGGED, FACING, OPEN, HANGING);
+        super.createBlockStateDefinition(builder);
+        builder.add(HANGING);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         return waterLog(ctx, this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite()).setValue(HANGING, canHangingOn(ctx.getLevel(), ctx.getClickedPos().above())));
-    }
-
-    @Override
-    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!player.isShiftKeyDown() && world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
-            be.openGui((ServerPlayer) player);
-            return InteractionResult.SUCCESS_SERVER;
-        }
-
-        return InteractionResult.PASS;
-    }
-
-    @Override
-    protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-        if (world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
-            be.tick();
-        }
-    }
-
-
-    @Override
-    public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
-        if (world.getBlockEntity(pos) instanceof BasketBlockEntity be) {
-            if (!world.isClientSide() && player.preventsBlockDrops() && !be.isEmpty()) {
-                var itemStack = this.asItem().getDefaultInstance();
-                itemStack.applyComponents(be.collectComponents());
-                ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
-                itemEntity.setDefaultPickUpDelay();
-                world.addFreshEntity(itemEntity);
-            } else {
-                //be.generateLoot(player);
-            }
-        }
-
-        return super.playerWillDestroy(world, pos, state, player);
-    }
-
-    @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-        if (blockEntity instanceof ShulkerBoxBlockEntity be) {
-            builder = builder.withDynamicDrop(CONTENTS_DYNAMIC_DROP_ID, (lootConsumer) -> {
-                for (int i = 0; i < be.getContainerSize(); ++i) {
-                    lootConsumer.accept(be.getItem(i));
-                }
-
-            });
-        }
-
-        return super.getDrops(state, builder);
     }
 
     @Override
@@ -148,23 +93,7 @@ public class BasketBlock extends BaseEntityBlock implements FactoryBlock, QuickW
 
     private boolean canHangingOn(LevelReader world, BlockPos up) {
         var state = world.getBlockState(up);
-
         return state.is(DecorationsBlocks.ROPE) || state.getBlock() instanceof ChainBlock && state.getValue(ChainBlock.AXIS) == Direction.Axis.Y;
-    }
-
-    public FluidState getFluidState(BlockState state) {
-        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
-    }
-
-    @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
-        Containers.updateNeighboursAfterDestroy(state, world, pos);
-        super.affectNeighborsAfterRemoval(state, world, pos, moved);
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
     }
 
     @Override
@@ -172,21 +101,13 @@ public class BasketBlock extends BaseEntityBlock implements FactoryBlock, QuickW
         return new Model(world, initialBlockState);
     }
 
-    @Nullable
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new BasketBlockEntity(pos, state);
-    }
-
-    public static final class Model extends BlockModel {
-        public static final ItemStack BASKET_OPEN = ItemDisplayElementUtil.getModel(id("block/basket_open"));
-        public static final ItemStack BASKET_CLOSE = ItemDisplayElementUtil.getModel(id("block/basket_closed"));
+    public final class Model extends BlockModel {
         private final ItemDisplayElement main;
 
         public Model(ServerLevel world, BlockState state) {
             var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) ? BASKET_OPEN : BASKET_CLOSE);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) ? modelOpen : modelClosed);
             this.main.setScale(new Vector3f(2));
             this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
             this.main.setYaw(direction);
@@ -200,7 +121,7 @@ public class BasketBlock extends BaseEntityBlock implements FactoryBlock, QuickW
                 var direction = state.getValue(FACING).toYRot();
                 this.main.setYaw(direction);
                 this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
-                this.main.setItem(state.getValue(OPEN) ? BASKET_OPEN : BASKET_CLOSE);
+                this.main.setItem(state.getValue(OPEN) ?  modelOpen : modelClosed);
                 this.tick();
             }
         }
