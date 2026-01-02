@@ -6,6 +6,7 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -35,7 +36,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
-public class TableBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
+public class TableBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, SimpleParticleBlock {
     public static final Corner NORTH_WEST = Corner.of(Direction.NORTH, Direction.WEST);
     public static final Corner NORTH_EAST = Corner.of(Direction.NORTH, Direction.EAST);
     public static final Corner SOUTH_WEST = Corner.of(Direction.SOUTH, Direction.WEST);
@@ -139,10 +140,10 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
 
         private static TableModel of(Identifier identifier) {
             var models = new ItemStack[COUNT];
-            models[0] = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/"));
+            models[0] = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/"));
 
             for (int i = 1; i < COUNT; i++) {
-                models[i] = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_" + i));
+                models[i] = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_" + i));
             }
 
             return new TableModel(models);

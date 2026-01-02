@@ -6,6 +6,9 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
@@ -42,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable {
+public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable, SimpleParticleBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<SlabType> TYPE = BlockStateProperties.SLAB_TYPE;
     private final Block base;
@@ -53,8 +56,9 @@ public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, Ba
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(TYPE, SlabType.BOTTOM));
         this.base = base;
-        this.topModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_top"));
-        this.doubleModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_double"));
+        this.topModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_top"));
+        this.doubleModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_double"));
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.SHELF.addSupportedBlock(this));
     }
 
     @Override
@@ -177,7 +181,7 @@ public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, Ba
 
         private ItemStack getModel(BlockState state) {
             return switch (state.getValue(TYPE)) {
-                case BOTTOM -> ItemDisplayElementUtil.getModel(state.getBlock().asItem());
+                case BOTTOM -> ItemDisplayElementUtil.getSolidModel(state.getBlock().asItem());
                 case DOUBLE -> doubleModel;
                 case TOP -> topModel;
             };

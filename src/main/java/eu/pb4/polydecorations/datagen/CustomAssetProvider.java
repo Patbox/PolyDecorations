@@ -2,9 +2,9 @@ package eu.pb4.polydecorations.datagen;
 
 import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.furniture.TableBlock;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.model.DecorationsModels;
@@ -13,6 +13,7 @@ import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
+import eu.pb4.polymer.resourcepack.extras.api.format.atlas.AtlasAsset;
 import eu.pb4.polymer.resourcepack.extras.api.format.item.ItemAsset;
 import eu.pb4.polymer.resourcepack.extras.api.format.item.model.BasicItemModel;
 import eu.pb4.polymer.resourcepack.extras.api.format.item.tint.ConstantTintSource;
@@ -26,14 +27,18 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
@@ -41,8 +46,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import static eu.pb4.polydecorations.ModInit.id;
+import static eu.pb4.polydecorations.util.DecorationsUtil.getValues;
 
-class CustomAssetProvider implements DataProvider {
+public class CustomAssetProvider implements DataProvider {
     private static final String BASE_WOOD_MODEL_JSON = """
             {
               "parent": "polydecorations:block/base_|TYPE|",
@@ -124,6 +130,282 @@ class CustomAssetProvider implements DataProvider {
         this.output = output;
     }
 
+    public static void writeWoodenBlocksAndItems(BiConsumer<String, byte[]> writer, List<WoodType> types) {
+        getValues(DecorationsItems.SHELF, types, (type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_shelf.json", BASE_WOOD_MODEL_JSON
+                    .replace("|TYPE|", "shelf")
+                    .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                    .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_shelf_top.json", BASE_WOOD_MODEL_JSON
+                    .replace("|TYPE|", "shelf_top")
+                    .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                    .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_shelf_double.json", BASE_WOOD_MODEL_JSON
+                    .replace("|TYPE|", "shelf_double")
+                    .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                    .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_shelf")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_shelf")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+        getValues(DecorationsItems.STUMP, types, (type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_stump.json", BASE_STUMP_MODEL_JSON
+                    .replace("|TYPE|", "stump")
+                    .replace("|TOP|", "polydecorations:block/" + WoodUtil.asPath(type) + "_" + WoodUtil.getLogSuffix(type) + "_stump_top")
+                    .replace("|SIDE|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_stump")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_stump")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+        getValues(DecorationsItems.STRIPPED_STUMP, types, (type, item) -> {
+            writer.accept("assets/polydecorations/models/block/stripped_" + type.name().replace(':', '/') + "_stump.json", BASE_STUMP_MODEL_JSON
+                    .replace("|TYPE|", "stump")
+                    .replace("|TOP|", "polydecorations:block/stripped_" + WoodUtil.asPath(type) + "_" + WoodUtil.getLogSuffix(type) + "_stump_top")
+                    .replace("|SIDE|", WoodUtil.getLogName(type).withPrefix("block/stripped_").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id("stripped_" + type.name().replace(':', '/') + "_stump")),
+                    new ItemAsset(new BasicItemModel(id("block/stripped_" + type.name().replace(':', '/') + "_stump")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+        getValues(DecorationsItems.BENCH, types, (type, item) -> {
+            writeBench(type, writer);
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_bench")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_bench")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+
+        getValues(DecorationsItems.TABLE, types, (type, block) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_table" + ".json", BASE_WOOD_MODEL_JSON
+                    .replace("|TYPE|", "table")
+                    .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                    .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            for (int i = 1; i < TableBlock.TableModel.COUNT; i++) {
+                writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_table_" + i + ".json", BASE_WOOD_MODEL_JSON
+                        .replace("|TYPE|", "table_" + i)
+                        .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                        .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                        .getBytes(StandardCharsets.UTF_8)
+                );
+            }
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_table")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_table")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+        getValues(DecorationsItems.WOODEN_STATUE, types, (type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_sign_post.json", BASE_WOOD_MODEL_JSON
+                    .replace("|TYPE|", "sign_post")
+                    .replace("|PLANKS|", "polydecorations:block/sign_post_" + type.name().replace(':', '/'))
+                    .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_sign_post")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_sign_post")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+
+            writeStatue(type.name().replace(':', '/'), Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString(), writer);
+        });
+
+        getValues(DecorationsItems.WOODEN_MAILBOX, types, (type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_mailbox.json",
+                    (type != WoodType.BAMBOO ? MAILBOX_MODEL_JSON : MAILBOX_BAMBOO_MODEL_JSON)
+                            .replace("|TYPE|", "mailbox")
+                            .replace("|FRONT|", "polydecorations:block/mailbox_front_" + WoodUtil.asPath(type))
+                            .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                            .replace("|STRIPPED_LOG|", WoodUtil.getLogName(type).withPrefix("block/stripped_").toString())
+                            .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_mailbox")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_mailbox")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+
+        getValues(DecorationsItems.TOOL_RACK, types, (type, item) -> {
+            writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_tool_rack.json",
+                    BASE_WOOD_MODEL_JSON
+                            .replace("|TYPE|", "tool_rack")
+                            .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                            .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                            .getBytes(StandardCharsets.UTF_8)
+            );
+
+            writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_tool_rack")),
+                    new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_tool_rack")), ItemAsset.Properties.DEFAULT)
+                            .toJson().getBytes(StandardCharsets.UTF_8));
+        });
+    }
+
+    public static void createWoodTextures(AtlasAsset.Builder blockAtlas, BiConsumer<String, byte[]> assetWriter, FileReader fileReader, List<WoodType> types) throws Exception {
+        var jar = PolymerCommonUtils.getClientJarRoot();
+        var b = new ByteArrayOutputStream();
+
+        blockAtlas.palettedPermutations(id("palette/wood/oak"), c -> {
+            c.texture(id("block/sign_post"));
+            c.texture(id("block/mailbox_front"));
+            for (var type : types) {
+                if (type == WoodType.BAMBOO) continue;
+
+                c.permutation(type.name().replace(':', '/'), id("palette/wood/" + type.name().replace(':', '/')));
+            }
+        });
+
+
+        { // Palette
+            var oakPlanks = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/oak_planks.png")));
+            var positions = new ArrayList<int[]>();
+            {
+                var existingColors = new IntOpenHashSet();
+                for (int x = 0; x < 16; x++) {
+                    for (int y = 0; y < 16; y++) {
+                        var rgb = oakPlanks.getRGB(x, y);
+                        if (existingColors.add(rgb)) {
+                            positions.add(new int[]{x, y});
+                        }
+                    }
+                }
+            }
+
+            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
+
+            for (var wood : types) {
+                try {
+                    var id = Identifier.parse(wood.name());
+
+                    var input = ImageIO.read(fileReader.apply("assets/" + id.getNamespace() + "/textures/block/" + id.getPath() + "_planks.png"));
+                    for (int i = 0; i < positions.size(); i++) {
+                        var pos = positions.get(i);
+                        palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
+                    }
+                    ImageIO.write(palette, "png", b);
+                    assetWriter.accept("assets/polydecorations/textures/palette/wood/" + wood.name().replace(':', '/') + ".png", b.toByteArray());
+                    b.reset();
+                } catch (Throwable e) {
+                    ModInit.LOGGER.warn("Failed to find planks texture for '" + wood.name() + "'", e);
+                }
+
+            }
+        }
+
+        // Stump top
+        for (var prefix : List.of("", "stripped_")) {
+            for (var wood : types) {
+                try {
+                    var id = Identifier.parse(wood.name());
+                    var source = ImageIO.read(fileReader.apply("assets/" + id.getNamespace() + "/textures/block/" + prefix + WoodUtil.getLogName(wood).getPath() + "_top.png"));
+                    var texture = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
+                    var frames = source.getHeight() / source.getWidth();
+
+                    var scale = source.getWidth() / 16f;
+
+                    var three = (int) (3 * scale);
+                    var threePlusFive = (int) ((3 + 5) * scale);
+                    var eleven = (int) (11 * scale);
+                    var five = Mth.ceil(5 * scale);
+
+                    for (int i = 0; i < frames; i++) {
+                        var offset = i * source.getWidth();
+                        for (int x = 0; x < five; x++) {
+                            for (int y = 0; y < five; y++) {
+                                texture.setRGB(x + three, y + three + offset, source.getRGB(x, y + offset));
+                                texture.setRGB(x + threePlusFive, y + three + offset, source.getRGB(eleven + x, y + offset));
+                                texture.setRGB(x + three, y + threePlusFive + offset, source.getRGB(x, eleven + y + offset));
+                                texture.setRGB(x + threePlusFive, y + threePlusFive + offset, source.getRGB(eleven + x, eleven + y + offset));
+                            }
+                        }
+                    }
+
+                    ImageIO.write(texture, "png", b);
+                    assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.asPath(wood) + "_" + WoodUtil.getLogSuffix(wood) + "_stump_top.png", b.toByteArray());
+
+                    var mcMeta = jar.resolve("assets/" + id.getNamespace() + "/textures/block/" + prefix + WoodUtil.getLogName(wood).getPath() + "_top.png.mcmeta");
+                    if (Files.exists(mcMeta)) {
+                        assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.asPath(wood) + "_" + WoodUtil.getLogSuffix(wood) + "_stump_top.png.mcmeta",
+                                Files.readAllBytes(mcMeta));
+                    }
+                    b.reset();
+                } catch (Throwable e) {
+                    ModInit.LOGGER.warn("Failed to find file for '" + wood.name() + "'", e);
+                }
+            }
+        }
+    }
+
+    private static void writeBench(WoodType name, BiConsumer<String, byte[]> writer) {
+        writeBenchSet(name, "", writer);
+        writeBenchSet(name, "_norest", writer);
+    }
+
+    private static void writeBenchSet(WoodType type, String suffix, BiConsumer<String, byte[]> writer) {
+        writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_bench" + suffix + ".json", BASE_WOOD_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix)
+                .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                .getBytes(StandardCharsets.UTF_8)
+        );
+        writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_bench" + suffix + "_left.json", BASE_WOOD_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix + "_left")
+                .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                .getBytes(StandardCharsets.UTF_8)
+        );
+        writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_bench" + suffix + "_right.json", BASE_WOOD_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix + "_right")
+                .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                .getBytes(StandardCharsets.UTF_8)
+        );
+        writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_bench" + suffix + "_middle.json", BASE_WOOD_MODEL_JSON
+                .replace("|TYPE|", "bench" + suffix + "_middle")
+                .replace("|PLANKS|", Identifier.parse(type.name()).withPrefix("block/").withSuffix("_planks").toString())
+                .replace("|LOG|", WoodUtil.getLogName(type).withPrefix("block/").toString())
+                .getBytes(StandardCharsets.UTF_8)
+        );
+    }
+
+    private static void writeStatue(String type, String texture, BiConsumer<String, byte[]> writer) {
+        for (var x : List.of("head", "body", "left_leg", "right_leg", "left_arm", "right_arm")) {
+            writer.accept("assets/polydecorations/models/block/statue/" + type + "/" + x + ".json", STATUE_MODEL_JSON
+                    .replace("|TYPE|", x)
+                    .replace("|TXT|", texture)
+                    .getBytes(StandardCharsets.UTF_8)
+            );
+        }
+
+        writer.accept("assets/polydecorations/models/item/" + type + "_statue.json", STATUE_ITEM_JSON
+                .replace("|TXT|", texture)
+                .getBytes(StandardCharsets.UTF_8)
+        );
+
+        writer.accept(AssetPaths.itemAsset(id(type + "_statue")),
+                new ItemAsset(new BasicItemModel(id("item/" + type + "_statue")), ItemAsset.Properties.DEFAULT)
+                        .toJson().getBytes(StandardCharsets.UTF_8));
+    }
+
     @Override
     public CompletableFuture<?> run(CachedOutput writer) {
         BiConsumer<String, byte[]> assetWriter = (path, data) -> {
@@ -135,11 +417,13 @@ class CustomAssetProvider implements DataProvider {
         };
         return CompletableFuture.runAsync(() -> {
             try {
-                createWoodTextures(assetWriter);
+                var blockAtlas = AtlasAsset.builder();
+                createWoodTextures(blockAtlas, assetWriter, ResourceUtils::getJarStream, WoodUtil.VANILLA);
                 createBedPalette(assetWriter);
                 createCopperBarPalette(assetWriter);
                 UiResourceCreator.generateAssets(assetWriter);
                 writeBlocksAndItems(assetWriter);
+                assetWriter.accept("assets/minecraft/atlases/blocks.json", blockAtlas.build().toBytes());
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
@@ -147,134 +431,7 @@ class CustomAssetProvider implements DataProvider {
     }
 
     private void writeBlocksAndItems(BiConsumer<String, byte[]> writer) {
-        var t = new StringBuilder();
-        DecorationsItems.SHELF.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf.json", BASE_WOOD_MODEL_JSON
-                    .replace("|TYPE|", "shelf")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf_top.json", BASE_WOOD_MODEL_JSON
-                    .replace("|TYPE|", "shelf_top")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_shelf_double.json", BASE_WOOD_MODEL_JSON
-                    .replace("|TYPE|", "shelf_double")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_shelf")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_shelf")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
-
-        DecorationsItems.STUMP.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_stump.json", BASE_STUMP_MODEL_JSON
-                    .replace("|TYPE|", "stump")
-                    .replace("|TOP|", "polydecorations:block/" + WoodUtil.getLogName(type) + "_stump_top")
-                    .replace("|SIDE|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_stump")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_stump")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
-
-        DecorationsItems.STRIPPED_STUMP.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/stripped_" + type.name() + "_stump.json", BASE_STUMP_MODEL_JSON
-                    .replace("|TYPE|", "stump")
-                    .replace("|TOP|", "polydecorations:block/stripped_" + WoodUtil.getLogName(type) + "_stump_top")
-                    .replace("|SIDE|", "minecraft:block/stripped_" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept(AssetPaths.itemAsset(id("stripped_" + type.name() + "_stump")),
-                    new ItemAsset(new BasicItemModel(id("block/stripped_" + type.name() + "_stump")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
-
-        DecorationsItems.BENCH.forEach((type, item) -> {
-            writeBench(type, writer);
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_bench")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_bench")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
-
-
-        DecorationsItems.TABLE.forEach((type, block) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_table" + ".json", BASE_WOOD_MODEL_JSON
-                    .replace("|TYPE|", "table")
-                    .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            for (int i = 1; i < TableBlock.TableModel.COUNT; i++) {
-                writer.accept("assets/polydecorations/models/block/" + type.name() + "_table_" + i + ".json", BASE_WOOD_MODEL_JSON
-                        .replace("|TYPE|", "table_" + i)
-                        .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                        .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                        .getBytes(StandardCharsets.UTF_8)
-                );
-            }
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_table")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_table")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
-
-        DecorationsItems.WOODEN_STATUE.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_sign_post.json", BASE_WOOD_MODEL_JSON
-                    .replace("|TYPE|", "sign_post")
-                    .replace("|PLANKS|", "polydecorations:block/sign_post_" + type.name())
-                    .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_sign_post")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_sign_post")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-
-            writeStatue(type.name(), "block/" + type.name() + "_planks", writer);
-        });
-
-        DecorationsItems.WOODEN_MAILBOX.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_mailbox.json",
-                    (type != WoodType.BAMBOO ? MAILBOX_MODEL_JSON : MAILBOX_BAMBOO_MODEL_JSON)
-                            .replace("|TYPE|", "mailbox")
-                            .replace("|FRONT|", "polydecorations:block/mailbox_front_" + type.name())
-                            .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                            .replace("|STRIPPED_LOG|", "minecraft:block/stripped_" + WoodUtil.getLogName(type))
-                            .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_mailbox")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_mailbox")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
-
-        DecorationsItems.TOOL_RACK.forEach((type, item) -> {
-            writer.accept("assets/polydecorations/models/block/" + type.name() + "_tool_rack.json",
-                    BASE_WOOD_MODEL_JSON
-                            .replace("|TYPE|", "tool_rack")
-                            .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                            .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                            .getBytes(StandardCharsets.UTF_8)
-            );
-
-            writer.accept(AssetPaths.itemAsset(id(type.name() + "_tool_rack")),
-                    new ItemAsset(new BasicItemModel(id("block/" + type.name() + "_tool_rack")), ItemAsset.Properties.DEFAULT)
-                            .toJson().getBytes(StandardCharsets.UTF_8));
-        });
+        writeWoodenBlocksAndItems(writer, WoodUtil.VANILLA);
 
         DecorationsItems.SLEEPING_BAG.forEach((type, item) -> {
             writer.accept("assets/polydecorations/models/block/" + type.getSerializedName() + "_sleeping_bag.json",
@@ -356,71 +513,6 @@ class CustomAssetProvider implements DataProvider {
                         .toJson().getBytes(StandardCharsets.UTF_8));
     }
 
-    private void createWoodTextures(BiConsumer<String, byte[]> assetWriter) throws Exception {
-        var jar = PolymerCommonUtils.getClientJarRoot();
-        var b = new ByteArrayOutputStream();
-
-        { // Palette
-            var oakPlanks = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/oak_planks.png")));
-            var positions = new ArrayList<int[]>();
-            {
-                var existingColors = new IntOpenHashSet();
-                for (int x = 0; x < 16; x++) {
-                    for (int y = 0; y < 16; y++) {
-                        var rgb = oakPlanks.getRGB(x, y);
-                        if (existingColors.add(rgb)) {
-                            positions.add(new int[]{x, y});
-                        }
-                    }
-                }
-            }
-
-            var palette = new BufferedImage(positions.size(), 1, BufferedImage.TYPE_INT_RGB);
-
-            for (var wood : WoodUtil.VANILLA) {
-                var input = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + wood.name() + "_planks.png")));
-                for (int i = 0; i < positions.size(); i++) {
-                    var pos = positions.get(i);
-                    palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
-                }
-                ImageIO.write(palette, "png", b);
-                assetWriter.accept("assets/polydecorations/textures/palette/wood/" + wood.name() + ".png", b.toByteArray());
-                b.reset();
-            }
-        }
-
-        // Stump top
-        for (var prefix :List.of("", "stripped_")) {
-            for (var wood : WoodUtil.VANILLA) {
-                var source = ImageIO.read(Files.newInputStream(jar.resolve("assets/minecraft/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_top.png")));
-                var texture = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
-                var frames = source.getHeight() / source.getWidth();
-
-                for (int i = 0; i < frames; i++) {
-                    var offset = i * source.getWidth();
-                    for (int x = 0; x < 5; x++) {
-                        for (int y = 0; y < 5; y++) {
-                            texture.setRGB(x + 3, y + 3 + offset, source.getRGB(x, y + offset));
-                            texture.setRGB(x + 3 + 5, y + 3 + offset, source.getRGB(11 + x, y + offset));
-                            texture.setRGB(x + 3, y + 3 + 5 + offset, source.getRGB(x, 11 + y + offset));
-                            texture.setRGB(x + 3 + 5, y + 3 + 5 + offset, source.getRGB(11 + x, 11 + y + offset));
-                        }
-                    }
-                }
-
-                ImageIO.write(texture, "png", b);
-                assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_stump_top.png", b.toByteArray());
-
-                var mcMeta = jar.resolve("assets/minecraft/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_top.png.mcmeta");
-                if (Files.exists(mcMeta)) {
-                    assetWriter.accept("assets/polydecorations/textures/block/" + prefix + WoodUtil.getLogName(wood) + "_stump_top.png.mcmeta",
-                            Files.readAllBytes(mcMeta));
-                }
-                b.reset();
-            }
-        }
-    }
-
     private void createCopperBarPalette(BiConsumer<String, byte[]> assetWriter) throws Exception {
         var jar = PolymerCommonUtils.getClientJarRoot();
         var b = new ByteArrayOutputStream();
@@ -498,7 +590,7 @@ class CustomAssetProvider implements DataProvider {
         }
     }
 
-    private void generateWindChimeModels(BiConsumer<String,byte[]> writer) {
+    private void generateWindChimeModels(BiConsumer<String, byte[]> writer) {
         writer.accept(AssetPaths.itemAsset(id("wind_chime")),
                 new ItemAsset(new BasicItemModel(id("block/wind_chime"), List.of(
                         new ConstantTintSource(0xFFFFFF),
@@ -601,59 +693,13 @@ class CustomAssetProvider implements DataProvider {
         }
     }
 
-    private void writeBench(WoodType name, BiConsumer<String, byte[]> writer) {
-        writeBenchSet(name, "", writer);
-        writeBenchSet(name, "_norest", writer);
-    }
-
-    private void writeBenchSet(WoodType type, String suffix, BiConsumer<String, byte[]> writer) {
-        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + ".json", BASE_WOOD_MODEL_JSON
-                .replace("|TYPE|", "bench" + suffix)
-                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                .getBytes(StandardCharsets.UTF_8)
-        );
-        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + "_left.json", BASE_WOOD_MODEL_JSON
-                .replace("|TYPE|", "bench" + suffix + "_left")
-                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                .getBytes(StandardCharsets.UTF_8)
-        );
-        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + "_right.json", BASE_WOOD_MODEL_JSON
-                .replace("|TYPE|", "bench" + suffix + "_right")
-                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                .getBytes(StandardCharsets.UTF_8)
-        );
-        writer.accept("assets/polydecorations/models/block/" + type.name() + "_bench" + suffix + "_middle.json", BASE_WOOD_MODEL_JSON
-                .replace("|TYPE|", "bench" + suffix + "_middle")
-                .replace("|PLANKS|", "minecraft:block/" + type.name() + "_planks")
-                .replace("|LOG|", "minecraft:block/" + WoodUtil.getLogName(type))
-                .getBytes(StandardCharsets.UTF_8)
-        );
-    }
-
-    private void writeStatue(String type, String texture, BiConsumer<String, byte[]> writer) {
-        for (var x : List.of("head", "body", "left_leg", "right_leg", "left_arm", "right_arm")) {
-            writer.accept("assets/polydecorations/models/block/statue/" + type + "/" + x + ".json", STATUE_MODEL_JSON
-                    .replace("|TYPE|", x)
-                    .replace("|TXT|", texture)
-                    .getBytes(StandardCharsets.UTF_8)
-            );
-        }
-
-        writer.accept("assets/polydecorations/models/item/" + type + "_statue.json", STATUE_ITEM_JSON
-                .replace("|TXT|", texture)
-                .getBytes(StandardCharsets.UTF_8)
-        );
-
-        writer.accept(AssetPaths.itemAsset(id(type + "_statue")),
-                new ItemAsset(new BasicItemModel(id("item/" + type + "_statue")), ItemAsset.Properties.DEFAULT)
-                        .toJson().getBytes(StandardCharsets.UTF_8));
-    }
-
     @Override
     public String getName() {
         return "polydecorations:assets";
+    }
+
+    @FunctionalInterface
+    public interface FileReader {
+        InputStream apply(String s) throws Exception;
     }
 }

@@ -72,7 +72,7 @@ public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierB
         private final ItemDisplayElement main;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             this.addElement(this.main);

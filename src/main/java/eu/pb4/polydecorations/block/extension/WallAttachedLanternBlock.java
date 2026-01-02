@@ -120,9 +120,9 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
     }
 
     public static final class Model extends BlockModel {
-        public static final ItemStack MODEL = ItemDisplayElementUtil.getModel(id("block/lantern_support"));
-        public static final ItemStack MODEL_WALL = ItemDisplayElementUtil.getModel(id("block/lantern_support_wall"));
-        public static final ItemStack MODEL_FENCE = ItemDisplayElementUtil.getModel(id("block/lantern_support_fence"));
+        public static final ItemStack MODEL = ItemDisplayElementUtil.getSolidModel(id("block/lantern_support"));
+        public static final ItemStack MODEL_WALL = ItemDisplayElementUtil.getSolidModel(id("block/lantern_support_wall"));
+        public static final ItemStack MODEL_FENCE = ItemDisplayElementUtil.getSolidModel(id("block/lantern_support_fence"));
         private final ItemDisplayElement main;
 
         private Model(BlockState state) {

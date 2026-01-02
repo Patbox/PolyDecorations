@@ -7,6 +7,7 @@ import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polydecorations.entity.SeatEntity;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
@@ -46,7 +47,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Locale;
 
-public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock {
+public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggable, PolymerTexturedBlock, SimpleParticleBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<Type> TYPE = EnumProperty.create("type", Type.class);
     public static final BooleanProperty HAS_REST = BooleanProperty.create("has_rest");
@@ -62,13 +63,13 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
     public BenchBlock(Properties settings, Identifier identifier, Block planks) {
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
-        this.leftModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_left"));
-        this.rightModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_right"));
-        this.middleModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_middle"));
-        this.noRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest"));
-        this.leftNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest_left"));
-        this.rightNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest_right"));
-        this.middleNoRestModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_norest_middle"));
+        this.leftModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_left"));
+        this.rightModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_right"));
+        this.middleModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_middle"));
+        this.noRestModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_norest"));
+        this.leftNoRestModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_norest_left"));
+        this.rightNoRestModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_norest_right"));
+        this.middleNoRestModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_norest_middle"));
         this.base = planks;
     }
 
@@ -85,7 +86,7 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
     public ItemStack getModel(BlockState state) {
         if (state.getValue(HAS_REST)) {
             return switch (state.getValue(TYPE)) {
-                case BOTH -> ItemDisplayElementUtil.getModel(this.asItem());
+                case BOTH -> ItemDisplayElementUtil.getSolidModel(this.asItem());
                 case LEFT -> leftModel;
                 case RIGHT -> rightModel;
                 case MIDDLE -> middleModel;

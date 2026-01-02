@@ -52,7 +52,7 @@ import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
 public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, CustomBreakingParticleBlock {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
-    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getModel(id("block/unlit_brazier")));
+    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getSolidModel(id("block/unlit_brazier")));
 
     public BrazierBlock(Properties settings) {
         super(settings);
@@ -156,11 +156,11 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
     }
 
     public static final class Model extends BlockModel {
-        public static final ItemStack UNLIT = ItemDisplayElementUtil.getModel(id("block/unlit_brazier"));
+        public static final ItemStack UNLIT = ItemDisplayElementUtil.getSolidModel(id("block/unlit_brazier"));
         private final ItemDisplayElement main;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(LIT) ? ItemDisplayElementUtil.getModel(state.getBlock().asItem()) : UNLIT);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(LIT) ? ItemDisplayElementUtil.getSolidModel(state.getBlock().asItem()) : UNLIT);
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             this.main.setBrightness(state.getValue(LIT) ? new Brightness(15, 15) : null);
@@ -172,7 +172,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
                 this.main.setBrightness(state.getValue(LIT) ? new Brightness(15, 15) : null);
-                this.main.setItem(state.getValue(LIT) ? ItemDisplayElementUtil.getModel(state.getBlock().asItem()) : UNLIT);
+                this.main.setItem(state.getValue(LIT) ? ItemDisplayElementUtil.getSolidModel(state.getBlock().asItem()) : UNLIT);
 
                 this.tick();
             }

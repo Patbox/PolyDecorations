@@ -2,7 +2,9 @@ package eu.pb4.polydecorations.block.item;
 
 import eu.pb4.factorytools.api.block.BlockEntityExtraListener;
 import eu.pb4.factorytools.api.block.entity.LockableBlockEntity;
+import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polydecorations.ui.GuiTextures;
 import eu.pb4.polydecorations.util.MinimalInventory;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
@@ -30,7 +32,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
-public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInventory, WorldlyContainer, BlockEntityExtraListener {
+public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInventory, WorldlyContainer, BlockEntityExtraListener, SimpleParticleBlock {
     private static final int[] ALL_SLOTS = IntStream.range(0, 6).toArray();
     private static final int[] TOP_SLOTS = IntStream.range(3, 6).toArray();
     private static final int[] BOTTOM_SLOTS = IntStream.range(0, 3).toArray();

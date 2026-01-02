@@ -7,6 +7,9 @@ import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polydecorations.item.DecorationsItemTags;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
@@ -46,7 +49,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, PolymerTexturedBlock, QuickWaterloggable {
+public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, PolymerTexturedBlock, QuickWaterloggable, SimpleParticleBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     private final Block base;
 
@@ -54,6 +57,7 @@ public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, Poly
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
         this.base = base;
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.TOOL_RACK.addSupportedBlock(this));
     }
 
     @Override
@@ -156,7 +160,7 @@ public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, Poly
         private final ItemDisplayElement[] items = new ItemDisplayElement[4];
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setItemDisplayContext(ItemDisplayContext.NONE);
             this.main.setDisplaySize(1, 1);
 

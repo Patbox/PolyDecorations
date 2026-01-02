@@ -5,6 +5,7 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polydecorations.entity.SeatEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
@@ -29,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-public class StumpBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
+public class StumpBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, SimpleParticleBlock {
     private final Block base;
 
     public StumpBlock(Properties settings, Block log) {
@@ -88,7 +89,7 @@ public class StumpBlock extends Block implements FactoryBlock, BarrierBasedWater
         private final ItemDisplayElement main;
 
         public Model(BlockState state, BlockPos pos) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             this.main.setYaw(RandomSource.create(pos.hashCode()).nextInt(4) * 90);

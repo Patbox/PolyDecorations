@@ -2,7 +2,7 @@
 	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "block/oak_log",
+		"particle": "#side",
 		"side": "block/oak_log",
 		"top": "block/oak_log_top"
 	},

@@ -20,17 +20,10 @@ import java.util.ArrayList;
 import static eu.pb4.polydecorations.ModInit.id;
 
 public class DecorationsBlockEntities {
-    public static final BlockEntityType<?> SHELF = register("shelf", ShelfBlockEntity::new, DecorationsBlocks.SHELF.values().toArray(new PlainShelfBlock[0]));
-    public static final BlockEntityType<?> SIGN_POST = register("sign_post", SignPostBlockEntity::new,
-            Util.make(new ArrayList<Block>(), (l) -> {
-                l.addAll(DecorationsBlocks.WOOD_SIGN_POST.values());
-                l.addAll(DecorationsBlocks.WALL_SIGN_POST.values());
-                l.add(DecorationsBlocks.NETHER_BRICK_SIGN_POST);
-            }).toArray(new Block[0])
-    );
+    public static final BlockEntityType<?> SHELF = register("shelf", ShelfBlockEntity::new);
+    public static final BlockEntityType<?> SIGN_POST = register("sign_post", SignPostBlockEntity::new);
 
-    public static final BlockEntityType<?> MAILBOX = register("mailbox", MailboxBlockEntity::new,
-            DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]));
+    public static final BlockEntityType<?> MAILBOX = register("mailbox", MailboxBlockEntity::new);
     public static final BlockEntityType<?> GLOBE = register("globe", GenericSingleItemBlockEntity::globe, DecorationsBlocks.GLOBE);
     public static final BlockEntityType<?> TRASHCAN = register("trashcan", TrashCanBlockEntity::new, DecorationsBlocks.TRASHCAN);
     public static final BlockEntityType<?> GENERIC_PICKABLE_STORAGE = register("generic_pickable_storage", PickableItemContainerBlockEntity::new,
@@ -47,8 +40,7 @@ public class DecorationsBlockEntities {
             DecorationsBlocks.LONG_FLOWER_POT
     );
 
-    public static final BlockEntityType<?> TOOL_RACK = register("tool_rack", ToolRackBlockEntity::new,
-            DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]));
+    public static final BlockEntityType<?> TOOL_RACK = register("tool_rack", ToolRackBlockEntity::new);
 
     //public static final BlockEntityType<?> BANNER_BED = register("banner_bed",
     //        FabricBlockEntityTypeBuilder.create(BedWithBannerBlockEntity::new)

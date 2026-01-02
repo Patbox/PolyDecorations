@@ -5,15 +5,19 @@ import eu.pb4.factorytools.api.block.QuickWaterloggable;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
+import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polydecorations.model.SignLikeText;
+import eu.pb4.polydecorations.util.ProxyAttachement;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
 import eu.pb4.polymer.virtualentity.api.BlockWithElementHolder;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
@@ -39,7 +43,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Map;
 
-public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlock, BlockWithElementHolder, QuickWaterloggable {
+public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlock, BlockWithElementHolder, QuickWaterloggable, SimpleParticleBlock {
     public static final Map<Block, AttachedSignPostBlock> MAP = new Reference2ObjectOpenHashMap<>();
 
     private final Block baseBlock;
@@ -51,6 +55,7 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
         this.radius = pixelSideLength / 16f / 2f;
         MAP.put(block, this);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.SIGN_POST.addSupportedBlock(this));
     }
 
     @Override
@@ -95,7 +100,12 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
 
     @Override
     public @Nullable ElementHolder createElementHolder(ServerLevel world, BlockPos pos, BlockState initialBlockState) {
-        return new Model();
+        return new Model(world, pos);
+    }
+
+    @Override
+    public ParticleOptions computeParticle(Block block) {
+        return SimpleParticleBlock.super.computeParticle(this.baseBlock);
     }
 
     public FluidState getFluidState(BlockState state) {
@@ -112,8 +122,11 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
         private final ItemDisplayElement lowerBack;
         private final SignLikeText lowerText;
 
+        @Nullable
+        ProxyAttachement proxyAttachement;
 
-        public Model() {
+
+        public Model(ServerLevel world, BlockPos pos) {
             this.upperBack = ItemDisplayElementUtil.createSimple();
             this.upperBack.setScale(new Vector3f(2));
             this.upperBack.setDisplaySize(1, 1);
@@ -136,6 +149,13 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
             this.addElement(this.upperText);
             this.addElement(this.lowerBack);
             this.addElement(this.lowerText);
+
+            if (BlockWithElementHolder.get(baseBlock.defaultBlockState()) instanceof BlockWithElementHolder b) {
+                this.proxyAttachement = new ProxyAttachement(this, b.createElementHolder(world, pos, baseBlock.defaultBlockState()), baseBlock::defaultBlockState);
+                this.proxyAttachement.holder().setAttachment(this.proxyAttachement);
+                this.addElement(this.proxyAttachement);
+            }
+
         }
 
         public void update(SignPostBlockEntity.Sign upperText, SignPostBlockEntity.Sign lowerText) {
@@ -161,7 +181,7 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
             this.upperBack.setTeleportDuration(0);
             this.upperBack.setYaw(upperText.flip() ? 180 + upperText.yaw() : upperText.yaw());
             this.upperBack.setTranslation(new Vector3f(0, 4 / 16f, zOffset));
-            this.upperBack.setItem(ItemDisplayElementUtil.getModel(upperText.item()));
+            this.upperBack.setItem(ItemDisplayElementUtil.getSolidModel(upperText.item()));
             this.upperBack.tick();
             this.upperBack.setTeleportDuration(1);
             this.upperBack.tick();
@@ -185,7 +205,7 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
             this.lowerBack.setTeleportDuration(0);
             this.lowerBack.setYaw(lowerText.flip() ? 180 + lowerText.yaw() : lowerText.yaw());
             this.lowerBack.setTranslation(new Vector3f(0, -4 / 16f, zOffset));
-            this.lowerBack.setItem(ItemDisplayElementUtil.getModel(lowerText.item()));
+            this.lowerBack.setItem(ItemDisplayElementUtil.getSolidModel(lowerText.item()));
             this.lowerBack.tick();
             this.lowerBack.setTeleportDuration(1);
             this.lowerBack.tick();

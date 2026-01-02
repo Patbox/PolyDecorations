@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DecorationsUtil {
@@ -89,5 +90,12 @@ public class DecorationsUtil {
         }
 
         return thing;
+    }
+
+    public static  <X, Y> void getValues(Map<X, Y> map, List<X> keys, BiConsumer<X, Y> consumer) {
+        for (var key : keys) {
+            var val = map.get(key);
+            consumer.accept(key, val);
+        }
     }
 }

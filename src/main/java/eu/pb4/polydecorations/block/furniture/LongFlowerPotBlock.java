@@ -68,7 +68,7 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
                     return;
                 }
                 MODEL_MAP.put(flowerPotBlock.getPotted(),
-                        ItemDisplayElementUtil.getModel(id("block/long_flower_pot/" + BuiltInRegistries.BLOCK.getKey(flowerPotBlock.getPotted()).toDebugFileName())));
+                        ItemDisplayElementUtil.getSolidModel(id("block/long_flower_pot/" + BuiltInRegistries.BLOCK.getKey(flowerPotBlock.getPotted()).toDebugFileName())));
             }
         }));
     }
@@ -197,7 +197,7 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
         private final ItemDisplayElement[] plants = new ItemDisplayElement[3];
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 

@@ -49,7 +49,7 @@ public class SleepingBagBlock extends BedBlock implements FactoryBlock, PolymerT
         private final ItemDisplayElement main;
 
         public Model(BlockState state, BlockPos pos) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setDisplaySize(2, 2);
             this.main.setItemDisplayContext(ItemDisplayContext.NONE);
             //this.main.setTranslation(new Vector3f(0, 0, 0.5f));

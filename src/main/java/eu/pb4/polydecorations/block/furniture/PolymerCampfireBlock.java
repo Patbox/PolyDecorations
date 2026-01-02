@@ -46,7 +46,7 @@ public class PolymerCampfireBlock extends CampfireBlock implements FactoryBlock,
     public static final class Model extends BlockModel {
         private final ItemDisplayElement main;
 
-        private static final ItemStack MODEL = ItemDisplayElementUtil.getModel(id("block/copper_campfire"));
+        private static final ItemStack MODEL = ItemDisplayElementUtil.getSolidModel(id("block/copper_campfire"));
 
         public Model(BlockState state) {
             this.main = ItemDisplayElementUtil.createSimple(state.getValue(LIT) ? MODEL : ItemStack.EMPTY);

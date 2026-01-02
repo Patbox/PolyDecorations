@@ -34,13 +34,15 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.block.state.properties.WoodType;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static eu.pb4.polydecorations.ModInit.id;
+import static eu.pb4.polydecorations.util.DecorationsUtil.getValues;
 
-class RecipesProvider extends FabricRecipeProvider {
+public class RecipesProvider extends FabricRecipeProvider {
 
 
     public RecipesProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
@@ -57,121 +59,10 @@ class RecipesProvider extends FabricRecipeProvider {
                 //noinspection unchecked
                 var dyes = (List<DyeItem>) (Object) List.of(Items.BLACK_DYE, Items.BLUE_DYE, Items.BROWN_DYE, Items.CYAN_DYE, Items.GRAY_DYE, Items.GREEN_DYE, Items.LIGHT_BLUE_DYE, Items.LIGHT_GRAY_DYE, Items.LIME_DYE, Items.MAGENTA_DYE, Items.ORANGE_DYE, Items.PINK_DYE, Items.PURPLE_DYE, Items.RED_DYE, Items.YELLOW_DYE, Items.WHITE_DYE);
 
-                DecorationsItems.SHELF.forEach(((woodType, item) -> {
-                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_slab"));
-                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_planks"));
-                    if (slab == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 2)
-                            .group("polydecorations:shelf")
-                            .pattern("-s-")
-                            .define('-', Items.STICK)
-                            .define('s', slab)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
-                            .save(output);
-                }));
-
-                DecorationsItems.BENCH.forEach(((woodType, item) -> {
-                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_slab"));
-                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_planks"));
-                    if (slab == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 2)
-                            .group("polydecorations:bench")
-                            .pattern("sss")
-                            .pattern("- -")
-                            .define('-', Items.STICK)
-                            .define('s', slab)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
-                            .save(output);
-                }));
-
-                DecorationsItems.TABLE.forEach(((woodType, item) -> {
-                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_slab"));
-                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_planks"));
-                    if (slab == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 1)
-                            .group("polydecorations:table")
-                            .pattern("sss")
-                            .pattern("- -")
-                            .pattern("- -")
-                            .define('-', Items.STICK)
-                            .define('s', slab)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
-                            .save(output);
-                }));
-
-                DecorationsItems.TOOL_RACK.forEach(((woodType, item) -> {
-                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_slab"));
-                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_planks"));
-                    if (slab == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 1)
-                            .group("polydecorations:toolrack")
-                            .pattern("s-s")
-                            .pattern("-i-")
-                            .pattern("s-s")
-                            .define('-', Items.STICK)
-                            .define('i', Items.IRON_INGOT)
-                            .define('s', slab)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
-                            .save(output);
-                }));
-
-                DecorationsItems.WOODEN_MAILBOX.forEach(((woodType, item) -> {
-                    var log = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(WoodUtil.getLogName(woodType)));
-                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_slab"));
-                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_planks"));
-                    if (slab == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 2)
-                            .group("polydecorations:mailbox")
-                            .pattern(" lc")
-                            .pattern("sps")
-                            .define('p', Items.PAPER)
-                            .define('c', Items.COPPER_INGOT)
-                            .define('l', log)
-                            .define('s', slab)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
-                            .save(output);
-                }));
-
-                DecorationsItems.STUMP.forEach(((woodType, item) -> {
-                    var log = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(WoodUtil.getLogName(woodType)));
-                    if (log == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 2)
-                            .group("polydecorations:stump")
-                            .pattern("s")
-                            .pattern("s")
-                            .define('s', log)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(log))
-                            .save(output);
-                }));
-
-                DecorationsItems.STRIPPED_STUMP.forEach(((woodType, item) -> {
-                    var log = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("stripped_" + WoodUtil.getLogName(woodType)));
-                    if (log == Items.AIR) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 2)
-                            .group("polydecorations:stump")
-                            .pattern("s")
-                            .pattern("s")
-                            .define('s', log)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(log))
-                            .save(output);
-                }));
+                woodRecipeProvider(WoodUtil.VANILLA, registryLookup, exporter).buildRecipes();
 
                 DecorationsItems.SLEEPING_BAG.forEach(((color, item) -> {
-                    var wool = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(color.getSerializedName() + "_wool"));
+                    var wool = BuiltInRegistries.ITEM.getValue(Identifier.parse(color.getSerializedName() + "_wool"));
                     if (wool == Items.AIR) {
                         return;
                     }
@@ -184,20 +75,6 @@ class RecipesProvider extends FabricRecipeProvider {
 
                 }));
                 colorItemWithDye(List.copyOf(dyes), List.copyOf(DecorationsItems.SLEEPING_BAG.values()), "polydecorations:sleeping_bag_dying", RecipeCategory.DECORATIONS);
-
-                DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
-                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(woodType.name() + "_planks"));
-                    if (planks == null) {
-                        return;
-                    }
-                    shaped(RecipeCategory.DECORATIONS, item, 2)
-                            .group("polydecorations:sign_post")
-                            .pattern("ss-")
-                            .define('-', Items.STICK)
-                            .define('s', planks)
-                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
-                            .save(output);
-                }));
 
                 shaped(RecipeCategory.DECORATIONS, DecorationsItems.HAMMER, 1)
                         .pattern("nI ")
@@ -397,19 +274,17 @@ class RecipesProvider extends FabricRecipeProvider {
                         DataComponentPatch.builder().set(DecorationsDataComponents.TIED, Unit.INSTANCE).build()
                 ), InventoryChangeTrigger.TriggerInstance.hasItems(Items.STRING));
 
-                for (var x : BuiltInRegistries.ITEM) {
-                    if (x instanceof StatueItem item) {
-                        shaped(RecipeCategory.DECORATIONS, item, 1)
-                                .pattern(" x ")
-                                .pattern("x#x")
-                                .pattern(" x ")
-                                .define('#', Items.ARMOR_STAND)
-                                .define('x', item.getType().block())
-                                .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(Items.ARMOR_STAND))
-                                .save(output);
-                    }
-                }
 
+                DecorationsItems.OTHER_STATUE.forEach((type, item) -> {
+                    shaped(RecipeCategory.DECORATIONS, item, 1)
+                            .pattern(" x ")
+                            .pattern("x#x")
+                            .pattern(" x ")
+                            .define('#', Items.ARMOR_STAND)
+                            .define('x', item.getType().block())
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(Items.ARMOR_STAND))
+                            .save(output);
+                });
         /*DecorationsBlocks.BANNER_BED.forEach(((dye, item) -> {
             exporter.accept(
                     id(getRecipeName(item)),
@@ -435,6 +310,151 @@ class RecipesProvider extends FabricRecipeProvider {
                         .requirements(AdvancementRequirements.Strategy.OR)
                         .addCriterion("item", criterion);
                 output.accept(resourceKey, wax, advancement.build(resourceKey.identifier().withPrefix("recipes/" + wax.category().getSerializedName() + "/")));
+            }
+        };
+    }
+    
+    public static RecipeProvider woodRecipeProvider(List<WoodType> woodTypes, HolderLookup.Provider registryLookup, RecipeOutput exporter) {
+        return new RecipeProvider(registryLookup, exporter) {
+            @Override
+            public void buildRecipes() {
+                getValues(DecorationsItems.WOODEN_STATUE, woodTypes, (type, item) -> {
+                    shaped(RecipeCategory.DECORATIONS, item, 1)
+                            .pattern(" x ")
+                            .pattern("x#x")
+                            .pattern(" x ")
+                            .define('#', Items.ARMOR_STAND)
+                            .define('x', item.getType().block())
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(Items.ARMOR_STAND))
+                            .save(output);
+                });
+
+                getValues(DecorationsItems.SHELF, woodTypes, ((woodType, item) -> {
+                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_slab"));
+                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:shelf")
+                            .pattern("-s-")
+                            .define('-', Items.STICK)
+                            .define('s', slab)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
+                            .save(output);
+                }));
+
+                getValues(DecorationsItems.BENCH, woodTypes, ((woodType, item) -> {
+                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_slab"));
+                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:bench")
+                            .pattern("sss")
+                            .pattern("- -")
+                            .define('-', Items.STICK)
+                            .define('s', slab)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
+                            .save(output);
+                }));
+
+                getValues(DecorationsItems.TABLE, woodTypes, ((woodType, item) -> {
+                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_slab"));
+                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 1)
+                            .group("polydecorations:table")
+                            .pattern("sss")
+                            .pattern("- -")
+                            .pattern("- -")
+                            .define('-', Items.STICK)
+                            .define('s', slab)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
+                            .save(output);
+                }));
+
+                DecorationsItems.TOOL_RACK.forEach(((woodType, item) -> {
+                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_slab"));
+                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 1)
+                            .group("polydecorations:toolrack")
+                            .pattern("s-s")
+                            .pattern("-i-")
+                            .pattern("s-s")
+                            .define('-', Items.STICK)
+                            .define('i', Items.IRON_INGOT)
+                            .define('s', slab)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
+                            .save(output);
+                }));
+
+                DecorationsItems.WOODEN_MAILBOX.forEach(((woodType, item) -> {
+                    var log = BuiltInRegistries.ITEM.getValue(WoodUtil.getLogName(woodType));
+                    var slab = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_slab"));
+                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_planks"));
+                    if (slab == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:mailbox")
+                            .pattern(" lc")
+                            .pattern("sps")
+                            .define('p', Items.PAPER)
+                            .define('c', Items.COPPER_INGOT)
+                            .define('l', log)
+                            .define('s', slab)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
+                            .save(output);
+                }));
+
+                getValues(DecorationsItems.STUMP, woodTypes, ((woodType, item) -> {
+                    var log = BuiltInRegistries.ITEM.getValue(WoodUtil.getLogName(woodType));
+                    if (log == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:stump")
+                            .pattern("s")
+                            .pattern("s")
+                            .define('s', log)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(log))
+                            .save(output);
+                }));
+
+                DecorationsItems.STRIPPED_STUMP.forEach(((woodType, item) -> {
+                    var log = BuiltInRegistries.ITEM.getValue(WoodUtil.getLogName(woodType).withPrefix("stripped_"));
+                    if (log == Items.AIR) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:stump")
+                            .pattern("s")
+                            .pattern("s")
+                            .define('s', log)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(log))
+                            .save(output);
+                }));
+
+                DecorationsItems.SIGN_POST.forEach(((woodType, item) -> {
+                    var planks = BuiltInRegistries.ITEM.getValue(Identifier.parse(woodType.name() + "_planks"));
+                    if (planks == null) {
+                        return;
+                    }
+                    shaped(RecipeCategory.DECORATIONS, item, 2)
+                            .group("polydecorations:sign_post")
+                            .pattern("ss-")
+                            .define('-', Items.STICK)
+                            .define('s', planks)
+                            .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(planks))
+                            .save(output);
+                }));
             }
         };
     }

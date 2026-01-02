@@ -1,7 +1,9 @@
 package eu.pb4.polydecorations.datagen;
 
+import com.google.common.collect.Maps;
 import eu.pb4.polydecorations.block.DecorationsBlockTags;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
+import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.core.HolderLookup;
@@ -9,7 +11,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import java.util.concurrent.CompletableFuture;
 
-class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
+public class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
     public BlockTagsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
@@ -17,14 +19,14 @@ class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
     @Override
     protected void addTags(HolderLookup.Provider arg) {
         this.valueLookupBuilder(BlockTags.MINEABLE_WITH_AXE)
-                .add(DecorationsBlocks.SHELF.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.WOOD_SIGN_POST.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.WOODEN_MAILBOX.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.BENCH.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.TABLE.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.TOOL_RACK.values().toArray(new Block[0]))
-                .add(DecorationsBlocks.STUMP.values().toArray(Block[]::new))
-                .add(DecorationsBlocks.STRIPPED_STUMP.values().toArray(Block[]::new))
+                .add(Maps.filterKeys(DecorationsBlocks.SHELF, WoodUtil.VANILLA::contains).values().toArray(new Block[0]))
+                .add(Maps.filterKeys(DecorationsBlocks.WOOD_SIGN_POST, WoodUtil.VANILLA::contains).values().toArray(new Block[0]))
+                .add(Maps.filterKeys(DecorationsBlocks.WOODEN_MAILBOX, WoodUtil.VANILLA::contains).values().toArray(new Block[0]))
+                .add(Maps.filterKeys(DecorationsBlocks.BENCH, WoodUtil.VANILLA::contains).values().toArray(new Block[0]))
+                .add(Maps.filterKeys(DecorationsBlocks.TABLE, WoodUtil.VANILLA::contains).values().toArray(new Block[0]))
+                .add(Maps.filterKeys(DecorationsBlocks.TOOL_RACK, WoodUtil.VANILLA::contains).values().toArray(new Block[0]))
+                .add(Maps.filterKeys(DecorationsBlocks.STUMP, WoodUtil.VANILLA::contains).values().toArray(Block[]::new))
+                .add(Maps.filterKeys(DecorationsBlocks.STRIPPED_STUMP, WoodUtil.VANILLA::contains).values().toArray(Block[]::new))
                 .add(DecorationsBlocks.COPPER_CAMPFIRE)
                 .add(DecorationsBlocks.BASKET)
                 .add(DecorationsBlocks.CARDBOARD_BOX)

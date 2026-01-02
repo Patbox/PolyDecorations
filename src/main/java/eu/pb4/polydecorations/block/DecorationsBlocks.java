@@ -119,7 +119,7 @@ public class DecorationsBlocks {
         if (BuiltInRegistries.BLOCK.containsKey(planks)) {
             return new PlainShelfBlock(
                     BlockBehaviour.Properties.ofFullCopy(BuiltInRegistries.BLOCK.getValue(planks)).setId(ResourceKey.create(Registries.BLOCK, id)).noOcclusion()
-                            .isRedstoneConductor(Blocks::never), BuiltInRegistries.BLOCK.getValue(planks), id(x.name() + "_shelf")
+                            .isRedstoneConductor(Blocks::never), BuiltInRegistries.BLOCK.getValue(planks), id
             );
         }
 
@@ -167,7 +167,7 @@ public class DecorationsBlocks {
     });
 
     public static final Map<WoodType, StumpBlock> STUMP = registerWood("stump", (x, id, settings) -> {
-        var log = Identifier.parse(WoodUtil.getLogName(x));
+        var log = WoodUtil.getLogName(x);
 
         if (BuiltInRegistries.BLOCK.containsKey(log)) {
             var logBlock = BuiltInRegistries.BLOCK.getValue(log);
@@ -183,7 +183,7 @@ public class DecorationsBlocks {
     });
 
     public static final Map<WoodType, StumpBlock> STRIPPED_STUMP = registerWood("stripped_", "stump", (x, id, settings) -> {
-        var log = Identifier.parse("stripped_" + WoodUtil.getLogName(x));
+        var log = WoodUtil.getLogName(x).withPrefix("stripped_");
 
         if (BuiltInRegistries.BLOCK.containsKey(log)) {
             var logBlock = BuiltInRegistries.BLOCK.getValue(log);
@@ -254,8 +254,8 @@ public class DecorationsBlocks {
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String prefix, String id, TriFunction<WoodType, Identifier, BlockBehaviour.Properties, T> object) {
         var map = new HashMap<WoodType, T>();
 
-        WoodUtil.VANILLA.forEach(x -> {
-            var y = register(prefix + x.name() + "_" + id, (s) -> object.apply(x,  id(prefix + x.name() + "_" + id), s));
+        WoodUtil.registerVanillaAndWaitForModded(x -> {
+            var y = register(prefix + x.name().replace(':', '/') + "_" + id, (s) -> object.apply(x,  id(prefix + x.name().replace(':', '/') + "_" + id), s));
             if (y != null) {
                 map.put(x, y);
             }

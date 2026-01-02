@@ -99,12 +99,12 @@ public class WindChimeBlock extends BaseEntityBlock implements FactoryBlock {
         private IntList color;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(id("block/wind_chime/base"));
+            this.main = ItemDisplayElementUtil.createSolid(id("block/wind_chime/base"));
             this.main.setDisplaySize(1, 1);
             this.addElement(this.main);
 
             for (var i = 0; i < 5; i++) {
-                this.chimes[i] = ItemDisplayElementUtil.createSimple(id("block/wind_chime/chime_" + i));
+                this.chimes[i] = ItemDisplayElementUtil.createSolid(id("block/wind_chime/chime_" + i));
                 this.chimes[i].setViewRange(1);
                 this.chimes[i].setDisplaySize(1, 1);
                 this.chimes[i].setInterpolationDuration(5);
@@ -158,11 +158,11 @@ public class WindChimeBlock extends BaseEntityBlock implements FactoryBlock {
             this.color = colors;
             if (colors.isEmpty()) {
                 for (var i = 0; i < 5; i++) {
-                    this.chimes[i].setItem(ItemDisplayElementUtil.getModel(id("block/wind_chime/chime_" + i)));
+                    this.chimes[i].setItem(ItemDisplayElementUtil.getSolidModel(id("block/wind_chime/chime_" + i)));
                 }
             } else {
                 for (var i = 0; i < 5; i++) {
-                    var model = ItemDisplayElementUtil.getModelCopy(id("block/wind_chime/chime_" + i));
+                    var model = ItemDisplayElementUtil.getSolidModelCopy(id("block/wind_chime/chime_" + i));
                     model.set(DataComponents.CUSTOM_MODEL_DATA,
                             new CustomModelData(List.of(), List.of(), List.of(), IntList.of(colors.getInt(i % colors.size()))));
                     this.chimes[i].setItem(model);

@@ -355,7 +355,7 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
         }
 
         private static ItemStack requestModel(String type, String head) {
-            return ItemDisplayElementUtil.getModel(id("block/statue/" + type + "/" + head));
+            return ItemDisplayElementUtil.getSolidModel(id("block/statue/" + type + "/" + head));
         }
 
         public SoundType soundGroup() {

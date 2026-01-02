@@ -77,8 +77,8 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
 
         var id = ((PropertiesAccessor) settings).getId().identifier();
 
-        this.modelOpen = ItemDisplayElementUtil.getModel(id.withPrefix("block/").withSuffix("_open"));
-        this.modelClosed = ItemDisplayElementUtil.getModel(id.withPrefix("block/").withSuffix("_closed"));
+        this.modelOpen = ItemDisplayElementUtil.getSolidModel(id.withPrefix("block/").withSuffix("_open"));
+        this.modelClosed = ItemDisplayElementUtil.getSolidModel(id.withPrefix("block/").withSuffix("_closed"));
     }
 
     @Override

@@ -122,7 +122,7 @@ public class DisplayCaseBlock extends BaseEntityBlock implements FactoryBlock, B
         private final TextDisplayElement text;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 

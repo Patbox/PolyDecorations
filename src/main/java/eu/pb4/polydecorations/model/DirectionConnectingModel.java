@@ -22,7 +22,7 @@ public class DirectionConnectingModel {
         this.baseModel = baseModel;
 
         for (var i = 0; i < SIZE; i++) {
-            this.models[i] = ItemDisplayElementUtil.getModel(baseModel.withSuffix("/" + i));
+            this.models[i] = ItemDisplayElementUtil.getSolidModel(baseModel.withSuffix("/" + i));
         }
     }
 

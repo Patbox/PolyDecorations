@@ -55,7 +55,7 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.create("force_open", OpenState.class);
-    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getModel(id("block/trashcan_bin")));
+    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getSolidModel(id("block/trashcan_bin")));
 
     public TrashCanBlock(Properties settings) {
         super(settings);
@@ -171,8 +171,8 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
     }
 
     public static final class Model extends BlockModel {
-        private static final ItemStack BIN = ItemDisplayElementUtil.getModel(id("block/trashcan_bin"));
-        private static final ItemStack LID = ItemDisplayElementUtil.getModel(id("block/trashcan_lid"));
+        private static final ItemStack BIN = ItemDisplayElementUtil.getSolidModel(id("block/trashcan_bin"));
+        private static final ItemStack LID = ItemDisplayElementUtil.getSolidModel(id("block/trashcan_lid"));
         private final ItemDisplayElement main;
         private final ItemDisplayElement lid;
 

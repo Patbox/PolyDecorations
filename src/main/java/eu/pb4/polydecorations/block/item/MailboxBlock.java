@@ -5,6 +5,9 @@ import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polydecorations.block.DecorationsBlockEntities;
+import eu.pb4.polydecorations.block.SimpleParticleBlock;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -41,8 +44,8 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable {
-    public static final ItemStack FLAG = ItemDisplayElementUtil.getModel(id("block/mailbox_flag"));
+public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable, SimpleParticleBlock {
+    public static final ItemStack FLAG = ItemDisplayElementUtil.getSolidModel(id("block/mailbox_flag"));
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     private final Block base;
 
@@ -51,6 +54,7 @@ public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, Barri
                 .isRedstoneConductor(Blocks::never));
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
         this.base = block;
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.MAILBOX.addSupportedBlock(this));
     }
 
     @Override
@@ -124,7 +128,7 @@ public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, Barri
         private boolean hasMail = false;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             var yaw = state.getValue(FACING).toYRot();

@@ -51,17 +51,17 @@ public class DecorationsItems {
     public static final Item TRASHCAN = register(DecorationsBlocks.TRASHCAN);
     public static final Item BASKET = register(DecorationsBlocks.BASKET, s -> s.stacksTo(1));
     public static final Item CARDBOARD_BOX = register(DecorationsBlocks.CARDBOARD_BOX, s -> s.stacksTo(1));
-    public static final Map<WoodType, Item> SHELF = register(DecorationsBlocks.SHELF, WoodType::name);
-    public static final Map<WoodType, Item> BENCH = register(DecorationsBlocks.BENCH, WoodType::name);
-    public static final Map<WoodType, Item> TABLE = register(DecorationsBlocks.TABLE, WoodType::name);
-    public static final Map<WoodType, Item> TOOL_RACK = register(DecorationsBlocks.TOOL_RACK, WoodType::name);
-    public static final Map<WoodType, Item> WOODEN_MAILBOX = register(DecorationsBlocks.WOODEN_MAILBOX, WoodType::name);
-    public static final Map<WoodType, Item> STUMP = register(DecorationsBlocks.STUMP, WoodType::name);
-    public static final Map<WoodType, Item> STRIPPED_STUMP = register(DecorationsBlocks.STRIPPED_STUMP, WoodType::name);
+    public static final Map<WoodType, BlockItem> SHELF = registerWood(DecorationsBlocks.SHELF);
+    public static final Map<WoodType, BlockItem> BENCH = registerWood(DecorationsBlocks.BENCH);
+    public static final Map<WoodType, BlockItem> TABLE = registerWood(DecorationsBlocks.TABLE);
+    public static final Map<WoodType, BlockItem> TOOL_RACK = registerWood(DecorationsBlocks.TOOL_RACK);
+    public static final Map<WoodType, BlockItem> WOODEN_MAILBOX = registerWood(DecorationsBlocks.WOODEN_MAILBOX);
+    public static final Map<WoodType, BlockItem> STUMP = registerWood(DecorationsBlocks.STUMP);
+    public static final Map<WoodType, BlockItem> STRIPPED_STUMP = registerWood(DecorationsBlocks.STRIPPED_STUMP);
     public static final Map<WoodType, SignPostItem> SIGN_POST = registerWood("sign_post", (x) -> (settings) -> new SignPostItem(settings.useBlockDescriptionPrefix()));
     public static final Map<WoodType, StatueItem> WOODEN_STATUE = registerWood("statue", (x) -> {
         var planks = BuiltInRegistries.BLOCK.getValue(Identifier.parse(x.name() + "_planks"));
-        return (settings) -> new StatueItem(StatueEntity.Type.of(x.name(), planks, false), settings.stacksTo(16));
+        return (settings) -> new StatueItem(StatueEntity.Type.of(WoodUtil.asPath(x), planks, false), settings.stacksTo(16));
     });
     public static final Map<DyeColor, Item> SLEEPING_BAG = register(DecorationsBlocks.SLEEPING_BAG, DyeColor::name, x -> x.stacksTo(1));
 
@@ -80,6 +80,7 @@ public class DecorationsItems {
     private static <T extends Block & PolymerBlock, B, U extends Comparable<? super U>> Map<B, Item> register(Map<B, T> blockMap, Function<B, U> toComparable) {
         return register(blockMap, toComparable, (s) -> {});
     }
+
     private static <T extends Block & PolymerBlock, B, U extends Comparable<? super U>> Map<B, Item> register(Map<B, T> blockMap, Function<B, U> toComparable, Consumer<Item.Properties> settingsConsumer) {
         var map = new LinkedHashMap<B, Item>();
         var keys = new ArrayList<>(blockMap.keySet());
@@ -131,13 +132,26 @@ public class DecorationsItems {
         );
     }
 
+    private static <E extends Block & PolymerBlock> Map<WoodType, BlockItem> registerWood(Map<WoodType, E> blockMap) {
+        var map = new HashMap<WoodType, BlockItem>();
+
+        WoodUtil.registerVanillaAndWaitForModded(x -> {
+            var y = blockMap.get(x);
+            if (y != null) {
+                map.put(x, register(y));
+            }
+        });
+
+        return map;
+    }
+
     private static <T extends Item> Map<WoodType, T> registerWood(String id, Function<WoodType, Function<Item.Properties, T>> object) {
         var map = new HashMap<WoodType, T>();
 
-        WoodUtil.VANILLA.forEach(x -> {
+        WoodUtil.registerVanillaAndWaitForModded(x -> {
             var y = object.apply(x);
             if (y != null) {
-                map.put(x, register(x.name() + "_" + id, y));
+                map.put(x, register(x.name().replace(':', '/') + "_" + id, y));
             }
         });
 

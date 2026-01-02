@@ -134,10 +134,10 @@ public class GlobeBlock extends BaseEntityBlock implements FactoryBlock, Barrier
     }
 
     public static final class Model extends BlockModel implements GenericSingleItemBlockEntity.ItemSetter {
-        public static final ItemStack GLOBE_BASE = ItemDisplayElementUtil.getModel(id("block/globe_base"));
-        public static final ItemStack GLOBE_EARTH = ItemDisplayElementUtil.getModel(id("block/globe_earth"));
+        public static final ItemStack GLOBE_BASE = ItemDisplayElementUtil.getSolidModel(id("block/globe_base"));
+        public static final ItemStack GLOBE_EARTH = ItemDisplayElementUtil.getSolidModel(id("block/globe_earth"));
 
-        public static final ItemStack TATER = ItemDisplayElementUtil.getModel(id("block/tiny_potato"));
+        public static final ItemStack TATER = ItemDisplayElementUtil.getSolidModel(id("block/tiny_potato"));
         private final ServerLevel world;
         private final ItemDisplayElement main;
         private final LodItemDisplayElement rotating;
