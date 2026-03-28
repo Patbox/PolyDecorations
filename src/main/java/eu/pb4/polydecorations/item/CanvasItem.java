@@ -98,11 +98,11 @@ public class CanvasItem extends SimplePolymerItem {
                             .withStyle(ChatFormatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             tooltip.accept(Component.empty().append(Component.literal("| ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(Component.translatable(super.getDescriptionId() + ".tooltip.3",
-                                    Items.SPONGE.getName().copy().withStyle(ChatFormatting.WHITE))
+                                    Items.SPONGE.getName(Items.SPONGE.getDefaultInstance()).copy().withStyle(ChatFormatting.WHITE))
                             .withStyle(ChatFormatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             tooltip.accept(Component.empty().append(Component.literal("| ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(Component.translatable(super.getDescriptionId() + ".tooltip.4",
-                                    Items.BRUSH.getName().copy().withStyle(ChatFormatting.WHITE))
+                                    Items.BRUSH.getName(Items.BRUSH.getDefaultInstance()).copy().withStyle(ChatFormatting.WHITE))
                             .withStyle(ChatFormatting.GRAY)).setStyle(Style.EMPTY.withItalic(false)));
             return;
         }

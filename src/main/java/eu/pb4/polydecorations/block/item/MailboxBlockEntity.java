@@ -10,7 +10,7 @@ import eu.pb4.polydecorations.ui.GuiTextures;
 import eu.pb4.polydecorations.ui.GuiUtils;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
-import eu.pb4.sgui.api.GuiHelpers;
+import eu.pb4.sgui.api.SguiUtils;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
@@ -189,7 +189,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             if (this.page > 0) {
                 this.setSlot(9 * 5 + 3, GuiTextures.PREVIOUS_PAGE_BUTTON.get()
                         .setName(Component.translatable("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
-                        .setCallback((a, b, c) -> {
+                        .setCallback(() -> {
                             this.page -= 1;
                             this.drawUi();
                             clickSound();
@@ -198,7 +198,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             } else if (this.page + 1 < this.pageCount) {
                 this.setSlot(9 * 5 + 3, GuiTextures.NEXT_PAGE_BUTTON.get()
                         .setName(Component.translatable("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
-                        .setCallback((a, b, c) -> {
+                        .setCallback(() -> {
                             this.page += 1;
                             this.drawUi();
                             clickSound();
@@ -232,7 +232,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
                     }
                 }
 
-                b.setCallback((a, g, c) -> {
+                b.setCallback(() -> {
                     clickSound();
                     if (inventories.get(entry.getKey()) != null) {
                         new InventoryGui(player, entry.getKey(), false);
@@ -271,18 +271,18 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             this.setTitle(GuiTextures.SHELF_2.apply(DecorationsUtil.someones(owner, getBlockState().getBlock().getName())));
             this.target = target;
             this.inventory = inventories.computeIfAbsent(target, (x) -> createInventory());
-            this.setSlotRedirect(3, createSlot(inventory, 0, canPutItems));
-            this.setSlotRedirect(4, createSlot(inventory, 1, canPutItems));
-            this.setSlotRedirect(5, createSlot(inventory, 2, canPutItems));
-            this.setSlotRedirect(3 + 9, createSlot(inventory, 3, canPutItems));
-            this.setSlotRedirect(4 + 9, createSlot(inventory, 4, canPutItems));
-            this.setSlotRedirect(5 + 9, createSlot(inventory, 5, canPutItems));
+            this.setSlot(3, createSlot(inventory, 0, canPutItems));
+            this.setSlot(4, createSlot(inventory, 1, canPutItems));
+            this.setSlot(5, createSlot(inventory, 2, canPutItems));
+            this.setSlot(3 + 9, createSlot(inventory, 3, canPutItems));
+            this.setSlot(4 + 9, createSlot(inventory, 4, canPutItems));
+            this.setSlot(5 + 9, createSlot(inventory, 5, canPutItems));
 
-            var curr = GuiHelpers.getCurrentGui(player);
+            var curr = SguiUtils.getCurrentGui(player);
 
             if (curr instanceof SelectorGui selectorGui) {
                 this.setSlot(9 + 8, GuiTextures.BACK_BUTTON.get().setName(CommonComponents.GUI_BACK)
-                        .setCallback((a, b, c) -> {
+                        .setCallback(() -> {
                             selectorGui.clickSound();
                             this.close(true);
                             selectorGui.open();
@@ -302,7 +302,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
         }
 
         @Override
-        public void onClose() {
+        public void onManualClose() {
             if (inventory.isEmpty()) {
                 inventories.remove(this.target, inventory);
             } else if (inventories.get(this.target) == null) {
@@ -313,7 +313,7 @@ public class MailboxBlockEntity extends LockableBlockEntity implements OwnedBloc
             if (model != null) {
                 model.setHasMail(!inventories.isEmpty());
             }
-            super.onClose();
+            super.onManualClose();
         }
 
         @Override

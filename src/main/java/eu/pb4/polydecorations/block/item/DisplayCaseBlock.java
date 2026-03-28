@@ -43,7 +43,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 public class DisplayCaseBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
@@ -122,7 +122,7 @@ public class DisplayCaseBlock extends BaseEntityBlock implements FactoryBlock, B
         private final TextDisplayElement text;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 

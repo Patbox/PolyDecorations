@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.SimpleParticleBlock;
@@ -13,7 +14,7 @@ import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,15 +136,15 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
         }
     }
 
-    public record TableModel(ItemStack[] models) {
+    public record TableModel(LazyItemStack[] models) {
         public static final int COUNT = (int) Math.pow(2, 4);
 
         private static TableModel of(Identifier identifier) {
-            var models = new ItemStack[COUNT];
-            models[0] = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/"));
+            var models = new LazyItemStack[COUNT];
+            models[0] = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/"));
 
             for (int i = 1; i < COUNT; i++) {
-                models[i] = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_" + i));
+                models[i] = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_" + i));
             }
 
             return new TableModel(models);
@@ -178,7 +179,7 @@ public class TableBlock extends Block implements FactoryBlock, BarrierBasedWater
                     i |= 1 << corner.id;
                 }
             }
-            return this.models[i];
+            return this.models[i].get();
         }
     }
 

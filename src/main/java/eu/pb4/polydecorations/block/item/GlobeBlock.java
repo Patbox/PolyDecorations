@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.factorytools.api.virtualentity.LodItemDisplayElement;
@@ -45,7 +46,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
@@ -134,10 +135,10 @@ public class GlobeBlock extends BaseEntityBlock implements FactoryBlock, Barrier
     }
 
     public static final class Model extends BlockModel implements GenericSingleItemBlockEntity.ItemSetter {
-        public static final ItemStack GLOBE_BASE = ItemDisplayElementUtil.getSolidModel(id("block/globe_base"));
-        public static final ItemStack GLOBE_EARTH = ItemDisplayElementUtil.getSolidModel(id("block/globe_earth"));
+        public static final LazyItemStack GLOBE_BASE = ItemDisplayElementUtil.getModel(id("block/globe_base"));
+        public static final LazyItemStack GLOBE_EARTH = ItemDisplayElementUtil.getModel(id("block/globe_earth"));
 
-        public static final ItemStack TATER = ItemDisplayElementUtil.getSolidModel(id("block/tiny_potato"));
+        public static final LazyItemStack TATER = ItemDisplayElementUtil.getModel(id("block/tiny_potato"));
         private final ServerLevel world;
         private final ItemDisplayElement main;
         private final LodItemDisplayElement rotating;
@@ -152,7 +153,7 @@ public class GlobeBlock extends BaseEntityBlock implements FactoryBlock, Barrier
             this.world = world;
             var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(GLOBE_BASE);
+            this.main = ItemDisplayElementUtil.createSimple(GLOBE_BASE.get());
             this.main.setScale(new Vector3f(2));
             this.main.setYaw(direction);
             this.addElement(this.main);
@@ -170,15 +171,7 @@ public class GlobeBlock extends BaseEntityBlock implements FactoryBlock, Barrier
         protected void onTick() {
             if (this.velocity != 0 || this.worldBound) {
                 if (this.worldBound) {
-                    if (this.velocity != 0) {
-                        this.world.setDayTime((long) (this.world.getDayTime() + this.velocity / Mth.TWO_PI * SharedConstants.TICKS_PER_GAME_DAY));
-                        var packet = new ClientboundSetTimePacket(world.getGameTime(), world.getDayTime(), true);
-                        for (var player : world.players()) {
-                            player.connection.send(packet);
-                        }
-                    }
-
-                    this.rotation = (this.world.getDayTime() * Mth.TWO_PI / SharedConstants.TICKS_PER_GAME_DAY) % Mth.TWO_PI;
+                    this.rotation = (this.world.getDefaultClockTime() * Mth.TWO_PI / SharedConstants.TICKS_PER_GAME_DAY) % Mth.TWO_PI;
                 } else {
                     this.rotation = (this.rotation + this.velocity) % Mth.TWO_PI;
                 }
@@ -217,11 +210,11 @@ public class GlobeBlock extends BaseEntityBlock implements FactoryBlock, Barrier
         public void setItem(ItemStack item) {
             ItemStack model;
             if (item.isEmpty()) {
-                model = GLOBE_EARTH;
+                model = GLOBE_EARTH.get();
                 this.scale = 1f;
                 this.offset = 0.5f;
             } else if (item.is(Items.POTATO)) {
-                model = TATER;
+                model = TATER.get();
                 this.offset = 0;
                 this.scale = 1;
             } else {

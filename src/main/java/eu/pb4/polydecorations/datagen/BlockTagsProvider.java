@@ -4,15 +4,17 @@ import com.google.common.collect.Maps;
 import eu.pb4.polydecorations.block.DecorationsBlockTags;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.util.WoodUtil;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
+
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
-    public BlockTagsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+public class BlockTagsProvider extends FabricTagsProvider.BlockTagsProvider {
+    public BlockTagsProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
@@ -91,14 +93,15 @@ public class BlockTagsProvider extends FabricTagProvider.BlockTagProvider {
         this.valueLookupBuilder(DecorationsBlockTags.ALLOWED_INTERACTIONS_BLOCKS)
                 .addOptionalTag(DecorationsBlockTags.MAILBOXES);
 
-        this.valueLookupBuilder(BlockTags.BAMBOO_PLANTABLE_ON)
-                .add(DecorationsBlocks.LARGE_FLOWER_POT);
-        this.valueLookupBuilder(BlockTags.DRY_VEGETATION_MAY_PLACE_ON)
-                .add(DecorationsBlocks.LARGE_FLOWER_POT);
-        this.valueLookupBuilder(BlockTags.BIG_DRIPLEAF_PLACEABLE)
-                .add(DecorationsBlocks.LARGE_FLOWER_POT);
-        this.valueLookupBuilder(BlockTags.SMALL_DRIPLEAF_PLACEABLE)
-                .add(DecorationsBlocks.LARGE_FLOWER_POT);
+        for (var x : List.of(
+                BlockTags.SUPPORTS_VEGETATION,
+                BlockTags.SUPPORTS_CROPS,
+                BlockTags.SUPPORTS_SMALL_DRIPLEAF,
+                BlockTags.SUPPORTS_BIG_DRIPLEAF
+        )) {
+            this.valueLookupBuilder(x)
+                    .add(DecorationsBlocks.LARGE_FLOWER_POT);
+        }
 
         this.valueLookupBuilder(DecorationsBlockTags.STUMPS)
                 .add(DecorationsBlocks.STUMP.values().toArray(Block[]::new))

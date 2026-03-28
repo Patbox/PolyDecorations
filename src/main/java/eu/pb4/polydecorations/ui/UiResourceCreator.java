@@ -12,6 +12,8 @@ import it.unimi.dsi.fastutil.chars.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javax.imageio.ImageIO;
+
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
@@ -20,6 +22,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import java.awt.image.BufferedImage;
@@ -66,30 +69,30 @@ public class UiResourceCreator {
 
     public static Supplier<GuiElementBuilder> icon16(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, BASE_MODEL);
-        return () -> GuiElementBuilder.from(model).setName(Component.empty()).hideDefaultTooltip();
+        return () -> new GuiElementBuilder(model).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static Supplier<GuiElementBuilder> icon32(String path) {
         var model = genericIconRaw(Items.ALLIUM, path, X32_MODEL);
-        return () -> GuiElementBuilder.from(model).setName(Component.empty()).hideDefaultTooltip();
+        return () -> new GuiElementBuilder(model).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static IntFunction<GuiElementBuilder> icon32Color(String path) {
         var model = genericIconRaw(Items.LEATHER_LEGGINGS, path, X32_MODEL);
         return (i) -> {
-            var b = GuiElementBuilder.from(model).setName(Component.empty()).hideDefaultTooltip();
+            var b = new GuiElementBuilder(model).setName(Component.empty()).hideDefaultTooltip();
             b.setComponent(DataComponents.DYED_COLOR, new DyedItemColor(i));
             return b;
         };
     }
 
     public static IntFunction<GuiElementBuilder> icon16(String path, int size) {
-        var models = new ItemStack[size];
+        var models = new ItemStackTemplate[size];
 
         for (var i = 0; i < size; i++) {
             models[i] = genericIconRaw(Items.ALLIUM, path + "_" + i, BASE_MODEL);
         }
-        return (i) -> GuiElementBuilder.from(models[i]).setName(Component.empty()).hideDefaultTooltip();
+        return (i) -> new GuiElementBuilder(models[i]).setName(Component.empty()).hideDefaultTooltip();
     }
 
     public static IntFunction<GuiElementBuilder> horizontalProgress16(String path, int start, int stop, boolean reverse) {
@@ -118,20 +121,21 @@ public class UiResourceCreator {
 
     public static IntFunction<GuiElementBuilder> genericProgress(String path, int start, int stop, boolean reverse, String base, List<SlicedTexture> progressType) {
 
-        var models = new ItemStack[stop - start];
+        var models = new ItemStackTemplate[stop - start];
 
         progressType.add(new SlicedTexture(path, start, stop, reverse));
 
         for (var i = start; i < stop; i++) {
             models[i - start] = genericIconRaw(Items.ALLIUM,  "gen/" + path + "_" + i, base);
         }
-        return (i) -> GuiElementBuilder.from(models[i]).setName(Component.empty()).hideDefaultTooltip();
+        return (i) -> new GuiElementBuilder(models[i]).setName(Component.empty()).hideDefaultTooltip();
     }
 
-    public static ItemStack genericIconRaw(Item item, String path, String base) {
+    public static ItemStackTemplate genericIconRaw(Item item, String path, String base) {
         var id = elementPath(path);
-        var stack = item.getDefaultInstance();
-        stack.set(DataComponents.ITEM_MODEL, bridgeModel(id));
+        var stack = new ItemStackTemplate(item, DataComponentPatch.builder()
+                .set(DataComponents.ITEM_MODEL, bridgeModel(id))
+                .build());
         SIMPLE_MODEL.add(new Tuple<>(id, base));
         return stack;
     }

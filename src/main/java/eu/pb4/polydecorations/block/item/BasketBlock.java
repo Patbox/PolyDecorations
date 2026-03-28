@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 public class BasketBlock extends PickableItemContainerBlock {
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
@@ -82,7 +82,7 @@ public class BasketBlock extends PickableItemContainerBlock {
         public Model(ServerLevel world, BlockState state) {
             var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen : modelClosed);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen.get() : modelClosed.get());
             this.main.setScale(new Vector3f(2));
             this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
             this.main.setYaw(direction);
@@ -96,7 +96,7 @@ public class BasketBlock extends PickableItemContainerBlock {
                 var direction = state.getValue(FACING).toYRot();
                 this.main.setYaw(direction);
                 this.main.setTranslation(new Vector3f(0, state.getValue(HANGING) ? 3 / 16f - 0.005f : 0.005f, 0));
-                this.main.setItem(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ?  modelOpen : modelClosed);
+                this.main.setItem(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ?  modelOpen.get() : modelClosed.get());
                 this.tick();
             }
         }

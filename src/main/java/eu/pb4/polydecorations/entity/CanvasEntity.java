@@ -47,7 +47,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -85,8 +85,8 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
             //noinspection unchecked
             POLYFACTORY_COLOR = Optional.ofNullable((DataComponentType<Integer>) BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(Identifier.parse("polyfactory:color")));
         }
-        if (stack.getItem() instanceof DyeItem dyeItem) {
-            return Optional.ofNullable(CanvasColor.from(dyeItem.getDyeColor().getMapColor(), MapColor.Brightness.NORMAL));
+        if (stack.has(DataComponents.DYE)) {
+            return Optional.ofNullable(CanvasColor.from(stack.get(DataComponents.DYE).getMapColor(), MapColor.Brightness.NORMAL));
         } else if (POLYFACTORY_COLOR.isPresent() && stack.has(POLYFACTORY_COLOR.get())) {
             //noinspection DataFlowIssue
             return Optional.ofNullable(CanvasUtils.findClosestColor(stack.get(POLYFACTORY_COLOR.get())));
@@ -201,13 +201,13 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
 
     private void onUsed(ServerPlayer serverPlayer, VirtualDisplay.ClickType clickType, int x, int y) {
         if (clickType.isLeft()) {
-            if (CommonProtection.canDamageEntity(this.level(), this, serverPlayer.getGameProfile(), serverPlayer)) {
+            if (CommonProtection.canDamageEntity(this.level(), this, serverPlayer.nameAndId(), serverPlayer)) {
                 serverPlayer.attack(this);
             }
             return;
         }
 
-        if (this.waxed || !CommonProtection.canInteractEntity(this.level(), this, serverPlayer.getGameProfile(), serverPlayer)) {
+        if (this.waxed || !CommonProtection.canInteractEntity(this.level(), this, serverPlayer.nameAndId(), serverPlayer)) {
             return;
         }
 

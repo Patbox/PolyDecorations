@@ -4,6 +4,7 @@ import com.mojang.math.OctahedralGroup;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.SimpleParticleBlock;
@@ -45,7 +46,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.awt.*;
 import java.util.Map;
@@ -59,16 +60,16 @@ public class StumpBlock extends Block implements FactoryBlock, BarrierBasedWater
     private static final Map<Direction, VoxelShape> SUPPORT_SHAPE = createShape(1);
 
     private final Block base;
-    private final ItemStack regularModel;
-    private final ItemStack tallModel;
+    private final LazyItemStack regularModel;
+    private final LazyItemStack tallModel;
 
     public StumpBlock(Properties settings, Block log) {
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(TALL, false).setValue(FACING, Direction.UP));
         this.base = log;
         var modelId = ((PropertiesAccessor) settings).getId().identifier().withPrefix("block/");
-        this.regularModel = ItemDisplayElementUtil.getSolidModel(modelId);
-        this.tallModel = ItemDisplayElementUtil.getSolidModel(modelId.withSuffix("_tall"));
+        this.regularModel = ItemDisplayElementUtil.getModel(modelId);
+        this.tallModel = ItemDisplayElementUtil.getModel(modelId.withSuffix("_tall"));
     }
 
     @Override
@@ -152,7 +153,7 @@ public class StumpBlock extends Block implements FactoryBlock, BarrierBasedWater
         }
 
         private void updateState(BlockState state) {
-            this.main.setItem(state.getValue(TALL) ? tallModel : regularModel);
+            this.main.setItem(state.getValue(TALL) ? tallModel.get() : regularModel.get());
             var dir = state.getValue(FACING);
 
             if (dir.getAxis() == Direction.Axis.Y) {

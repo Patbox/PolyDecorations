@@ -21,18 +21,21 @@ import eu.pb4.polymer.resourcepack.extras.api.format.item.tint.CustomModelDataTi
 import eu.pb4.polymer.resourcepack.extras.api.format.model.ModelAsset;
 import eu.pb4.polymer.resourcepack.extras.api.format.model.ModelElement;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -127,7 +130,7 @@ public class CustomAssetProvider implements DataProvider {
 
     private final PackOutput output;
 
-    public CustomAssetProvider(FabricDataOutput output) {
+    public CustomAssetProvider(FabricPackOutput output) {
         this.output = output;
     }
 
@@ -630,10 +633,10 @@ public class CustomAssetProvider implements DataProvider {
         for (int i = 0; i < 5; i++) {
             chimes[i] = ModelAsset.builder();
             chimesElement[i] = new ArrayList<>();
-            decoded.textures().forEach(chimes[i]::texture);
+            chimes[i].texture(decoded.textures());
         }
 
-        decoded.textures().forEach(base::texture);
+        base.texture(decoded.textures());
 
         var el = decoded.elements().orElseThrow();
 
@@ -647,12 +650,12 @@ public class CustomAssetProvider implements DataProvider {
             }
             base.element(el.get(e));
         }
-        var chimeOffset = new ArrayList<Vec3>();
+        var chimeOffset = new ArrayList<Vector3fc>();
 
         for (int i = 0; i < 5; i++) {
             chimeOffset.add(chimesElement[i].getFirst().rotation().orElseThrow().origin());
             for (var e : chimesElement[i]) {
-                var offset = e.rotation().orElseThrow().origin().reverse().add(8, 8, 8);
+                var offset = e.rotation().orElseThrow().origin().negate(new Vector3f()).add(8, 8, 8);
                 var map = new EnumMap<Direction, ModelElement.Face>(Direction.class);
 
                 for (var face : e.faces().entrySet()) {
@@ -661,7 +664,7 @@ public class CustomAssetProvider implements DataProvider {
                             : face.getValue());
                 }
 
-                chimes[i].element(new ModelElement(e.from().add(offset), e.to().add(offset), map));
+                chimes[i].element(new ModelElement(e.from().add(offset.x, offset.y, offset.z), e.to().add(offset.x, offset.y, offset.z), map));
             }
             writer.accept(AssetPaths.blockModel(id("wind_chime/chime_" + i)), chimes[i].build().toBytes());
 
@@ -673,7 +676,7 @@ public class CustomAssetProvider implements DataProvider {
 
         }
 
-        writer.accept("wind_chime_offsets.json", Vec3.CODEC.listOf().encodeStart(JsonOps.INSTANCE, chimeOffset).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
+        writer.accept("wind_chime_offsets.json", ExtraCodecs.VECTOR3F.listOf().encodeStart(JsonOps.INSTANCE, chimeOffset).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
 
         writer.accept(AssetPaths.blockModel(id("wind_chime/base")), base.build().toBytes());
 

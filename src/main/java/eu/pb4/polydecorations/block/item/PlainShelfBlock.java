@@ -4,6 +4,7 @@ import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.ModInit;
@@ -43,22 +44,22 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable, SimpleParticleBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<SlabType> TYPE = BlockStateProperties.SLAB_TYPE;
     private final Block base;
-    private final ItemStack topModel;
-    private final ItemStack doubleModel;
+    private final LazyItemStack topModel;
+    private final LazyItemStack doubleModel;
 
     public PlainShelfBlock(Properties settings, Block base, Identifier identifier) {
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false).setValue(TYPE, SlabType.BOTTOM));
         this.base = base;
-        this.topModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_top"));
-        this.doubleModel = ItemDisplayElementUtil.getSolidModel(identifier.withPrefix("block/").withSuffix("_double"));
-        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.SHELF.addSupportedBlock(this));
+        this.topModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_top"));
+        this.doubleModel = ItemDisplayElementUtil.getModel(identifier.withPrefix("block/").withSuffix("_double"));
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.SHELF.addValidBlock(this));
     }
 
     @Override
@@ -180,11 +181,11 @@ public class PlainShelfBlock extends BaseEntityBlock implements FactoryBlock, Ba
         }
 
         private ItemStack getModel(BlockState state) {
-            return switch (state.getValue(TYPE)) {
-                case BOTTOM -> ItemDisplayElementUtil.getSolidModel(state.getBlock().asItem());
+            return (switch (state.getValue(TYPE)) {
+                case BOTTOM -> ItemDisplayElementUtil.getModel(state.getBlock().asItem());
                 case DOUBLE -> doubleModel;
                 case TOP -> topModel;
-            };
+            }).get();
         }
 
         @Override

@@ -4,14 +4,18 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
+import eu.pb4.polymer.resourcepack.extras.api.ResourcePackExtras;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,12 +25,15 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Brightness;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -46,13 +53,16 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.id;
 
 public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable, CustomBreakingParticleBlock {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
-    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getSolidModel(id("block/unlit_brazier")));
+    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, Util.make(() -> new ItemStackTemplate(
+            Items.STONE,
+            DataComponentPatch.builder().set(DataComponents.ITEM_MODEL, ResourcePackExtras.bridgeModel(id("block/unlit_brazier"))).build()
+    )));
 
     public BrazierBlock(Properties settings) {
         super(settings);
@@ -156,11 +166,11 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
     }
 
     public static final class Model extends BlockModel {
-        public static final ItemStack UNLIT = ItemDisplayElementUtil.getSolidModel(id("block/unlit_brazier"));
+        public static final LazyItemStack UNLIT = ItemDisplayElementUtil.getModel(id("block/unlit_brazier"));
         private final ItemDisplayElement main;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(LIT) ? ItemDisplayElementUtil.getSolidModel(state.getBlock().asItem()) : UNLIT);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(LIT) ? ItemDisplayElementUtil.getModel(state.getBlock().asItem()).get() : UNLIT.get());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             this.main.setBrightness(state.getValue(LIT) ? new Brightness(15, 15) : null);
@@ -172,7 +182,7 @@ public class BrazierBlock extends Block implements FactoryBlock, BarrierBasedWat
             if (updateType == BlockAwareAttachment.BLOCK_STATE_UPDATE) {
                 var state = this.blockState();
                 this.main.setBrightness(state.getValue(LIT) ? new Brightness(15, 15) : null);
-                this.main.setItem(state.getValue(LIT) ? ItemDisplayElementUtil.getSolidModel(state.getBlock().asItem()) : UNLIT);
+                this.main.setItem(state.getValue(LIT) ? ItemDisplayElementUtil.getModel(state.getBlock().asItem()).get() : UNLIT.get());
 
                 this.tick();
             }

@@ -1,6 +1,7 @@
 package eu.pb4.polydecorations.polydex;
 
 import eu.pb4.sgui.api.elements.GuiElement;
+import eu.pb4.sgui.api.elements.SimpleGuiElement;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -23,6 +24,6 @@ public class PolydexCompat {
         if (IS_PRESENT) {
             return PolydexCompatImpl.getButton(type);
         }
-        return GuiElement.EMPTY;
+        return SimpleGuiElement.EMPTY;
     }
 }

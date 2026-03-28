@@ -48,16 +48,16 @@ public class DecorationsUtil {
 
     private static final List<Runnable> RUN_NEXT_TICK = new ArrayList<>();
 
-    public static final Map<Direction, BlockState> TRAPDOOR_STATES_REGULAR = Util.makeEnumMap(Direction.class, x -> PolymerBlockResourceUtils.requestEmpty(BlockModelType.valueOf(switch (x) {
+    public static final Map<Direction, BlockState> TRAPDOOR_STATES_REGULAR = Util.makeEnumMap(Direction.class, x -> PolymerBlockResourceUtils.requestEmpty(BlockModelType.valueOf("TRAPDOOR_" + switch (x) {
         case UP -> "BOTTOM";
         case DOWN -> "TOP";
         default -> x.getSerializedName().toUpperCase(Locale.ROOT);
-    } + "_TRAPDOOR")));
-    public static final Map<Direction, BlockState> TRAPDOOR_STATES_WATERLOGGED = Util.makeEnumMap(Direction.class, x -> PolymerBlockResourceUtils.requestEmpty(BlockModelType.valueOf(switch (x) {
+    })));
+    public static final Map<Direction, BlockState> TRAPDOOR_STATES_WATERLOGGED = Util.makeEnumMap(Direction.class, x -> PolymerBlockResourceUtils.requestEmpty(BlockModelType.valueOf("TRAPDOOR_" + switch (x) {
         case UP -> "BOTTOM";
         case DOWN -> "TOP";
         default -> x.getSerializedName().toUpperCase(Locale.ROOT);
-    } + "_TRAPDOOR_WATERLOGGED")));
+    } + "_WATERLOGGED")));
 
     public static final BlockState CAMPFIRE_STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.CAMPFIRE);
     public static final BlockState CAMPFIRE_WATERLOGGED_STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.CAMPFIRE_WATERLOGGED);

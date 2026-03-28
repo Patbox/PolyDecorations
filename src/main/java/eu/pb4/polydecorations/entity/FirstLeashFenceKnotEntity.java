@@ -4,9 +4,9 @@ import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.VirtualEntityUtils;
 import eu.pb4.polymer.virtualentity.api.attachment.EntityAttachment;
+import eu.pb4.polymer.virtualentity.api.data.EntityData;
 import eu.pb4.polymer.virtualentity.api.elements.GenericEntityElement;
 import eu.pb4.polymer.virtualentity.api.elements.VirtualElement;
-import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.Consumers;
 import org.jspecify.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -90,11 +90,6 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand interactionHand) {
-        return super.interact(player, interactionHand);
-    }
-
-    @Override
     protected void addAdditionalSaveData(ValueOutput valueOutput) {
         super.addAdditionalSaveData(valueOutput);
         this.writeLeashData(valueOutput, this.leashData);
@@ -103,7 +98,7 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
     @Override
     public void onEntityPacketSent(Consumer<Packet<?>> consumer, Packet<?> packet) {
         if (packet instanceof ClientboundSetEntityLinkPacket linkPacket) {
-            consumer.accept(VirtualEntityUtils.createEntityAttachPacket(this.leadAttachment.getEntityId(), linkPacket.getDestId()));
+            consumer.accept(VirtualEntityUtils.createClientboundSetEntityLinkPacket(this.leadAttachment.getEntityId(), linkPacket.getDestId()));
         } else {
             consumer.accept(packet);
         }
@@ -122,10 +117,10 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
 
     private class LeadAttachmentElement extends GenericEntityElement {
         public LeadAttachmentElement() {
-            this.dataTracker.set(EntityTrackedData.SILENT, true);
-            this.dataTracker.set(EntityTrackedData.NO_GRAVITY, true);
+            this.syncedData.set(EntityData.SILENT, true);
+            this.syncedData.set(EntityData.NO_GRAVITY, true);
             this.setOffset(new Vec3(0, EntityType.LEASH_KNOT.getHeight() / 2 - EntityType.SLIME.getDimensions().eyeHeight(), 0));
-            this.dataTracker.set(EntityTrackedData.FLAGS, (byte) ((1 << EntityTrackedData.INVISIBLE_FLAG_INDEX)));
+            this.syncedData.set(EntityData.FLAGS, (byte) ((1 << EntityData.INVISIBLE_FLAG_INDEX)));
         }
 
 
@@ -140,7 +135,7 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
 
             var d = FirstLeashFenceKnotEntity.this.leashData;
             if (d != null && d.leashHolder != null) {
-                packetConsumer.accept(VirtualEntityUtils.createEntityAttachPacket(this.getEntityId(), d.leashHolder.getId()));
+                packetConsumer.accept(VirtualEntityUtils.createClientboundSetEntityLinkPacket(this.getEntityId(), d.leashHolder.getId()));
             }
         }
 

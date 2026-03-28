@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.FactoryBlock;
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
@@ -51,7 +52,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.List;
 
@@ -65,8 +66,8 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
 
     public final SoundEvent openSoundEvent;
     public final SoundEvent closeSoundEvent;
-    protected final ItemStack modelOpen;
-    protected final ItemStack modelClosed;
+    protected final LazyItemStack modelOpen;
+    protected final LazyItemStack modelClosed;
 
     public PickableItemContainerBlock(Properties settings, SoundEvent openSoundEvent, SoundEvent closeSoundEvent) {
         super(settings);
@@ -77,8 +78,8 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
 
         var id = ((PropertiesAccessor) settings).getId().identifier();
 
-        this.modelOpen = ItemDisplayElementUtil.getSolidModel(id.withPrefix("block/").withSuffix("_open"));
-        this.modelClosed = ItemDisplayElementUtil.getSolidModel(id.withPrefix("block/").withSuffix("_closed"));
+        this.modelOpen = ItemDisplayElementUtil.getModel(id.withPrefix("block/").withSuffix("_open"));
+        this.modelClosed = ItemDisplayElementUtil.getModel(id.withPrefix("block/").withSuffix("_closed"));
     }
 
     @Override
@@ -106,7 +107,7 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
                 var z = pos.getZ() + 0.5;
                 //noinspection DataFlowIssue
                 world.playSound(null, x, y, z, state.getValue(FORCE_OPEN) && !state.getValue(OPEN) ? closeSoundEvent : openSoundEvent,
-                        SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+                        SoundSource.BLOCKS, 0.5F, world.getRandom().nextFloat() * 0.1F + 0.9F);
             }
 
             world.setBlockAndUpdate(pos, state.cycle(FORCE_OPEN));
@@ -211,7 +212,7 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
         public Model(ServerLevel world, BlockState state) {
             var direction = state.getValue(FACING).toYRot();
 
-            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen : modelClosed);
+            this.main = ItemDisplayElementUtil.createSimple(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen.get() : modelClosed.get());
             this.main.setTranslation(new Vector3f(0, 1 / 64f, 0));
             this.main.setScale(new Vector3f(2));
             this.main.setYaw(direction);
@@ -224,7 +225,7 @@ public class PickableItemContainerBlock extends BaseEntityBlock implements Facto
                 var state = this.blockState();
                 var direction = state.getValue(FACING).toYRot();
                 this.main.setYaw(direction);
-                this.main.setItem(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen : modelClosed);
+                this.main.setItem(state.getValue(OPEN) || state.getValue(FORCE_OPEN) ? modelOpen.get() : modelClosed.get());
                 this.tick();
             }
         }

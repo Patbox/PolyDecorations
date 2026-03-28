@@ -51,7 +51,7 @@ public class HammerItem extends SimplePolymerItem {
     }
 
     private boolean apply(Player player, Level world, BlockPos blockPos, Vec3 hitPos, boolean reverse) {
-        if (!CommonProtection.canBreakBlock(world, blockPos, player.getGameProfile(), player) || !player.mayBuild()) {
+        if (!CommonProtection.canBreakBlock(world, blockPos, player.nameAndId(), player) || !player.mayBuild()) {
             return false;
         }
 
@@ -175,7 +175,7 @@ public class HammerItem extends SimplePolymerItem {
             return cycleState(property).then((state, world, pos, hitResult, reverse) -> {
                 for (var dir : Direction.values()) {
                     var offPos = pos.relative(dir);
-                    state = state.updateShape(world, world, pos, dir, offPos, world.getBlockState(offPos), world.random);
+                    state = state.updateShape(world, world, pos, dir, offPos, world.getBlockState(offPos), world.getRandom());
                 }
                 return state;
             });

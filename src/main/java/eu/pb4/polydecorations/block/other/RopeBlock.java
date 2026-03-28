@@ -23,6 +23,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
@@ -37,9 +38,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlock, CustomBreakingParticleBlock {
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
@@ -57,8 +59,8 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
         directions.put(Direction.UP, BlockStateProperties.UP);
         directions.put(Direction.DOWN, BlockStateProperties.DOWN);
     }));
-    private static final BlockState STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.VINES_BLOCK);
-    private static final ParticleOptions BREAKING_PARTICLE = new ItemParticleOption(ParticleTypes.ITEM, DecorationsModels.ROPE.get(0));
+    private static final BlockState STATE = PolymerBlockResourceUtils.requestEmpty(BlockModelType.VINES);
+    private static final Supplier<ParticleOptions> BREAKING_PARTICLE = DecorationsModels.ROPE.getLazy(0).derivative(x -> new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(x)));
     public RopeBlock(Properties settings) {
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(NORTH, false).setValue(SOUTH, false)
@@ -169,7 +171,7 @@ public class RopeBlock extends Block implements FactoryBlock, PolymerTexturedBlo
 
     @Override
     public ParticleOptions getBreakingParticle(BlockState blockState) {
-        return BREAKING_PARTICLE;
+        return BREAKING_PARTICLE.get();
     }
 
     public static class Model extends BlockModel {

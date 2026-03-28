@@ -5,8 +5,9 @@ import eu.pb4.polymer.core.api.block.PolymerBlock;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.HolderLookup;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +37,8 @@ public class WindChimeItem extends FactoryBlockItem {
 	}
 
 	@Override
-	public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context) {
-		super.modifyBasePolymerItemStack(out, stack, context);
+	public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
+		super.modifyBasePolymerItemStack(out, stack, context, lookup);
 		var color = stack.get(DecorationsDataComponents.WIND_CHIME_COLOR);
 		if (color == null || color.isEmpty()) {
 			return;

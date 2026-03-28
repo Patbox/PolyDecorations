@@ -1,6 +1,7 @@
 package eu.pb4.polydecorations.block.extension;
 
 import eu.pb4.factorytools.api.block.QuickWaterloggable;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.block.DecorationsBlockTags;
@@ -11,6 +12,7 @@ import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.MutableComponent;
@@ -38,7 +40,6 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -128,9 +129,9 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
     }
 
     public static final class Model extends BlockModel {
-        public static final ItemStack MODEL[] = Arrays.stream(Attached.values())
-                .map(x -> ItemDisplayElementUtil.getSolidModel(id("block/lantern_support/" + x.ordinal())))
-                .toArray(ItemStack[]::new);
+        public static final LazyItemStack MODEL[] = Arrays.stream(Attached.values())
+                .map(x -> ItemDisplayElementUtil.getModel(id("block/lantern_support/" + x.ordinal())))
+                .toArray(LazyItemStack[]::new);
         private final ItemDisplayElement main;
 
         private Model(BlockState state) {
@@ -141,7 +142,7 @@ public class WallAttachedLanternBlock extends Block implements PolymerBlock, Blo
         }
 
         private ItemStack model(BlockState state) {
-            return MODEL[state.getValue(ATTACHED).ordinal()];
+            return MODEL[state.getValue(ATTACHED).ordinal()].get();
         }
 
         @Override

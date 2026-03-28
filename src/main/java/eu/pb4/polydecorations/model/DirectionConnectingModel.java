@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.model;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.util.ResourceUtils;
 import eu.pb4.polymer.resourcepack.api.AssetPaths;
@@ -16,13 +17,13 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DirectionConnectingModel {
     public static final int SIZE = (int) Math.pow(2, 6);
     private final Identifier baseModel;
-    private final ItemStack[] models = new ItemStack[SIZE];
+    private final LazyItemStack[] models = new LazyItemStack[SIZE];
 
     public DirectionConnectingModel(Identifier baseModel) {
         this.baseModel = baseModel;
 
         for (var i = 0; i < SIZE; i++) {
-            this.models[i] = ItemDisplayElementUtil.getSolidModel(baseModel.withSuffix("/" + i));
+            this.models[i] = ItemDisplayElementUtil.getModel(baseModel.withSuffix("/" + i));
         }
     }
 
@@ -96,6 +97,10 @@ public class DirectionConnectingModel {
     }
 
     public ItemStack get(int i) {
+        return this.models[i].get();
+    }
+
+    public LazyItemStack getLazy(int i) {
         return this.models[i];
     }
     public static boolean hasDirection(int i, Direction direction) {

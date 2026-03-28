@@ -9,8 +9,8 @@ import eu.pb4.polydecorations.entity.StatueEntity;
 import eu.pb4.polydecorations.util.DecorationsUtil;
 import eu.pb4.polydecorations.util.WoodUtil;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
-import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polydecorations.ModInit;
+import eu.pb4.polymer.core.api.item.PolymerCreativeModeTabUtils;
 import eu.pb4.polymer.core.api.other.PolymerComponent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -100,7 +100,7 @@ public class DecorationsItems {
     }
 
     public static void register() {
-        PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.fromNamespaceAndPath(ModInit.ID, "a_group"), PolymerItemGroupUtils.builder()
+        PolymerCreativeModeTabUtils.registerPolymerCreativeModeTab(Identifier.fromNamespaceAndPath(ModInit.ID, "a_group"), PolymerCreativeModeTabUtils.builder()
                 .icon(() -> BENCH.get(WoodType.OAK).getDefaultInstance())
                 .title(Component.translatable("itemgroup." + ModInit.ID))
                 .displayItems(((context, entries) -> {

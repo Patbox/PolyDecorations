@@ -4,7 +4,7 @@ import eu.pb4.factorytools.api.block.entity.LockableBlockEntity;
 import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.util.MinimalInventory;
-import eu.pb4.sgui.api.GuiHelpers;
+import eu.pb4.sgui.api.SguiUtils;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ public class PickableItemContainerBlockEntity extends LockableBlockEntity implem
 
         @Override
         public boolean isOwnContainer(Player player) {
-            return player instanceof ServerPlayer serverPlayer && GuiHelpers.getCurrentGui(serverPlayer) instanceof PickableItemContainerBlockEntity.Gui gui && gui.isSource(PickableItemContainerBlockEntity.this);
+            return player instanceof ServerPlayer serverPlayer && SguiUtils.getCurrentGui(serverPlayer) instanceof PickableItemContainerBlockEntity.Gui gui && gui.isSource(PickableItemContainerBlockEntity.this);
         }
     };
 
@@ -137,7 +137,7 @@ public class PickableItemContainerBlockEntity extends LockableBlockEntity implem
         var y = this.worldPosition.getY() + 0.8;
         var z = this.worldPosition.getZ() + 0.5;
         //noinspection DataFlowIssue
-        this.level.playSound(null, x, y, z, soundEvent, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+        this.level.playSound(null, x, y, z, soundEvent, SoundSource.BLOCKS, 0.5F, this.level.getRandom().nextFloat() * 0.1F + 0.9F);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class PickableItemContainerBlockEntity extends LockableBlockEntity implem
             this.setTitle(PickableItemContainerBlockEntity.this.getBlockState().getBlock().getName());
 
             for (int i = 0; i < 5; i++) {
-                this.setSlotRedirect(i, new ShulkerBoxSlot(PickableItemContainerBlockEntity.this, i, 0, 0));
+                this.setSlot(i, new ShulkerBoxSlot(PickableItemContainerBlockEntity.this, i, 0, 0));
             }
 
             this.open();
@@ -172,8 +172,8 @@ public class PickableItemContainerBlockEntity extends LockableBlockEntity implem
         }
 
         @Override
-        public void onClose() {
-            super.onClose();
+        public void onManualClose() {
+            super.onManualClose();
             PickableItemContainerBlockEntity.this.stopOpen(player);
         }
 

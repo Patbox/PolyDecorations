@@ -47,7 +47,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, PolymerTexturedBlock, QuickWaterloggable, SimpleParticleBlock {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -57,7 +57,7 @@ public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, Poly
         super(settings);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
         this.base = base;
-        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.TOOL_RACK.addSupportedBlock(this));
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.TOOL_RACK.addValidBlock(this));
     }
 
     @Override
@@ -160,7 +160,7 @@ public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, Poly
         private final ItemDisplayElement[] items = new ItemDisplayElement[4];
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setItemDisplayContext(ItemDisplayContext.NONE);
             this.main.setDisplaySize(1, 1);
 

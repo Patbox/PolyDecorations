@@ -15,8 +15,10 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -36,7 +38,7 @@ public class ColorWindChimeRecipe extends CustomRecipe {
     private static Optional<DataComponentType<Integer>> POLYFACTORY_COLOR;
 
     public ColorWindChimeRecipe(CraftingBookCategory category) {
-        super(category);
+        super();
     }
 
     @Override
@@ -57,7 +59,7 @@ public class ColorWindChimeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider wrapperLookup) {
+    public ItemStack assemble(CraftingInput inventory) {
         var colors = new IntArrayList();
         for (var stack : inventory.items()) {
             if (stack.is(ConventionalItemTags.DYES)) {
@@ -75,8 +77,8 @@ public class ColorWindChimeRecipe extends CustomRecipe {
             //noinspection unchecked
             POLYFACTORY_COLOR = Optional.ofNullable((DataComponentType<Integer>) BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(Identifier.parse("polyfactory:color")));
         }
-        if (stack.getItem() instanceof DyeItem dyeItem) {
-            return dyeItem.getDyeColor().getTextureDiffuseColor();
+        if (stack.has(DataComponents.DYE)) {
+            return stack.getOrDefault(DataComponents.DYE, DyeColor.WHITE).getTextureDiffuseColor();
         } else if (POLYFACTORY_COLOR.isPresent() && stack.has(POLYFACTORY_COLOR.get())) {
             //noinspection DataFlowIssue
             return stack.get(POLYFACTORY_COLOR.get());

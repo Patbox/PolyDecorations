@@ -23,7 +23,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierBasedWaterloggable {
     public LargeFlowerPotBlock(Properties settings) {
@@ -72,7 +72,7 @@ public class LargeFlowerPotBlock extends Block implements FactoryBlock, BarrierB
         private final ItemDisplayElement main;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             this.addElement(this.main);

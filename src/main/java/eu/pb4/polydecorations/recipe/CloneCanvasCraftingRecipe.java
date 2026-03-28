@@ -22,16 +22,17 @@ import net.minecraft.world.level.Level;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public record CloneCanvasCraftingRecipe(String group, Item input) implements CraftingRecipe {
+public record CloneCanvasCraftingRecipe(CommonInfo commonInfo, CraftingBookInfo craftingBookInfo, Item input) implements CraftingRecipe {
     public static final MapCodec<CloneCanvasCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(x -> x.group(
-                    Codec.STRING.optionalFieldOf("group", "").forGetter(CloneCanvasCraftingRecipe::group),
+                    CommonInfo.MAP_CODEC.forGetter(CloneCanvasCraftingRecipe::commonInfo),
+                    CraftingBookInfo.MAP_CODEC.forGetter(CloneCanvasCraftingRecipe::craftingBookInfo),
                     BuiltInRegistries.ITEM.byNameCodec().fieldOf("input").forGetter(CloneCanvasCraftingRecipe::input)
             ).apply(x, CloneCanvasCraftingRecipe::new)
     );
 
 
     public static RecipeHolder<CloneCanvasCraftingRecipe> of(String id, Item item) {
-        return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, id(id)), new CloneCanvasCraftingRecipe("", item));
+        return new RecipeHolder<>(ResourceKey.create(Registries.RECIPE, id(id)), new CloneCanvasCraftingRecipe(new CommonInfo(true), new CraftingBookInfo(CraftingBookCategory.MISC, ""), item));
     }
 
     @Override
@@ -57,7 +58,7 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
     }
 
     @Override
-    public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider wrapperLookup) {
+    public ItemStack assemble(CraftingInput inventory) {
         CanvasData nbt = null;
         int count = 0;
         for (var stack : inventory.items()) {
@@ -71,6 +72,16 @@ public record CloneCanvasCraftingRecipe(String group, Item input) implements Cra
         var stack = new ItemStack(this.input, count);
         stack.set(DecorationsDataComponents.CANVAS_DATA, nbt);
         return stack;
+    }
+
+    @Override
+    public boolean showNotification() {
+        return this.commonInfo.showNotification();
+    }
+
+    @Override
+    public String group() {
+        return this.craftingBookInfo.group();
     }
 
     @SuppressWarnings("rawtypes")

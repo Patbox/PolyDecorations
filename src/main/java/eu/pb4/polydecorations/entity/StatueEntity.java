@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.entity;
 
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import eu.pb4.polydecorations.item.StatueItem;
@@ -8,8 +9,8 @@ import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.VirtualEntityUtils;
 import eu.pb4.polymer.virtualentity.api.attachment.EntityAttachment;
+import eu.pb4.polymer.virtualentity.api.data.EntityData;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import eu.pb4.polymer.virtualentity.api.tracker.EntityTrackedData;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -49,7 +50,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -227,14 +228,14 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
         var sendFlags = initial;
         for (var i = 0; i < data.size(); i++) {
             var x = data.get(i);
-            if (x.id() == EntityTrackedData.FLAGS.id()) {
-                data.set(i, SynchedEntityData.DataValue.create(EntityTrackedData.FLAGS, (byte) (((byte) x.value()) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
+            if (x.id() == EntityData.FLAGS.id()) {
+                data.set(i, SynchedEntityData.DataValue.create(EntityData.FLAGS, (byte) (((byte) x.value()) | (1 << EntityData.INVISIBLE_FLAG_INDEX))));
                 sendFlags = false;
             }
         }
 
         if (initial && sendFlags) {
-            data.add(SynchedEntityData.DataValue.create(EntityTrackedData.FLAGS, (byte) (((byte) this.entityData.get(DATA_SHARED_FLAGS_ID)) | (1 << EntityTrackedData.INVISIBLE_FLAG_INDEX))));
+            data.add(SynchedEntityData.DataValue.create(EntityData.FLAGS, (byte) (((byte) this.entityData.get(DATA_SHARED_FLAGS_ID)) | (1 << EntityData.INVISIBLE_FLAG_INDEX))));
         }
     }
 
@@ -309,7 +310,7 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
         }
     }
 
-    public record Type(String type, ItemStack head, ItemStack body, ItemStack leftArm, ItemStack rightArm, ItemStack leftLeg, ItemStack rightLeg, Block block, boolean fireproof) {
+    public record Type(String type, LazyItemStack head, LazyItemStack body, LazyItemStack leftArm, LazyItemStack rightArm, LazyItemStack leftLeg, LazyItemStack rightLeg, Block block, boolean fireproof) {
         public static final List<Type> NON_WOOD = new ArrayList<>();
         public static final Type STONE = nonWood("stone", Blocks.STONE);
         public static final Type DEEPSLATE = nonWood("deepslate", Blocks.DEEPSLATE);
@@ -354,8 +355,8 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
                     requestModel(type, "right_arm"), requestModel(type, "left_leg"), requestModel(type, "right_leg"), block, fireproof);
         }
 
-        private static ItemStack requestModel(String type, String head) {
-            return ItemDisplayElementUtil.getSolidModel(id("block/statue/" + type + "/" + head));
+        private static LazyItemStack requestModel(String type, String head) {
+            return ItemDisplayElementUtil.getModel(id("block/statue/" + type + "/" + head));
         }
 
         public SoundType soundGroup() {
@@ -425,12 +426,12 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
         }
 
         public void setType(Type type) {
-            this.head.display.setItem(type.head);
-            this.body.display.setItem(type.body);
-            this.leftArm.display.setItem(type.leftArm);
-            this.rightArm.display.setItem(type.rightArm);
-            this.leftLeg.display.setItem(type.leftLeg);
-            this.rightLeg.display.setItem(type.rightLeg);
+            this.head.display.setItem(type.head.get());
+            this.body.display.setItem(type.body.get());
+            this.leftArm.display.setItem(type.leftArm.get());
+            this.rightArm.display.setItem(type.rightArm.get());
+            this.leftLeg.display.setItem(type.leftLeg.get());
+            this.rightLeg.display.setItem(type.rightLeg.get());
         }
 
         @Override

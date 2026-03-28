@@ -142,22 +142,22 @@ public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInve
 
             switch (getBlockState().getValue(PlainShelfBlock.TYPE)) {
                 case BOTTOM -> {
-                    this.setSlotRedirect(3, new Slot(ShelfBlockEntity.this, 0, 0, 0));
-                    this.setSlotRedirect(4, new Slot(ShelfBlockEntity.this, 1, 1, 0));
-                    this.setSlotRedirect(5, new Slot(ShelfBlockEntity.this, 2, 2, 0));
+                    this.setSlot(3, new Slot(ShelfBlockEntity.this, 0, 0, 0));
+                    this.setSlot(4, new Slot(ShelfBlockEntity.this, 1, 1, 0));
+                    this.setSlot(5, new Slot(ShelfBlockEntity.this, 2, 2, 0));
                 }
                 case TOP -> {
-                    this.setSlotRedirect(3, new Slot(ShelfBlockEntity.this, 3, 0, 0));
-                    this.setSlotRedirect(4, new Slot(ShelfBlockEntity.this, 4, 1, 0));
-                    this.setSlotRedirect(5, new Slot(ShelfBlockEntity.this, 5, 2, 0));
+                    this.setSlot(3, new Slot(ShelfBlockEntity.this, 3, 0, 0));
+                    this.setSlot(4, new Slot(ShelfBlockEntity.this, 4, 1, 0));
+                    this.setSlot(5, new Slot(ShelfBlockEntity.this, 5, 2, 0));
                 }
                 case DOUBLE -> {
-                    this.setSlotRedirect(3, new Slot(ShelfBlockEntity.this, 3, 0, 0));
-                    this.setSlotRedirect(4, new Slot(ShelfBlockEntity.this, 4, 1, 0));
-                    this.setSlotRedirect(5, new Slot(ShelfBlockEntity.this, 5, 2, 0));
-                    this.setSlotRedirect(3 + 9, new Slot(ShelfBlockEntity.this, 0, 0, 0));
-                    this.setSlotRedirect(4 + 9, new Slot(ShelfBlockEntity.this, 1, 1, 0));
-                    this.setSlotRedirect(5 + 9, new Slot(ShelfBlockEntity.this, 2, 2, 0));
+                    this.setSlot(3, new Slot(ShelfBlockEntity.this, 3, 0, 0));
+                    this.setSlot(4, new Slot(ShelfBlockEntity.this, 4, 1, 0));
+                    this.setSlot(5, new Slot(ShelfBlockEntity.this, 5, 2, 0));
+                    this.setSlot(3 + 9, new Slot(ShelfBlockEntity.this, 0, 0, 0));
+                    this.setSlot(4 + 9, new Slot(ShelfBlockEntity.this, 1, 1, 0));
+                    this.setSlot(5 + 9, new Slot(ShelfBlockEntity.this, 2, 2, 0));
                 }
             }
 
@@ -166,8 +166,8 @@ public class ShelfBlockEntity extends LockableBlockEntity implements MinimalInve
         }
 
         @Override
-        public void onClose() {
-            super.onClose();
+        public void onManualClose() {
+            super.onManualClose();
         }
 
         @Override

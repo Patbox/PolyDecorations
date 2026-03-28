@@ -166,12 +166,12 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         }
 
         if (player.getMainHandItem().getItem() instanceof SignApplicator item) {
-            if (item.canApplyToSign(getText(upper).text, player)) {
+            if (item.canApplyToSign(getText(upper).text, player.getMainHandItem(), player)) {
                 var fake = Fake.INSTANCE;
                 fake.setText(getText(upper).text, false);
                 fake.setWaxed(getText(upper).waxed);
                 try {
-                    if (item.tryApplyToSign(level, fake, false, player)) {
+                    if (item.tryApplyToSign(level, fake, false, player.getMainHandItem(), player)) {
                         if (!player.isCreative()) {
                             player.getMainHandItem().shrink(1);
                         }
@@ -308,9 +308,9 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         }
 
         @Override
-        public void onClose() {
+        public void onManualClose() {
             setter.accept(getter.get().withText(getter.get().text.setMessage(0, this.getLine(0))));
-            super.onClose();
+            super.onManualClose();
         }
 
         @Override

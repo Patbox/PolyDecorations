@@ -10,7 +10,7 @@ import eu.pb4.polydecorations.recipe.CloneCanvasCraftingRecipe;
 import eu.pb4.polydecorations.recipe.ColorWindChimeRecipe;
 import eu.pb4.polydecorations.recipe.ComponentApplyCraftingRecipe;
 import eu.pb4.polydecorations.util.WoodUtil;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.advancements.AdvancementRequirements;
@@ -32,6 +32,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -45,7 +46,7 @@ import static eu.pb4.polydecorations.util.DecorationsUtil.getValues;
 public class RecipesProvider extends FabricRecipeProvider {
 
 
-    public RecipesProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+    public RecipesProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
@@ -236,40 +237,43 @@ public class RecipesProvider extends FabricRecipeProvider {
                         .save(output);
 
                 output.accept(key("wind_chime_coloring"), new ColorWindChimeRecipe(CraftingBookCategory.BUILDING), null);
-
+                
+                var info = new Recipe.CommonInfo(true);
+                var craftingInfo = new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, "");
+                
                 {
-
-                    acceptWithUnlock(output, key("canvas_waxing"), new CanvasTransformRecipe("", "wax", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.HONEYCOMB))),
+                    
+                    acceptWithUnlock(output, key("canvas_waxing"), new CanvasTransformRecipe(info, craftingInfo, "wax",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.HONEYCOMB))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
 
-                    acceptWithUnlock(output, key("canvas_glowing"), new CanvasTransformRecipe("", "glow", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.GLOW_INK_SAC))),
+                    acceptWithUnlock(output, key("canvas_glowing"), new CanvasTransformRecipe(info, craftingInfo, "glow",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.GLOW_INK_SAC))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
 
-                    acceptWithUnlock(output, key("canvas_unglowing"), new CanvasTransformRecipe("", "unglow", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.INK_SAC))),
+                    acceptWithUnlock(output, key("canvas_unglowing"), new CanvasTransformRecipe(info, craftingInfo, "unglow",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.INK_SAC))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
 
-                    acceptWithUnlock(output, key("canvas_cut"), new CanvasTransformRecipe("", "cut", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.SHEARS))),
+                    acceptWithUnlock(output, key("canvas_cut"), new CanvasTransformRecipe(info, craftingInfo, "cut",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.SHEARS))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
 
-                    acceptWithUnlock(output, key("canvas_uncut"), new CanvasTransformRecipe("", "uncut", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.PAPER))),
+                    acceptWithUnlock(output, key("canvas_uncut"), new CanvasTransformRecipe(info, craftingInfo, "uncut",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.PAPER))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
 
-                    acceptWithUnlock(output, key("canvas_dye"), new CanvasTransformRecipe("", "dye", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(itemWrap.getOrThrow(ConventionalItemTags.DYES)))),
+                    acceptWithUnlock(output, key("canvas_dye"), new CanvasTransformRecipe(info, craftingInfo, "dye",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(itemWrap.getOrThrow(ConventionalItemTags.DYES)))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
-                    acceptWithUnlock(output, key("canvas_undye"), new CanvasTransformRecipe("", "dye", CraftingBookCategory.MISC,
-                                    new ItemStack(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.WATER_BUCKET))),
+                    acceptWithUnlock(output, key("canvas_undye"), new CanvasTransformRecipe(info, craftingInfo, "dye",
+                                    new ItemStackTemplate(DecorationsItems.CANVAS), Ingredient.of(DecorationsItems.CANVAS), List.of(Ingredient.of(Items.WATER_BUCKET))),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
-                    acceptWithUnlock(output, key("canvas_clone"), new CloneCanvasCraftingRecipe("", DecorationsItems.CANVAS),
+                    acceptWithUnlock(output, key("canvas_clone"), new CloneCanvasCraftingRecipe(info, craftingInfo, DecorationsItems.CANVAS),
                             InventoryChangeTrigger.TriggerInstance.hasItems(DecorationsItems.CANVAS));
                 }
 
-                acceptWithUnlock(output, key("tie_container"), new ComponentApplyCraftingRecipe("", CraftingBookCategory.MISC,
+                acceptWithUnlock(output, key("tie_container"), new ComponentApplyCraftingRecipe(info, craftingInfo,
                         this.tag(DecorationsItemTags.TIEABLE_CONTAINERS), List.of(Ingredient.of(Items.STRING)),
                         DataComponentPatch.builder().set(DecorationsDataComponents.TIED, Unit.INSTANCE).build()
                 ), InventoryChangeTrigger.TriggerInstance.hasItems(Items.STRING));

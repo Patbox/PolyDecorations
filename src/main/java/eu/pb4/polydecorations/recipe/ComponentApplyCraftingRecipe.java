@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -26,10 +27,10 @@ import java.util.Objects;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
-public record ComponentApplyCraftingRecipe(String group, CraftingBookCategory category, Ingredient input, List<Ingredient> extra, DataComponentPatch componentPatch) implements CraftingRecipe {
+public record ComponentApplyCraftingRecipe(CommonInfo commonInfo, CraftingBookInfo craftingBookInfo, Ingredient input, List<Ingredient> extra, DataComponentPatch componentPatch) implements CraftingRecipe {
     public static final MapCodec<ComponentApplyCraftingRecipe> CODEC = RecordCodecBuilder.mapCodec(x -> x.group(
-                    Codec.STRING.optionalFieldOf("group", "").forGetter(ComponentApplyCraftingRecipe::group),
-                    CraftingBookCategory.CODEC.fieldOf("category").forGetter(ComponentApplyCraftingRecipe::category),
+                    CommonInfo.MAP_CODEC.forGetter(ComponentApplyCraftingRecipe::commonInfo),
+                    CraftingBookInfo.MAP_CODEC.forGetter(ComponentApplyCraftingRecipe::craftingBookInfo),
                     Ingredient.CODEC.fieldOf("input").forGetter(ComponentApplyCraftingRecipe::input),
                     ExtraCodecs.compactListCodec(Ingredient.CODEC).optionalFieldOf("extra", List.of()).forGetter(ComponentApplyCraftingRecipe::extra),
                 DataComponentPatch.CODEC.fieldOf("components").forGetter(ComponentApplyCraftingRecipe::componentPatch)
@@ -66,7 +67,7 @@ public record ComponentApplyCraftingRecipe(String group, CraftingBookCategory ca
     }
 
     @Override
-    public ItemStack assemble(CraftingInput inventory, HolderLookup.Provider wrapperLookup) {
+    public ItemStack assemble(CraftingInput inventory) {
         for (var stack : inventory.items()) {
             if (this.input.test(stack)) {
                 stack = stack.copyWithCount(1);
@@ -78,10 +79,25 @@ public record ComponentApplyCraftingRecipe(String group, CraftingBookCategory ca
         return ItemStack.EMPTY;
     }
 
+    @Override
+    public boolean showNotification() {
+        return this.commonInfo().showNotification();
+    }
+
+    @Override
+    public String group() {
+        return this.craftingBookInfo.group();
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public RecipeSerializer getSerializer() {
         return DecorationsRecipeSerializers.COMPONENT_APPLY;
+    }
+
+    @Override
+    public CraftingBookCategory category() {
+        return this.craftingBookInfo.category();
     }
 
     @Override
@@ -100,7 +116,7 @@ public record ComponentApplyCraftingRecipe(String group, CraftingBookCategory ca
                 new SlotDisplay.Composite(this.input().items().map(x -> {
                     var y = x.value().getDefaultInstance();
                     y.applyComponents(this.componentPatch);
-                    return (SlotDisplay) new SlotDisplay.ItemStackSlotDisplay(y);
+                    return (SlotDisplay) new SlotDisplay.ItemStackSlotDisplay(ItemStackTemplate.fromNonEmptyStack(y));
                 }).toList()), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
         ));
     }

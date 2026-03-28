@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.CustomBreakingParticleBlock;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.util.DecorationsSoundEvents;
@@ -11,10 +12,15 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -55,7 +61,8 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.create("force_open", OpenState.class);
-    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, ItemDisplayElementUtil.getSolidModel(id("block/trashcan_bin")));
+    private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, new ItemStackTemplate(Items.STONE, DataComponentPatch.builder()
+            .set(DataComponents.ITEM_MODEL, id("block/trashcan_bin")).build()));
 
     public TrashCanBlock(Properties settings) {
         super(settings);
@@ -93,7 +100,7 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
                 var y = pos.getZ() + 0.5;
                 //noinspection DataFlowIssue
                 world.playSound(null, x, z, y, state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? DecorationsSoundEvents.TRASHCAN_CLOSE : DecorationsSoundEvents.TRASHCAN_OPEN,
-                        SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+                        SoundSource.BLOCKS, 0.5F, world.getRandom().nextFloat() * 0.1F + 0.9F);
             }
 
             world.setBlockAndUpdate(pos, state.cycle(FORCE_OPEN));
@@ -171,13 +178,13 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
     }
 
     public static final class Model extends BlockModel {
-        private static final ItemStack BIN = ItemDisplayElementUtil.getSolidModel(id("block/trashcan_bin"));
-        private static final ItemStack LID = ItemDisplayElementUtil.getSolidModel(id("block/trashcan_lid"));
+        private static final LazyItemStack BIN = ItemDisplayElementUtil.getModel(id("block/trashcan_bin"));
+        private static final LazyItemStack LID = ItemDisplayElementUtil.getModel(id("block/trashcan_lid"));
         private final ItemDisplayElement main;
         private final ItemDisplayElement lid;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSimple(BIN);
+            this.main = ItemDisplayElementUtil.createSimple(BIN.get());
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
@@ -194,7 +201,7 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
             var direction = state.getValue(FACING).toYRot();
             this.main.setYaw(direction);
             this.lid.setYaw(direction);
-            this.lid.setItem(state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? ItemStack.EMPTY : LID);
+            this.lid.setItem(state.getValue(FORCE_OPEN) == OpenState.LIDLESS ? ItemStack.EMPTY : LID.get());
 
             if (state.getValue(OPEN) || state.getValue(FORCE_OPEN) == OpenState.TRUE) {
                 this.lid.setTranslation(new Vector3f(0, 0.25f, 0));

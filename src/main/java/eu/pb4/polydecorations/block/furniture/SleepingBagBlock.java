@@ -11,7 +11,7 @@ import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class SleepingBagBlock extends BedBlock implements FactoryBlock, PolymerT
         private final ItemDisplayElement main;
 
         public Model(BlockState state, BlockPos pos) {
-            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setDisplaySize(2, 2);
             this.main.setItemDisplayContext(ItemDisplayContext.NONE);
             //this.main.setTranslation(new Vector3f(0, 0, 0.5f));

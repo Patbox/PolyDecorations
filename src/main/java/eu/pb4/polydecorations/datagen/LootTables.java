@@ -3,9 +3,10 @@ package eu.pb4.polydecorations.datagen;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.WindChimeItem;
+import eu.pb4.polydecorations.mixin.BlockLootSubProviderAccessor;
 import eu.pb4.polydecorations.util.WoodUtil;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -35,8 +36,8 @@ import java.util.function.BiConsumer;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.getValues;
 
-public class LootTables extends FabricBlockLootTableProvider {
-    protected LootTables(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+public class LootTables extends FabricBlockLootSubProvider {
+    protected LootTables(FabricPackOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
         super(dataOutput, registryLookup);
     }
 
@@ -97,7 +98,7 @@ public class LootTables extends FabricBlockLootTableProvider {
         @Override
         public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
             this.generate();
-            for (Map.Entry<ResourceKey<LootTable>, LootTable.Builder> entry : map.entrySet()) {
+            for (Map.Entry<ResourceKey<LootTable>, LootTable.Builder> entry : ((BlockLootSubProviderAccessor) this).getMap().entrySet()) {
                 ResourceKey<LootTable> registryKey = entry.getKey();
                 biConsumer.accept(registryKey, entry.getValue());
             }

@@ -39,7 +39,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.Map;
 
@@ -55,7 +55,7 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
         this.radius = pixelSideLength / 16f / 2f;
         MAP.put(block, this);
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
-        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.SIGN_POST.addSupportedBlock(this));
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.SIGN_POST.addValidBlock(this));
     }
 
     @Override
@@ -181,7 +181,7 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
             this.upperBack.setTeleportDuration(0);
             this.upperBack.setYaw(upperText.flip() ? 180 + upperText.yaw() : upperText.yaw());
             this.upperBack.setTranslation(new Vector3f(0, 4 / 16f, zOffset));
-            this.upperBack.setItem(ItemDisplayElementUtil.getSolidModel(upperText.item()));
+            this.upperBack.setItem(ItemDisplayElementUtil.getModel(upperText.item()).get());
             this.upperBack.tick();
             this.upperBack.setTeleportDuration(1);
             this.upperBack.tick();
@@ -205,7 +205,7 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
             this.lowerBack.setTeleportDuration(0);
             this.lowerBack.setYaw(lowerText.flip() ? 180 + lowerText.yaw() : lowerText.yaw());
             this.lowerBack.setTranslation(new Vector3f(0, -4 / 16f, zOffset));
-            this.lowerBack.setItem(ItemDisplayElementUtil.getSolidModel(lowerText.item()));
+            this.lowerBack.setItem(ItemDisplayElementUtil.getModel(lowerText.item()).get());
             this.lowerBack.tick();
             this.lowerBack.setTeleportDuration(1);
             this.lowerBack.tick();

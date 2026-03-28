@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.block.item;
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.BarrierBasedWaterloggable;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.ModInit;
@@ -40,12 +41,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static eu.pb4.polydecorations.ModInit.id;
 
 public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, BarrierBasedWaterloggable, SimpleParticleBlock {
-    public static final ItemStack FLAG = ItemDisplayElementUtil.getSolidModel(id("block/mailbox_flag"));
+    public static final LazyItemStack FLAG = ItemDisplayElementUtil.getModel(id("block/mailbox_flag"));
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     private final Block base;
 
@@ -54,7 +55,7 @@ public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, Barri
                 .isRedstoneConductor(Blocks::never));
         this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, false));
         this.base = block;
-        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.MAILBOX.addSupportedBlock(this));
+        ModInit.LATE_INIT.add(() -> DecorationsBlockEntities.MAILBOX.addValidBlock(this));
     }
 
     @Override
@@ -128,13 +129,13 @@ public class MailboxBlock extends BaseEntityBlock implements FactoryBlock, Barri
         private boolean hasMail = false;
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setDisplaySize(1, 1);
             this.main.setScale(new Vector3f(2));
             var yaw = state.getValue(FACING).toYRot();
             this.main.setYaw(yaw);
 
-            this.flag = ItemDisplayElementUtil.createSimple(FLAG);
+            this.flag = ItemDisplayElementUtil.createSimple(FLAG.get());
             this.flag.setDisplaySize(2, 2);
             this.flag.setYaw(yaw);
             this.flag.setInterpolationDuration(5);

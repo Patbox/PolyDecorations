@@ -5,7 +5,7 @@ import eu.pb4.polydecorations.block.DecorationsBlockEntities;
 import eu.pb4.polydecorations.ui.GuiTextures;
 import eu.pb4.polydecorations.util.DecorationsSoundEvents;
 import eu.pb4.polydecorations.util.MinimalInventory;
-import eu.pb4.sgui.api.GuiHelpers;
+import eu.pb4.sgui.api.SguiUtils;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +57,7 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
         }
 
         public boolean isOwnContainer(Player player) {
-            return player instanceof ServerPlayer serverPlayer && GuiHelpers.getCurrentGui(serverPlayer) instanceof Gui gui && gui.isSource(TrashCanBlockEntity.this);
+            return player instanceof ServerPlayer serverPlayer && SguiUtils.getCurrentGui(serverPlayer) instanceof Gui gui && gui.isSource(TrashCanBlockEntity.this);
         }
     };
 
@@ -109,7 +109,7 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
         var z = this.worldPosition.getY() + 1;
         var y = this.worldPosition.getZ() + 0.5;
         //noinspection DataFlowIssue
-        this.level.playSound(null, x, z, y, soundEvent, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+        this.level.playSound(null, x, z, y, soundEvent, SoundSource.BLOCKS, 0.5F, this.level.getRandom().nextFloat() * 0.1F + 0.9F);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
             this.setTitle(GuiTextures.TRASHCAN.apply(TrashCanBlockEntity.this.getBlockState().getBlock().getName()));
 
             for (var i = 0; i < SIZE; i++) {
-                this.setSlotRedirect(i, new Slot(TrashCanBlockEntity.this, i, i, 0));
+                this.setSlot(i, new Slot(TrashCanBlockEntity.this, i, i, 0));
             }
 
             this.open();
@@ -202,8 +202,8 @@ public class TrashCanBlockEntity extends LockableBlockEntity implements MinimalI
         }
 
         @Override
-        public void onClose() {
-            super.onClose();
+        public void onManualClose() {
+            super.onManualClose();
             TrashCanBlockEntity.this.stopOpen(player);
         }
 

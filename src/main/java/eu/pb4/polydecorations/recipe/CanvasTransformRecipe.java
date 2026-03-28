@@ -15,12 +15,9 @@ import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
@@ -33,10 +30,10 @@ import java.util.Optional;
 public class CanvasTransformRecipe extends ShapelessRecipe {
     public static MapCodec<CanvasTransformRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
         return instance.group(
-                        Codec.STRING.optionalFieldOf("group", "").forGetter(CanvasTransformRecipe::group),
+                        CommonInfo.MAP_CODEC.forGetter(x -> x.commonInfo),
+                        CraftingBookInfo.MAP_CODEC.forGetter(x -> x.bookInfo),
                         Codec.STRING.optionalFieldOf("action", "wax").forGetter(CanvasTransformRecipe::action),
-                        CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(CanvasTransformRecipe::category),
-                        ItemStack.CODEC.fieldOf("result").forGetter(t -> t.result),
+                        ItemStackTemplate.CODEC.fieldOf("result").forGetter(t -> t.result),
                         Ingredient.CODEC.fieldOf("source").forGetter(t -> t.source),
                         Ingredient.CODEC.listOf().fieldOf("ingredients").flatXmap((ingredients) -> {
                             return ingredients.size() > 8 ? DataResult.error(() -> {
@@ -45,13 +42,13 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
                         }, DataResult::success).forGetter(t -> t.ingredientsOg))
                 .apply(instance, CanvasTransformRecipe::new);
     });
-    private final ItemStack result;
+    private final ItemStackTemplate result;
     private final String action;
     private final Ingredient source;
     private final List<Ingredient> ingredientsOg;
 
-    public CanvasTransformRecipe(String group, String action, CraftingBookCategory category, ItemStack result, Ingredient source, List<Ingredient> ingredients) {
-        super(group, category, result, merge(ingredients, source));
+    public CanvasTransformRecipe(CommonInfo info, CraftingBookInfo craftingBookInfo,  String action, ItemStackTemplate result, Ingredient source, List<Ingredient> ingredients) {
+        super(info, craftingBookInfo, result, merge(ingredients, source));
         this.ingredientsOg = ingredients;
         this.action = action;
         this.result = result;
@@ -96,8 +93,8 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput recipeInputInventory, HolderLookup.Provider wrapperLookup) {
-        var stack = super.assemble(recipeInputInventory, wrapperLookup);
+    public ItemStack assemble(CraftingInput recipeInputInventory) {
+        var stack = super.assemble(recipeInputInventory);
         ItemStack dye = recipeInputInventory.items().stream().filter(tmp -> tmp.is(ConventionalItemTags.DYES)).findFirst().orElse(ItemStack.EMPTY);
         for (var tmp : recipeInputInventory.items()) {
             if (this.source.test(tmp)) {
@@ -164,17 +161,18 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
 
         for (int i = 0; i < defaultedList.size(); ++i) {
             var stack = input.getItem(i);
-            var remainer = stack.getItem().getCraftingRemainder();
-            if (remainer.isEmpty() && stack.isDamageableItem()) {
-                remainer = stack.copy();
-                remainer.setDamageValue(remainer.getDamageValue() + 1);
-                if (remainer.getDamageValue() >= remainer.getMaxDamage()) {
-                    remainer = ItemStack.EMPTY;
+            var remainer = stack.getCraftingRemainder();
+            var outStack = ItemStack.EMPTY;
+            if (remainer != null && stack.isDamageableItem()) {
+                outStack = stack.copy();
+                outStack.setDamageValue(outStack.getDamageValue() + 1);
+                if (outStack.getDamageValue() >= outStack.getMaxDamage()) {
+                    outStack = ItemStack.EMPTY;
                 }
             } else if (stack.is(Items.WATER_BUCKET)) {
-                remainer = stack.copy();
+                outStack = stack.copy();
             }
-            defaultedList.set(i, remainer);
+            defaultedList.set(i, outStack);
         }
 
         return defaultedList;
@@ -187,7 +185,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
         for (var ing : this.ingredientsOg) {
             list.add(ing.display());
         }
-        var res = this.result.copy();
+        var res = this.result.create();
 
         var fakeImage = Optional.of(new CanvasPixels(new byte[0]));
         res.update(DecorationsDataComponents.CANVAS_DATA, CanvasData.DEFAULT, (x) -> switch (this.action) {
@@ -200,7 +198,7 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
             default -> x;
         });
 
-        return List.of(new ShapelessCraftingRecipeDisplay(list, new SlotDisplay.ItemStackSlotDisplay(res), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
+        return List.of(new ShapelessCraftingRecipeDisplay(list, new SlotDisplay.ItemStackSlotDisplay(ItemStackTemplate.fromNonEmptyStack(res)), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)));
     }
 
     @SuppressWarnings("rawtypes")

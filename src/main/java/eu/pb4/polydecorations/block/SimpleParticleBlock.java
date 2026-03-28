@@ -5,6 +5,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -20,6 +21,6 @@ public interface SimpleParticleBlock extends CustomBreakingParticleBlock {
     }
 
     default ParticleOptions computeParticle(Block block) {
-        return new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(block.asItem()));
+        return new ItemParticleOption(ParticleTypes.ITEM, new ItemStackTemplate(block.asItem()));
     }
 }

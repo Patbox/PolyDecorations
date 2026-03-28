@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.block.furniture;
 
 import com.mojang.serialization.MapCodec;
 import eu.pb4.factorytools.api.block.FactoryBlock;
+import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.mixin.FlowerPotBlockAccessor;
@@ -43,7 +44,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ import static eu.pb4.polydecorations.ModInit.id;
 public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock, PolymerTexturedBlock {
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
-    private static final Map<Block, ItemStack> MODEL_MAP = new IdentityHashMap<>();
+    private static final Map<Block, LazyItemStack> MODEL_MAP = new IdentityHashMap<>();
 
     public LongFlowerPotBlock(Properties settings) {
         super(settings);
@@ -68,7 +69,7 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
                     return;
                 }
                 MODEL_MAP.put(flowerPotBlock.getPotted(),
-                        ItemDisplayElementUtil.getSolidModel(id("block/long_flower_pot/" + BuiltInRegistries.BLOCK.getKey(flowerPotBlock.getPotted()).toDebugFileName())));
+                        ItemDisplayElementUtil.getModel(id("block/long_flower_pot/" + BuiltInRegistries.BLOCK.getKey(flowerPotBlock.getPotted()).toDebugFileName())));
             }
         }));
     }
@@ -82,8 +83,8 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
             var output = id("long_flower_pot/" + id.toDebugFileName());
             builder.addData(AssetPaths.blockModel(output), ModelAsset.builder()
                     .parent(BuiltInRegistries.BLOCK.getKey(entry.getValue()).withPrefix("block/"))
-                    .texture("flowerpot", "polydecorations:block/empty")
-                    .texture("dirt", "polydecorations:block/empty")
+                    .texture("flowerpot", id("block/empty"))
+                    .texture("dirt", id("block/empty"))
                     .build());
         }
     }
@@ -197,7 +198,7 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
         private final ItemDisplayElement[] plants = new ItemDisplayElement[3];
 
         public Model(BlockState state) {
-            this.main = ItemDisplayElementUtil.createSolid(state.getBlock().asItem());
+            this.main = ItemDisplayElementUtil.createSimple(state.getBlock().asItem());
             this.main.setScale(new Vector3f(2));
             this.main.setDisplaySize(1, 1);
 
@@ -236,10 +237,8 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
             if (stack.isEmpty()) {
                 model = ItemStack.EMPTY;
             } else if (stack.getItem() instanceof BlockItem blockItem) {
-                model = MODEL_MAP.get(blockItem.getBlock());
-                if (model == null) {
-                    model = stack.copy();
-                }
+                var x = MODEL_MAP.get(blockItem.getBlock());
+                model = x != null ? x.get() : stack.copy();
             } else {
                 model = stack.copy();
             }
