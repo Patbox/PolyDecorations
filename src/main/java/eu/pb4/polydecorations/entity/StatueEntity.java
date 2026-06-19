@@ -33,6 +33,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -220,7 +221,7 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
 
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
-        return EntityType.ARMOR_STAND;
+        return EntityTypes.ARMOR_STAND;
     }
 
     @Override
@@ -456,11 +457,11 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
             public static Bone from(Vector3f offset, Rotations angle) {
                 var d = new ItemDisplayElement();
                 d.setItemDisplayContext(ItemDisplayContext.GUI);
-                d.setOffset(new Vec3(0, EntityType.ARMOR_STAND.getHeight(), 0));
+                d.setOffset(new Vec3(0, EntityTypes.ARMOR_STAND.getHeight(), 0));
                 d.setInvisible(true);
                 d.setSendPositionUpdates(false);
                 d.setTeleportDuration(2);
-                d.setTranslation(offset.sub(0, EntityType.ARMOR_STAND.getHeight(), 0));
+                d.setTranslation(offset.sub(0, EntityTypes.ARMOR_STAND.getHeight(), 0));
                 d.setLeftRotation(new Quaternionf().rotationZYX(-angle.z() * Mth.DEG_TO_RAD,
                         -angle.y()  * Mth.DEG_TO_RAD, angle.x() * Mth.DEG_TO_RAD));
                 return new Bone(d, offset, new MutableObject<>(angle));

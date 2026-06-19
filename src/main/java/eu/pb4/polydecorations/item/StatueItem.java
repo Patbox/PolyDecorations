@@ -43,7 +43,7 @@ public class StatueItem extends SimplePolymerItem {
             AABB box = DecorationsEntities.STATUE.getDimensions().makeBoundingBox(vec3d.x(), vec3d.y(), vec3d.z());
             if (world.noCollision(null, box) && world.getEntities(null, box).isEmpty()) {
                 if (world instanceof ServerLevel serverWorld) {
-                    Consumer<StatueEntity> consumer = EntityType.createDefaultStackConfig(serverWorld, itemStack, context.getPlayer());
+                    var consumer = EntityType.<StatueEntity>createDefaultStackConfig(serverWorld, itemStack, context.getPlayer());
                     var statueEntity = DecorationsEntities.STATUE.create(serverWorld, consumer, blockPos, EntitySpawnReason.MOB_SUMMONED, true, true);
                     if (statueEntity == null) {
                         return InteractionResult.FAIL;

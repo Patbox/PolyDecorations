@@ -31,11 +31,6 @@ public class SleepingBagBlock extends BedBlock implements FactoryBlock, PolymerT
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return null;
-    }
-
-    @Override
     public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
         return DecorationsUtil.TRAPDOOR_STATES_REGULAR.get(Direction.UP);
     }

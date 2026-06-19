@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.ui;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.util.ResourceUtils;
@@ -19,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -57,10 +57,10 @@ public class UiResourceCreator {
 
     private static final List<SlicedTexture> VERTICAL_PROGRESS = new ArrayList<>();
     private static final List<SlicedTexture> HORIZONTAL_PROGRESS = new ArrayList<>();
-    private static final List<Tuple<Identifier, String>> SIMPLE_MODEL = new ArrayList<>();
+    private static final List<Pair<Identifier, String>> SIMPLE_MODEL = new ArrayList<>();
     private static final Char2IntMap SPACES = new Char2IntOpenHashMap();
     private static final Char2ObjectMap<Identifier> TEXTURES = new Char2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<Tuple<Character, Character>, Identifier> TEXTURES_POLYDEX = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<Pair<Character, Character>, Identifier> TEXTURES_POLYDEX = new Object2ObjectOpenHashMap<>();
     private static final List<String> TEXTURES_NUMBERS = new ArrayList<>();
     private static char character = 'a';
 
@@ -136,7 +136,7 @@ public class UiResourceCreator {
         var stack = new ItemStackTemplate(item, DataComponentPatch.builder()
                 .set(DataComponents.ITEM_MODEL, bridgeModel(id))
                 .build());
-        SIMPLE_MODEL.add(new Tuple<>(id, base));
+        SIMPLE_MODEL.add(new Pair<>(id, base));
         return stack;
     }
 
@@ -154,12 +154,12 @@ public class UiResourceCreator {
         return new TextBuilders(Component.literal(builder.toString()).setStyle(STYLE));
     }
 
-    public static Tuple<Component, Component> polydexBackground(String path) {
+    public static Pair<Component, Component> polydexBackground(String path) {
         var c = (character++);
         var d = (character++);
-        TEXTURES_POLYDEX.put(new Tuple<>(c, d), id("sgui/polydex/" + path));
+        TEXTURES_POLYDEX.put(new Pair<>(c, d), id("sgui/polydex/" + path));
 
-        return new Tuple<>(
+        return new Pair<>(
                 Component.literal(Character.toString(c)).setStyle(STYLE),
                 Component.literal(Character.toString(d)).setStyle(STYLE)
         );
@@ -211,8 +211,8 @@ public class UiResourceCreator {
 
     public static void generateAssets(BiConsumer<String, byte[]> assetWriter) {
         for (var texture : SIMPLE_MODEL) {
-            assetWriter.accept("assets/" + texture.getA().getNamespace() + "/models/" + texture.getA().getPath() + ".json",
-                    ITEM_TEMPLATE.replace("|ID|", texture.getA().toString()).replace("|BASE|", texture.getB()).getBytes(StandardCharsets.UTF_8));
+            assetWriter.accept("assets/" + texture.getFirst().getNamespace() + "/models/" + texture.getFirst().getPath() + ".json",
+                    ITEM_TEMPLATE.replace("|ID|", texture.getFirst().toString()).replace("|BASE|", texture.getSecond()).getBytes(StandardCharsets.UTF_8));
         }
 
         generateProgress(assetWriter, VERTICAL_PROGRESS, false);
@@ -243,15 +243,15 @@ public class UiResourceCreator {
             providers.add(bitmap);
         });
 
-        TEXTURES_POLYDEX.entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getA())).forEach((entry) -> {
+        TEXTURES_POLYDEX.entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getFirst())).forEach((entry) -> {
             var bitmap = new JsonObject();
             bitmap.addProperty("type", "bitmap");
             bitmap.addProperty("file", entry.getValue().toString() + ".png");
             bitmap.addProperty("ascent", -4);
             bitmap.addProperty("height", 128);
             var chars = new JsonArray();
-            chars.add(Character.toString(entry.getKey().getA()));
-            chars.add(Character.toString(entry.getKey().getB()));
+            chars.add(Character.toString(entry.getKey().getFirst()));
+            chars.add(Character.toString(entry.getKey().getSecond()));
             bitmap.add("chars", chars);
             providers.add(bitmap);
         });

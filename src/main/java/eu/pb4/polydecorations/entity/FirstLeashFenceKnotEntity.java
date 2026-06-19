@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -56,7 +57,7 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
 
     @Override
     protected Component getTypeName() {
-        return EntityType.LEASH_KNOT.getDescription();
+        return EntityTypes.LEASH_KNOT.getDescription();
     }
 
     @Override
@@ -112,14 +113,14 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
 
     @Override
     public EntityType<?> getPolymerEntityType(PacketContext context) {
-        return EntityType.LEASH_KNOT;
+        return EntityTypes.LEASH_KNOT;
     }
 
     private class LeadAttachmentElement extends GenericEntityElement {
         public LeadAttachmentElement() {
             this.syncedData.set(EntityData.SILENT, true);
             this.syncedData.set(EntityData.NO_GRAVITY, true);
-            this.setOffset(new Vec3(0, EntityType.LEASH_KNOT.getHeight() / 2 - EntityType.SLIME.getDimensions().eyeHeight(), 0));
+            this.setOffset(new Vec3(0, EntityTypes.LEASH_KNOT.getHeight() / 2 - EntityTypes.SLIME.getDimensions().eyeHeight(), 0));
             this.syncedData.set(EntityData.FLAGS, (byte) ((1 << EntityData.INVISIBLE_FLAG_INDEX)));
         }
 
@@ -128,7 +129,7 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
         public void startWatching(ServerPlayer player, Consumer<Packet<ClientGamePacketListener>> packetConsumer) {
             super.startWatching(player, packetConsumer);
             var scale = new AttributeInstance(Attributes.SCALE, Consumers.nop());
-            scale.setBaseValue(EntityType.LEASH_KNOT.getWidth() / EntityType.SLIME.getWidth());
+            scale.setBaseValue(EntityTypes.LEASH_KNOT.getWidth() / EntityTypes.SLIME.getWidth());
             packetConsumer.accept(new ClientboundUpdateAttributesPacket(this.getEntityId(), List.of(
                     scale
             )));
@@ -141,7 +142,7 @@ public class FirstLeashFenceKnotEntity extends LeashFenceKnotEntity implements L
 
         @Override
         protected EntityType<? extends Entity> getEntityType() {
-            return EntityType.SLIME;
+            return EntityTypes.SLIME;
         }
     }
 }

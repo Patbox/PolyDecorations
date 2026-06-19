@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -33,7 +34,7 @@ import static eu.pb4.polydecorations.ModInit.id;
 public class PolymerCampfireBlock extends CampfireBlock implements FactoryBlock, PolymerTexturedBlock {
     public PolymerCampfireBlock(boolean emitsParticles, int fireDamage, Properties settings) {
         super(emitsParticles, fireDamage, settings);
-        BlockEntityType.CAMPFIRE.addValidBlock(this);
+        BlockEntityTypes.CAMPFIRE.addValidBlock(this);
     }
 
     @Override

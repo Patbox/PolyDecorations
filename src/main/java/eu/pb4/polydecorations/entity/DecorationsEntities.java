@@ -3,16 +3,12 @@ package eu.pb4.polydecorations.entity;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 
 public class DecorationsEntities {
@@ -20,7 +16,7 @@ public class DecorationsEntities {
             .of(CanvasEntity::new, MobCategory.MISC).sized(0.5f, 0.5f));
 
     public static final EntityType<StatueEntity> STATUE = register("statue", EntityType.Builder
-            .of(StatueEntity::new, MobCategory.MISC).sized(EntityType.ARMOR_STAND.getDimensions().width(), EntityType.ARMOR_STAND.getDimensions().height()));
+            .of(StatueEntity::new, MobCategory.MISC).sized(EntityTypes.ARMOR_STAND.getDimensions().width(), EntityTypes.ARMOR_STAND.getDimensions().height()));
 
     public static final EntityType<SeatEntity> SEAT = register("seat", EntityType.Builder
             .of(SeatEntity::new, MobCategory.MISC).fireImmune().sized(0f, 0f).noSummon());

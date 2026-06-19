@@ -53,12 +53,4 @@ public class PolydexCompatImpl {
         }
         return list;
     }
-
-    public static PolydexStack<?>[] createOutput(List<OutputStack> output) {
-        var list = new ArrayList<PolydexStack<?>>(output.size());
-        for (var x : output) {
-            list.add(PolydexStack.of(x.stack().copyWithCount(x.stack().getCount() * x.roll()), x.chance()));
-        }
-        return list.toArray(new PolydexStack[0]);
-    }
 }

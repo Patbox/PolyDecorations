@@ -569,6 +569,11 @@ public class CustomAssetProvider implements DataProvider {
     }
 
     private void createBedPalette(BiConsumer<String, byte[]> assetWriter) throws Exception {
+        // Todo: Broken due to 26.2 changes
+        if (true) {
+            return;
+        }
+
         var jar = PolymerCommonUtils.getClientJarRoot();
         var b = new ByteArrayOutputStream();
 

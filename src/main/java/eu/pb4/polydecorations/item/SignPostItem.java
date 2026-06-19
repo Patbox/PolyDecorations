@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
 
 public class SignPostItem extends SimplePolymerItem {
     private String translationKey;
@@ -31,7 +32,7 @@ public class SignPostItem extends SimplePolymerItem {
         if (context.getLevel().getBlockEntity(context.getClickedPos()) instanceof SignPostBlockEntity be) {
             var text = be.getText(upper);
             if (text.item() == Items.AIR) {
-                var rel = context.getClickLocation().subtract(context.getClickedPos().getCenter());
+                var rel = context.getClickLocation().subtract(Vec3.atCenterOf(context.getClickedPos()));
                 var axis = context.getClickedFace().getAxis();
                 if (axis == Direction.Axis.Y) {
                     axis = rel.x > rel.z ? Direction.Axis.Z : Direction.Axis.X;

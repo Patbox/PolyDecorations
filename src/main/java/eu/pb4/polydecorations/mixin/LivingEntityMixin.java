@@ -42,7 +42,7 @@ public abstract class LivingEntityMixin extends Entity {
         var fakePos = value.atY(value.getY() > 0 ? this.level().getMinY() : this.level().getMaxY() - 1);
 
         for (var player : ((ServerLevel) this.level()).getChunkSource().chunkMap.getPlayersCloseForSpawning(this.chunkPosition())) {
-            player.connection.send(new ClientboundBlockUpdatePacket(fakePos, Blocks.BLACK_BED.defaultBlockState().setValue(BedBlock.FACING, state.getValue(BedBlock.FACING))));
+            player.connection.send(new ClientboundBlockUpdatePacket(fakePos, Blocks.BED.black().defaultBlockState().setValue(BedBlock.FACING, state.getValue(BedBlock.FACING))));
         }
 
         return fakePos;

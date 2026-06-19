@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -21,79 +22,82 @@ class ItemTagsProvider extends FabricTagsProvider.ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider arg) {
-        this.valueLookupBuilder(DecorationsItemTags.GLOBE_REPLACEMENT)
-                .add(Items.POTATO)
-                .add(Items.PLAYER_HEAD)
-                .add(Items.HEAVY_CORE)
-                .add(Items.ZOMBIE_HEAD)
-                .add(Items.CREEPER_HEAD)
-                .add(Items.SKELETON_SKULL)
-                .add(Items.WITHER_SKELETON_SKULL);
+        this.tag(DecorationsItemTags.GLOBE_REPLACEMENT)
+                .add(get(Items.POTATO))
+                .add(get(Items.PLAYER_HEAD))
+                .add(get(Items.HEAVY_CORE))
+                .add(get(Items.ZOMBIE_HEAD))
+                .add(get(Items.CREEPER_HEAD))
+                .add(get(Items.SKELETON_SKULL))
+                .add(get(Items.WITHER_SKELETON_SKULL));
 
-        this.valueLookupBuilder(DecorationsItemTags.TOOL_RACK_ACCEPTABLE)
+        this.tag(DecorationsItemTags.TOOL_RACK_ACCEPTABLE)
                 .addOptionalTag(ConventionalItemTags.TOOLS)
                 .addOptionalTag(ConventionalItemTags.RODS)
                 .addOptionalTag(ConventionalItemTags.FISHING_ROD_TOOLS)
-                .add(Items.SPYGLASS)
-                .add(Items.MACE)
-                .add(Items.FLINT_AND_STEEL)
-                .add(Items.CARROT_ON_A_STICK)
-                .add(Items.WARPED_FUNGUS_ON_A_STICK)
-                .add(Items.WARPED_FUNGUS_ON_A_STICK)
+                .add(get(Items.SPYGLASS))
+                .add(get(Items.MACE))
+                .add(get(Items.FLINT_AND_STEEL))
+                .add(get(Items.CARROT_ON_A_STICK))
+                .add(get(Items.WARPED_FUNGUS_ON_A_STICK))
+                .add(get(Items.WARPED_FUNGUS_ON_A_STICK))
         ;
 
-        this.valueLookupBuilder(ConventionalItemTags.TOOLS)
-                .add(DecorationsItems.TROWEL)
-                .add(DecorationsItems.HAMMER)
+        this.tag(ConventionalItemTags.TOOLS)
+                .add(get(DecorationsItems.TROWEL))
+                .add(get(DecorationsItems.HAMMER))
         ;
 
-        this.valueLookupBuilder(DecorationsItemTags.UNSCALED_DISPLAY_CASE)
-                .add(Items.PLAYER_HEAD)
-                .add(Items.ZOMBIE_HEAD)
-                .add(Items.HEAVY_CORE)
-                .add(Items.CREEPER_HEAD)
-                .add(Items.SKELETON_SKULL)
-                .add(Items.WITHER_SKELETON_SKULL)
+        this.tag(DecorationsItemTags.UNSCALED_DISPLAY_CASE)
+                .add(get(Items.PLAYER_HEAD))
+                .add(get(Items.ZOMBIE_HEAD))
+                .add(get(Items.HEAVY_CORE))
+                .add(get(Items.CREEPER_HEAD))
+                .add(get(Items.SKELETON_SKULL))
+                .add(get(Items.WITHER_SKELETON_SKULL))
         ;
 
 
-        this.valueLookupBuilder(DecorationsItemTags.FORCE_FIXED_MODEL)
-                .add(Items.SPYGLASS)
-                .add(Items.TRIDENT)
-                .add(Items.SHIELD)
+        this.tag(DecorationsItemTags.FORCE_FIXED_MODEL)
+                .add(get(Items.SPYGLASS))
+                .add(get(Items.TRIDENT))
+                .add(get(Items.SHIELD))
         ;
 
-        this.valueLookupBuilder(DecorationsItemTags.CANVAS_CLEAR_PIXELS)
-                .add(Items.PAPER)
-                .add(Items.SPONGE)
-                .add(Items.WET_SPONGE);
+        this.tag(DecorationsItemTags.CANVAS_CLEAR_PIXELS)
+                .add(get(Items.PAPER))
+                .add(get(Items.SPONGE))
+                .add(get(Items.WET_SPONGE));
 
-        this.valueLookupBuilder(DecorationsItemTags.CANVAS_DARKEN_PIXELS)
+        this.tag(DecorationsItemTags.CANVAS_DARKEN_PIXELS)
                 .addOptionalTag(ItemTags.COALS);
 
-        this.valueLookupBuilder(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS)
-                .add(Items.BONE_MEAL);
+        this.tag(DecorationsItemTags.CANVAS_LIGHTEN_PIXELS)
+                .add(get(Items.BONE_MEAL));
 
-        this.valueLookupBuilder(DecorationsItemTags.STATUES)
-                .add(DecorationsItems.WOODEN_STATUE.values().toArray(Item[]::new))
-                .add(DecorationsItems.OTHER_STATUE.values().toArray(Item[]::new))
+        this.tag(DecorationsItemTags.STATUES)
+                .addAll(DecorationsItems.WOODEN_STATUE.values().stream().map(this::get))
+                .addAll(DecorationsItems.OTHER_STATUE.values().stream().map(this::get))
                 ;
 
-        this.valueLookupBuilder(DecorationsItemTags.STUMPS)
-                .add(DecorationsItems.STUMP.values().toArray(Item[]::new))
-                .add(DecorationsItems.STRIPPED_STUMP.values().toArray(Item[]::new))
+        this.tag(DecorationsItemTags.STUMPS)
+                .addAll(DecorationsItems.STUMP.values().stream().map(this::get))
+                .addAll(DecorationsItems.STRIPPED_STUMP.values().stream().map(this::get))
         ;
 
-        this.valueLookupBuilder(DecorationsItemTags.SLEEPING_BAGS)
-                .add(DecorationsItems.SLEEPING_BAG.values().toArray(Item[]::new))
+        this.tag(DecorationsItemTags.SLEEPING_BAGS)
+                .addAll(DecorationsItems.SLEEPING_BAG.values().stream().map(this::get))
         ;
 
-        this.valueLookupBuilder(DecorationsItemTags.TIEABLE_CONTAINERS)
-                .add(DecorationsItems.BASKET)
-                .add(DecorationsItems.CARDBOARD_BOX)
+        this.tag(DecorationsItemTags.TIEABLE_CONTAINERS)
+                .add(get(DecorationsItems.BASKET))
+                .add(get(DecorationsItems.CARDBOARD_BOX))
                 .addOptionalTag(ItemTags.SHULKER_BOXES)
         ;
     }
 
-
+    // Temp workaround
+    private ResourceKey<Item> get(Item item) {
+        return item.builtInRegistryHolder().key();
+    }
 }

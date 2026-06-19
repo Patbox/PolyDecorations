@@ -23,17 +23,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.WeatheringCopper;
-import net.minecraft.world.level.block.WeatheringCopperBlocks;
-import net.minecraft.world.level.block.WeatheringLanternBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -57,7 +47,7 @@ public class DecorationsBlocks {
     public static final WallAttachedLanternBlock WALL_LANTERN = register("wall_lantern", (LanternBlock) Blocks.LANTERN, WallAttachedLanternBlock::new);
     public static final WallAttachedLanternBlock WALL_SOUL_LANTERN = register("wall_soul_lantern", (LanternBlock) Blocks.SOUL_LANTERN, WallAttachedLanternBlock::new);
 
-    public static WeatheringCopperBlocks WALL_COPPER_LANTERNS = registerRelativeCopper("copper_wall_lantern", Blocks.COPPER_LANTERN,
+    public static WeatheringCopperCollection<Block> WALL_COPPER_LANTERNS = registerRelativeCopper("copper_wall_lantern", Blocks.COPPER_LANTERN,
             (settings, block) -> new WallAttachedLanternBlock(settings, (LanternBlock) block),
             (level, settings, block) -> new WallAttachedOxidizableLanternBlock(settings, (WeatheringLanternBlock) block),
             (level, block) -> BlockBehaviour.Properties.ofFullCopy(block)
@@ -73,7 +63,7 @@ public class DecorationsBlocks {
             }))
     );
 
-    public static final BrazierBlock COPPER_BRAZIER = register("copper_brazier", Blocks.COPPER_LANTERN.unaffected(), (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
+    public static final BrazierBlock COPPER_BRAZIER = register("copper_brazier", Blocks.COPPER_LANTERN.weathering().unaffected(), (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
                 return x.getValue(BrazierBlock.LIT) ? Blocks.CAMPFIRE.defaultBlockState().getLightEmission() : 0;
             }))
     );
@@ -330,36 +320,37 @@ public class DecorationsBlocks {
     }
 
 
-    public static <Waxed extends Block, Regular extends Block & WeatheringCopper> WeatheringCopperBlocks registerRelativeCopper(String baseId, WeatheringCopperBlocks source,
+    public static <Waxed extends Block, Regular extends Block & WeatheringCopper> WeatheringCopperCollection<Block> registerRelativeCopper(String baseId, WeatheringCopperCollection<Block> source,
                                                                                                                   BiFunction<BlockBehaviour.Properties, Block, Waxed> waxedBlockFactory,
                                                                                                                   TriFunction<WeatheringCopper.WeatherState, BlockBehaviour.Properties, Block, Regular> unwaxedBlockFactory,
                                                                                                                   BiFunction<WeatheringCopper.WeatherState, Block, BlockBehaviour.Properties> settingsFromOxidationLevel) {
 
-        Block unaffected = register(baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.UNAFFECTED, source.unaffected()), (settings) -> {
-            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.UNAFFECTED, settings, source.unaffected());
+        Block unaffected = register(baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.UNAFFECTED, source.weathering().unaffected()), (settings) -> {
+            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.UNAFFECTED, settings, source.weathering().unaffected());
         });
-        Block exposed = register("exposed_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.EXPOSED, source.exposed()), (settings) -> {
-            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.EXPOSED, settings, source.exposed());
+        Block exposed = register("exposed_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.EXPOSED, source.weathering().exposed()), (settings) -> {
+            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.EXPOSED, settings, source.weathering().exposed());
         });
-        Block weathered = register("weathered_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.WEATHERED, source.weathered()), (settings) -> {
-            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.WEATHERED, settings, source.weathered());
+        Block weathered = register("weathered_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.WEATHERED, source.weathering().weathered()), (settings) -> {
+            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.WEATHERED, settings, source.weathering().weathered());
         });
-        Block oxidized = register("oxidized_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.OXIDIZED, source.oxidized()), (settings) -> {
-            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.OXIDIZED, settings, source.oxidized());
+        Block oxidized = register("oxidized_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.OXIDIZED, source.weathering().oxidized()), (settings) -> {
+            return unwaxedBlockFactory.apply(WeatheringCopper.WeatherState.OXIDIZED, settings, source.weathering().oxidized());
         });
 
-        Block unaffectedWaxed = register("waxed_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.UNAFFECTED, source.waxed()), (settings) -> {
-            return waxedBlockFactory.apply(settings, source.waxed());
+        Block unaffectedWaxed = register("waxed_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.UNAFFECTED, source.waxed().unaffected()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxed().unaffected());
         });
-        Block exposedWaxed = register("waxed_exposed_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.EXPOSED, source.waxedExposed()), (settings) -> {
-            return waxedBlockFactory.apply(settings, source.waxedExposed());
+        Block exposedWaxed = register("waxed_exposed_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.EXPOSED, source.waxed().exposed()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxed().exposed());
         });
-        Block weatheredWaxed = register("waxed_weathered_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.WEATHERED, source.waxedWeathered()), (settings) -> {
-            return waxedBlockFactory.apply(settings, source.waxedWeathered());
+        Block weatheredWaxed = register("waxed_weathered_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.WEATHERED, source.waxed().weathered()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxed().weathered());
         });
-        Block oxidizedWaxed = register("waxed_oxidized_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.OXIDIZED, source.waxedOxidized()), (settings) -> {
-            return waxedBlockFactory.apply(settings, source.waxedOxidized());
+        Block oxidizedWaxed = register("waxed_oxidized_" + baseId, settingsFromOxidationLevel.apply(WeatheringCopper.WeatherState.OXIDIZED, source.waxed().oxidized()), (settings) -> {
+            return waxedBlockFactory.apply(settings, source.waxed().oxidized());
         });
-        return new WeatheringCopperBlocks(unaffected, exposed, weathered, oxidized, unaffectedWaxed, exposedWaxed, weatheredWaxed, oxidizedWaxed);
+        return new WeatheringCopperCollection<>(new WeatheringCopperCollection.ByState<>(unaffected, exposed, weathered, oxidized),
+                new WeatheringCopperCollection.ByState<>(unaffectedWaxed, exposedWaxed, weatheredWaxed, oxidizedWaxed));
     }
 }
