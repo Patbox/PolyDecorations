@@ -1,4 +1,5 @@
 {
+	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
 		"particle": "block/spruce_planks",
@@ -26,9 +27,7 @@
 				"north": {"uv": [2, 4, 4, 7], "texture": "#planks"},
 				"east": {"uv": [2, 4, 4, 7], "texture": "#planks"},
 				"south": {"uv": [2, 4, 4, 7], "texture": "#planks"},
-				"west": {"uv": [2, 4, 4, 7], "texture": "#planks"},
-				"up": {"uv": [0, 0, 2, 2], "texture": "#planks"},
-				"down": {"uv": [0, 0, 2, 2], "texture": "#planks"}
+				"west": {"uv": [2, 4, 4, 7], "texture": "#planks"}
 			}
 		},
 		{
@@ -78,9 +77,7 @@
 				"north": {"uv": [8, 2, 9, 12], "texture": "#rod"},
 				"east": {"uv": [8, 2, 9, 12], "texture": "#rod"},
 				"south": {"uv": [8, 2, 9, 12], "texture": "#rod"},
-				"west": {"uv": [8, 2, 9, 12], "texture": "#rod"},
-				"up": {"uv": [8, 3, 9, 4], "texture": "#rod"},
-				"down": {"uv": [8, 3, 9, 4], "texture": "#rod"}
+				"west": {"uv": [8, 2, 9, 12], "texture": "#rod"}
 			}
 		}
 	],
@@ -100,7 +97,7 @@
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"firstperson_lefthand": {
-			"rotation": [0, 225, 0],
+			"rotation": [0, -135, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"ground": {
@@ -108,7 +105,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, 225, 0],
+			"rotation": [30, -135, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {

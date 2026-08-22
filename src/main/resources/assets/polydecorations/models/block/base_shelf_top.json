@@ -1,4 +1,5 @@
 {
+	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
 		"particle": "#planks",
@@ -26,7 +27,6 @@
 				"east": {"uv": [8, 0, 10, 7], "rotation": 90, "texture": "#logs"},
 				"south": {"uv": [14, 7, 16, 9], "rotation": 90, "texture": "#logs"},
 				"west": {"uv": [12, 0, 14, 7], "rotation": 90, "texture": "#logs"},
-				"up": {"uv": [14, 0, 16, 7], "texture": "#logs"},
 				"down": {"uv": [10, 0, 12, 7], "texture": "#logs"}
 			}
 		},
@@ -38,7 +38,6 @@
 				"east": {"uv": [8, 0, 10, 7], "rotation": 90, "texture": "#logs"},
 				"south": {"uv": [14, 7, 16, 9], "rotation": 90, "texture": "#logs"},
 				"west": {"uv": [12, 0, 14, 7], "rotation": 90, "texture": "#logs"},
-				"up": {"uv": [14, 0, 16, 7], "texture": "#logs"},
 				"down": {"uv": [10, 0, 12, 7], "texture": "#logs"}
 			}
 		}
@@ -60,7 +59,7 @@
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"firstperson_lefthand": {
-			"rotation": [0, 225, 0],
+			"rotation": [0, -135, 0],
 			"translation": [0, 2.5, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
@@ -69,7 +68,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, 225, 0],
+			"rotation": [30, -135, 0],
 			"translation": [1.5, 0.25, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},

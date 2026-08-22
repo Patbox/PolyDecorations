@@ -1,4 +1,6 @@
 {
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "block/lodestone_top",
 		"1": "polydecorations:block/display_case_glass",
@@ -25,8 +27,7 @@
 				"east": {"uv": [0, 0, 12, 12], "texture": "#1"},
 				"south": {"uv": [0, 0, 12, 12], "texture": "#1"},
 				"west": {"uv": [0, 0, 12, 12], "texture": "#1"},
-				"up": {"uv": [0, 0, 12, 12], "texture": "#1"},
-				"down": {"uv": [0, 0, 12, 12], "texture": "#1"}
+				"up": {"uv": [0, 0, 12, 12], "texture": "#1"}
 			}
 		}
 	],
@@ -46,7 +47,7 @@
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"firstperson_lefthand": {
-			"rotation": [0, 225, 0],
+			"rotation": [0, -135, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"ground": {
@@ -54,7 +55,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, 225, 0],
+			"rotation": [30, -135, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},
 		"fixed": {

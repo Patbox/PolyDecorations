@@ -8,6 +8,7 @@ import eu.pb4.factorytools.api.util.LazyItemStack;
 import eu.pb4.factorytools.api.virtualentity.BlockModel;
 import eu.pb4.factorytools.api.virtualentity.ItemDisplayElementUtil;
 import eu.pb4.polydecorations.util.DecorationsSoundEvents;
+import eu.pb4.polymer.resourcepack.extras.api.ResourcePackExtras;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.BlockAwareAttachment;
 import eu.pb4.polymer.virtualentity.api.attachment.HolderAttachment;
@@ -62,7 +63,7 @@ public class TrashCanBlock extends BaseEntityBlock implements FactoryBlock, Barr
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final EnumProperty<OpenState> FORCE_OPEN = EnumProperty.create("force_open", OpenState.class);
     private final ParticleOptions breakingParticle = new ItemParticleOption(ParticleTypes.ITEM, new ItemStackTemplate(Items.STONE, DataComponentPatch.builder()
-            .set(DataComponents.ITEM_MODEL, id("block/trashcan_bin")).build()));
+            .set(DataComponents.ITEM_MODEL, ResourcePackExtras.bridgeModel(id("block/trashcan_bin"))).build()));
 
     public TrashCanBlock(Properties settings) {
         super(settings);

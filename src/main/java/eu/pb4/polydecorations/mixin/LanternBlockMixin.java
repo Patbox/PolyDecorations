@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.mixin;
 
+import eu.pb4.polydecorations.ModCompatStatus;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,7 @@ public abstract class LanternBlockMixin {
 
     @Inject(method = "getStateForPlacement", at = @At("HEAD"), cancellable = true)
     private void swapByDefault(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (!ctx.isSecondaryUseActive() || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
+        if (ModCompatStatus.AURORALANTERNS || !ctx.isSecondaryUseActive() || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
             return;
         }
         var pos = ctx.getClickedPos().relative(ctx.getClickedFace(), -1);
@@ -42,7 +43,7 @@ public abstract class LanternBlockMixin {
     }
     @Inject(method = "getStateForPlacement", at = @At("RETURN"), cancellable = true)
     private void swapNullForWallAttached(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (cir.getReturnValue() != null || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
+        if (ModCompatStatus.AURORALANTERNS || cir.getReturnValue() != null || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
             return;
         }
         var pos = ctx.getClickedPos().relative(ctx.getClickedFace(), -1);

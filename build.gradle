@@ -79,7 +79,7 @@ dependencies {
 	implementation 'eu.pb4:polymer-virtual-entity:0.17.0+26.2-rc-2'
 	implementation include('eu.pb4:common-protection-api:2.0.0')
 	implementation include('eu.pb4:sgui:2.1.0+26.2')
-	implementation include('eu.pb4:map-canvas-api:0.9.0+26.2')
+	implementation include('eu.pb4:map-canvas-api:0.9.1+26.2')
 	implementation include('eu.pb4:factorytools:0.11.0+26.2')
 	implementation include('nl.theepicblock:resource-locator-api:0.8.0-patbox+26.2')
 

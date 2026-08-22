@@ -1,7 +1,9 @@
 {
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
 	"texture_size": [32, 16],
 	"textures": {
-		"particle": "#planks",
+		"particle": "polydecorations:block/sign_post",
 		"planks": "polydecorations:block/sign_post"
 	},
 	"elements": [
@@ -22,7 +24,6 @@
 			"to": [0, 10, 8.5],
 			"faces": {
 				"north": {"uv": [9, 2, 9.5, 5], "texture": "#planks"},
-				"east": {"uv": [8.5, 2, 9, 5], "texture": "#planks"},
 				"south": {"uv": [9, 2, 9.5, 5], "texture": "#planks"},
 				"west": {"uv": [9.5, 2, 10, 5], "texture": "#planks"},
 				"up": {"uv": [9, 1, 9.5, 2], "texture": "#planks"},
@@ -34,7 +35,6 @@
 			"to": [-1, 9, 8.5],
 			"faces": {
 				"north": {"uv": [9.5, 3, 10, 4], "texture": "#planks"},
-				"east": {"uv": [9.5, 3, 10, 4], "texture": "#planks"},
 				"south": {"uv": [9.5, 3, 10, 4], "texture": "#planks"},
 				"west": {"uv": [9.5, 3, 10, 4], "texture": "#planks"},
 				"up": {"uv": [9.5, 3, 10, 4], "texture": "#planks"},
@@ -69,12 +69,12 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [0, 180, 0],
+			"rotation": [0, -180, 0],
 			"translation": [-0.25, 0, 0],
 			"scale": [0.8, 0.8, 0.8]
 		},
 		"head": {
-			"rotation": [0, 180, 0],
+			"rotation": [0, -180, 0],
 			"translation": [0, -4.5, -7]
 		},
 		"fixed": {

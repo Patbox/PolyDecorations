@@ -1,7 +1,8 @@
 {
+	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "#stripped_log",
+		"particle": "block/stripped_oak_log",
 		"stripped_log": "block/stripped_oak_log",
 		"stripped_log_top": "block/stripped_oak_log_top",
 		"log": "block/oak_log",
@@ -17,7 +18,6 @@
 				"east": {"uv": [5, 0, 16, 16], "rotation": 90, "texture": "#stripped_log"},
 				"south": {"uv": [2, 3, 14, 14], "texture": "#stripped_log_top"},
 				"west": {"uv": [5, 0, 16, 16], "rotation": 90, "texture": "#stripped_log"},
-				"up": {"uv": [2, 0, 14, 16], "rotation": 180, "texture": "#stripped_log"},
 				"down": {"uv": [3, 0, 15, 16], "texture": "#stripped_log"}
 			}
 		},
@@ -27,7 +27,6 @@
 			"rotation": {"angle": 22.5, "axis": "z", "origin": [3.4358, 1.69974, 0]},
 			"faces": {
 				"north": {"uv": [9, 0, 16, 2], "texture": "#log_top"},
-				"east": {"uv": [0, 0, 2, 16], "rotation": 90, "texture": "#log"},
 				"south": {"uv": [0, 0, 7, 2], "texture": "#log_top"},
 				"west": {"uv": [6, 0, 8, 16], "rotation": 90, "texture": "#log"},
 				"up": {"uv": [8, 0, 15, 16], "rotation": 180, "texture": "#log"},
@@ -42,7 +41,6 @@
 				"north": {"uv": [0, 0, 7, 2], "texture": "#log_top"},
 				"east": {"uv": [12, 0, 14, 16], "rotation": 90, "texture": "#log"},
 				"south": {"uv": [9, 0, 16, 2], "texture": "#log_top"},
-				"west": {"uv": [0, 0, 2, 16], "rotation": 90, "texture": "#log"},
 				"up": {"uv": [0, 0, 7, 16], "texture": "#log"},
 				"down": {"uv": [8, 0, 15, 16], "texture": "#stripped_log"}
 			}
@@ -64,11 +62,7 @@
 			"to": [11, 12, 16],
 			"faces": {
 				"north": {"uv": [5, 2, 11, 3], "texture": "#stripped_log_top"},
-				"east": {"uv": [10, 0, 11, 16], "rotation": 90, "texture": "#stripped_log"},
-				"south": {"uv": [5, 2, 11, 3], "texture": "#stripped_log_top"},
-				"west": {"uv": [5, 0, 6, 16], "rotation": 90, "texture": "#stripped_log"},
-				"up": {"uv": [5, 0, 11, 16], "texture": "#stripped_log"},
-				"down": {"uv": [5, 0, 11, 16], "texture": "#stripped_log"}
+				"south": {"uv": [5, 2, 11, 3], "texture": "#stripped_log_top"}
 			}
 		},
 		{
@@ -100,7 +94,7 @@
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"firstperson_lefthand": {
-			"rotation": [0, 225, 0],
+			"rotation": [0, -135, 0],
 			"scale": [0.4, 0.4, 0.4]
 		},
 		"ground": {
@@ -108,7 +102,7 @@
 			"scale": [0.25, 0.25, 0.25]
 		},
 		"gui": {
-			"rotation": [30, 225, 0],
+			"rotation": [30, -135, 0],
 			"scale": [0.625, 0.625, 0.625]
 		},
 		"head": {
