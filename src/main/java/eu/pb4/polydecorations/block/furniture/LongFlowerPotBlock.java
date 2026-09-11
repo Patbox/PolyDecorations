@@ -22,6 +22,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -160,7 +161,7 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
                 be.setItem(slot, ItemStack.EMPTY);
 
                 if (!player.addItem(stack)) {
-                    player.drop(stack, false);
+                    player.drop(stack, false, Prediction.SERVER_ONLY);
                 }
                 world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
                 return InteractionResult.SUCCESS_SERVER;
@@ -176,10 +177,6 @@ public class LongFlowerPotBlock extends BaseEntityBlock implements FactoryBlock,
         super.affectNeighborsAfterRemoval(state, world, pos, moved);
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
-    }
 
     @Nullable
     @Override

@@ -22,8 +22,8 @@ public class DecorationsLootTablePatches {
             return;
         }
 
-        var be = lootContext.getParameter(LootContext.BlockEntityTarget.BLOCK_ENTITY.contextParam());
-        if (be.components().has(DecorationsDataComponents.TIED)) {
+        var be = lootContext.getOptional(LootContext.BlockEntityTarget.BLOCK_ENTITY.contextParam());
+        if (be != null && be.components().has(DecorationsDataComponents.TIED)) {
             for (var stack : itemStacks) {
                 if (stack.has(DataComponents.CONTAINER)) {
                     stack.set(DecorationsDataComponents.TIED, Unit.INSTANCE);

@@ -9,6 +9,7 @@
     "BlockMixin",
     "BuiltinRegistriesMixin",
     "CeilingHangingSignBlockMixin",
+    "FabricBlockLootSubProviderAccessor",
     "FaceAttachedHorizontalDirectionalBlockMixin",
     "FlowerPotBlockAccessor",
     "FolderRepositorySourceAccessor",

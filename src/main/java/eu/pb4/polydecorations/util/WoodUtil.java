@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 public class WoodUtil {
     public static List<WoodType> VANILLA = List.of(
             WoodType.OAK, WoodType.SPRUCE, WoodType.BIRCH, WoodType.ACACIA,
-            WoodType.CHERRY, WoodType.JUNGLE, WoodType.DARK_OAK, WoodType.PALE_OAK,
+            WoodType.CHERRY, WoodType.JUNGLE, WoodType.DARK_OAK, WoodType.PALE_OAK, WoodType.POPLAR,
             WoodType.CRIMSON, WoodType.WARPED, WoodType.MANGROVE,
             WoodType.BAMBOO);
 

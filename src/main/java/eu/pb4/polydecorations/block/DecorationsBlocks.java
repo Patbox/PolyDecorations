@@ -203,7 +203,7 @@ public class DecorationsBlocks {
         var bed = Identifier.parse(x.getSerializedName() + "_bed");
         var block = BuiltInRegistries.BLOCK.getValue(bed);
         if (block instanceof BedBlock) {
-            return new SleepingBagBlock(x, BlockBehaviour.Properties.ofFullCopy(block).pushReaction(PushReaction.BLOCK).setId(ResourceKey.create(Registries.BLOCK, id)));
+            return new SleepingBagBlock(x, BlockBehaviour.Properties.ofFullCopy(block).pushReaction(PushReaction.IMMOVEABLE).setId(ResourceKey.create(Registries.BLOCK, id)));
         }
 
         return null;

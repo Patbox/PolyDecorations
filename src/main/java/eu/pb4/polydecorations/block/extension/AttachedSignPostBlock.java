@@ -73,11 +73,6 @@ public class AttachedSignPostBlock extends BaseEntityBlock implements PolymerBlo
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
-    }
-
-    @Override
     public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (world.getBlockEntity(pos) instanceof SignPostBlockEntity be && player.mayBuild()) {
             return be.onUse(player, hit.getLocation().y() - (int) hit.getLocation().y() >= 0.5, hit);

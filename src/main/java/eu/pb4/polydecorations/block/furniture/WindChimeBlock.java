@@ -69,11 +69,6 @@ public class WindChimeBlock extends BaseEntityBlock implements FactoryBlock {
         return super.useWithoutItem(state, world, pos, player, hit);
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
-    }
-
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

@@ -58,8 +58,8 @@ public record ComponentApplyCraftingRecipe(CommonInfo commonInfo, CraftingBookIn
             return false;
         }
 
-        for (var comp : this.componentPatch.entrySet()) {
-            if (!Objects.equals(input.get(comp.getKey()), comp.getValue().orElse(null))) {
+        for (var comp : this.componentPatch.split().added()) {
+            if (!Objects.equals(input.get(comp.type()), comp.value())) {
                 return true;
             }
         }

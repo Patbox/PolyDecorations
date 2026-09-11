@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Lifecycle;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.datagen.CustomAssetProvider;
@@ -13,21 +14,24 @@ import eu.pb4.polydecorations.mixin.LanguageAccessor;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.polymer.resourcepack.api.ResourcePackBuilder;
 import eu.pb4.polymer.resourcepack.extras.api.format.atlas.AtlasAsset;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.fabricmc.fabric.api.datagen.v1.recipe.FabricRecipeOutput;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.advancements.triggers.ImpossibleTrigger;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
+import net.minecraft.core.registries.BootstrapRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackSelectionConfig;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
@@ -50,7 +54,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ModdedCompat {
     private static final PackLocationInfo PACK_LOCATION_INFO = new PackLocationInfo("$polydecorations", Component.literal("PolyDecorations Dynamic Compat Data"), PackSource.BUILT_IN, Optional.empty());
@@ -126,38 +132,36 @@ public class ModdedCompat {
         var registryAccess = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
         var ops = registryAccess.createSerializationContext(JsonOps.INSTANCE);
 
-        var recipeOutput = new RecipeOutput() {
-            public void accept(ResourceKey<Recipe<?>> resourceKey, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
-                this.saveRecipe(resourceKey, recipe);
-                if (advancementHolder != null) {
-                    this.saveAdvancement(advancementHolder);
-                }
+        FabricBootstrapContext<Recipe<?>> recipes = new RecipeBootstrapContext(registryAccess, identifier -> Identifier.fromNamespaceAndPath(ModInit.ID, identifier.getPath()));
+        FabricBootstrapContext<Advancement> advancements = new FabricBootstrapContext<>(registryAccess, Registries.ADVANCEMENT);
+
+        RecipesProvider.woodRecipeProvider(WoodUtil.MODDED, recipes, advancements).buildRecipes();
+        new LootTables.WoodLootTables(WoodUtil.MODDED, new LootTableSubProvider.Context() {
+            @Override
+            public Holder.Reference<LootTable> accept(ResourceKey<LootTable> key, LootTable.Builder value) {
+                map.put("data/" + key.identifier().getNamespace() + "/loot_table/" + key.identifier().getPath() + ".json",
+                        LootTable.DIRECT_CODEC.encodeStart(ops, value.build()).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
+
+                return null;
             }
 
-            @SuppressWarnings("removal")
-            public Advancement.Builder advancement() {
-                return net.minecraft.advancements.Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+            @Override
+            public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> key) {
+                return registryAccess.lookupOrThrow(key);
             }
 
-            public void includeRootAdvancement() {
-                AdvancementHolder advancementHolder = net.minecraft.advancements.Advancement.Builder.recipeAdvancement().addCriterion("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).build(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
-                this.saveAdvancement(advancementHolder);
+            @Override
+            public <S> Stream<Holder.Reference<S>> listContextElements(ResourceKey<? extends Registry<? extends S>> key) {
+                return registryAccess.lookupOrThrow(key).listElements();
             }
+        }).run();
 
-            private void saveRecipe(ResourceKey<Recipe<?>> resourceKey, Recipe<?> recipe) {
-                map.put("data/" + resourceKey.identifier().getNamespace() + "/recipe/" + resourceKey.identifier().getPath() + ".json", Recipe.CODEC.encodeStart(ops, recipe).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
-            }
+        recipes.entries().forEach((key, val) -> {
+            map.put("data/" + key.identifier().getNamespace() + "/recipe/" + key.identifier().getPath() + ".json", Recipe.DIRECT_CODEC.encodeStart(ops, val).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
+        });
 
-            private void saveAdvancement(AdvancementHolder advancementHolder) {
-                var resourceKey = advancementHolder.id();
-                map.put("data/" + resourceKey.getNamespace() + "/advancement/" + resourceKey.getPath() + ".json", Advancement.CODEC.encodeStart(ops, advancementHolder.value()).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
-            }
-        };
-
-        RecipesProvider.woodRecipeProvider(WoodUtil.MODDED, registryAccess, recipeOutput).buildRecipes();
-        new LootTables.WoodLootTables(WoodUtil.MODDED, registryAccess).generate((key, builder) -> {
-            map.put("data/" + key.identifier().getNamespace() + "/loot_table/" + key.identifier().getPath() + ".json",
-                    LootTable.DIRECT_CODEC.encodeStart(ops, builder.build()).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
+        advancements.entries().forEach((key, val) -> {
+            map.put("data/" + key.identifier().getNamespace() + "/advancement/" + key.identifier().getPath() + ".json", Advancement.CODEC.encodeStart(ops, val).getOrThrow().toString().getBytes(StandardCharsets.UTF_8));
         });
 
         var list = new ArrayList<TagEntry>();
@@ -252,19 +256,75 @@ public class ModdedCompat {
                         PACK_LOCATION_INFO,
                         new Pack.ResourcesSupplier() {
                             @Override
-                            public PackResources openPrimary(PackLocationInfo packLocationInfo) {
+                            public PackMetadataResources openMetadata(PackLocationInfo location) {
                                 return resources;
                             }
 
                             @Override
-                            public PackResources openFull(PackLocationInfo packLocationInfo, Pack.Metadata metadata) {
-                                return resources;
+                            public Stream<PackResources> openResources(PackLocationInfo location, Pack.Metadata metadata) {
+                                return Stream.of(resources);
                             }
                         },
                         new Pack.Metadata(Component.literal("PolyDecorations Dynamic Compat Data"), PackCompatibility.COMPATIBLE, FeatureFlagSet.of(), List.of()),
                         new PackSelectionConfig(true, Pack.Position.BOTTOM, true)
                 ));
             }
+        }
+    }
+
+
+    private static class FabricBootstrapContext<T> implements BootstrapContext<T> {
+        private final HolderLookup.Provider registries;
+        private final ResourceKey<? extends Registry<T>> registryKey;
+        private final Map<ResourceKey<T>, T> entries = new LinkedHashMap<>();
+        private final BootstrapRegistry<T> entryLookup;
+
+        private FabricBootstrapContext(HolderLookup.Provider registries, ResourceKey<? extends Registry<T>> registryKey) {
+            this.registries = registries;
+            this.registryKey = registryKey;
+            this.entryLookup = new BootstrapRegistry<>(registryKey, Lifecycle.stable());
+        }
+
+        @Override
+        public Holder.Reference<T> register(ResourceKey<T> key, T value) {
+            if (entries.putIfAbsent(key, value) != null) {
+                throw new IllegalStateException("Duplicate registration for " + key);
+            }
+
+            return entryLookup.getOrThrow(key);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> key) {
+            if (key.equals(registryKey)) {
+                return (HolderGetter<S>) entryLookup;
+            }
+
+            return registries.lookupOrThrow(key);
+        }
+
+        @Override
+        public <S> Stream<Holder.Reference<S>> listContextElements(ResourceKey<? extends Registry<? extends S>> key) {
+            return registries.lookupOrThrow(key).listElements();
+        }
+
+        public Map<ResourceKey<T>, T> entries() {
+            return entries;
+        }
+    }
+
+    private static final class RecipeBootstrapContext extends FabricBootstrapContext<Recipe<?>> implements FabricRecipeOutput {
+        private final Function<Identifier, Identifier> recipeIdentifier;
+
+        private RecipeBootstrapContext(HolderLookup.Provider registries, Function<Identifier, Identifier> recipeIdentifier) {
+            super(registries, Registries.RECIPE);
+            this.recipeIdentifier = recipeIdentifier;
+        }
+
+        @Override
+        public Identifier getRecipeIdentifier(Identifier recipeId) {
+            return recipeIdentifier.apply(recipeId);
         }
     }
 }

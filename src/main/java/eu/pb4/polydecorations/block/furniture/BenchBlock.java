@@ -135,7 +135,7 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
         if (player.getMainHandItem().is(ItemTags.AXES) && state.getValue(HAS_REST) && CommonProtection.canBreakBlock(world, pos, player.nameAndId(), player) && player.mayBuild()) {
             world.setBlockAndUpdate(pos, state.setValue(HAS_REST, false));
             player.getMainHandItem().hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
-            world.playSound(null, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
+            world.playSound(null, pos, SoundEvents.AXE_STRIP.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
             return InteractionResult.SUCCESS_SERVER;
         } else if (!player.isShiftKeyDown() && SeatEntity.create(world, pos, 1 / 16f, state.getValue(FACING), player)) {
             return InteractionResult.SUCCESS_SERVER;
@@ -178,11 +178,6 @@ public class BenchBlock extends Block implements FactoryBlock, QuickWaterloggabl
             }
         }
         return state;
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return null;
     }
 
     @Override

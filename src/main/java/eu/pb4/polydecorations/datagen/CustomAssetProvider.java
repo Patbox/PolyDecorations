@@ -284,13 +284,13 @@ public class CustomAssetProvider implements DataProvider {
         var jar = PolymerCommonUtils.getClientJarRoot();
         var b = new ByteArrayOutputStream();
 
-        blockAtlas.palettedPermutations(id("palette/wood/oak"), c -> {
+        blockAtlas.palettedPermutations(id("wood/oak"), c -> {
             c.texture(id("block/sign_post"));
             c.texture(id("block/mailbox_front"));
             for (var type : types) {
                 if (type == WoodType.BAMBOO) continue;
 
-                c.permutation(type.name().replace(':', '/'), id("palette/wood/" + type.name().replace(':', '/')));
+                c.permutation(type.name().replace(':', '/'), id("wood/" + type.name().replace(':', '/')));
             }
         });
 
@@ -320,7 +320,7 @@ public class CustomAssetProvider implements DataProvider {
                         palette.setRGB(i, 0, input.getRGB(pos[0], pos[1]));
                     }
                     ImageIO.write(palette, "png", b);
-                    assetWriter.accept("assets/polydecorations/textures/palette/wood/" + wood.name().replace(':', '/') + ".png", b.toByteArray());
+                    assetWriter.accept("assets/polydecorations/textures/palettes/wood/" + wood.name().replace(':', '/') + ".png", b.toByteArray());
                     b.reset();
                 } catch (Throwable e) {
                     ModInit.LOGGER.warn("Failed to find planks texture for '" + wood.name() + "'", e);

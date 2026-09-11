@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -89,25 +90,6 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         super.loadAdditional(view);
         this.upperText = view.read("upper",  Sign.CODEC).orElseGet(Sign::of);
         this.lowerText = view.read("lower",  Sign.CODEC).orElseGet(Sign::of);
-
-        if (this.upperText.text.getMessage(1, false).getContents() instanceof PlainTextContents.LiteralContents(String string) && string.equals("\"\"")) {
-            var tmp = this.upperText.text;
-            this.upperText = this.upperText.withText(new SignText()
-                    .setColor(tmp.getColor())
-                    .setHasGlowingText(tmp.hasGlowingText())
-                    .setMessage(0, ComponentSerialization.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(tmp.getMessage(0, false).getString()))
-                            .result().map(Pair::getFirst).orElse(tmp.getMessage(0, false)))
-            );
-        }
-
-        if (this.lowerText.text.getMessage(1, false).getContents() instanceof PlainTextContents.LiteralContents(String string) && string.equals("\"\"")) {
-            var tmp = this.lowerText.text;
-            this.lowerText = this.lowerText.withText(new SignText()
-                    .setColor(tmp.getColor())
-                    .setHasGlowingText(tmp.hasGlowingText())
-                    .setMessage(0, ComponentSerialization.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(tmp.getMessage(0, false).getString()))
-                            .result().map(Pair::getFirst).orElse(tmp.getMessage(0, false)))            );
-        }
 
         if (this.model != null) {
             this.model.update(this.upperText, this.lowerText);
@@ -168,14 +150,14 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         if (player.getMainHandItem().getItem() instanceof SignApplicator item) {
             if (item.canApplyToSign(getText(upper).text, player.getMainHandItem(), player)) {
                 var fake = Fake.INSTANCE;
-                fake.setText(getText(upper).text, false);
+                fake.setText(getText(upper).text, SignTextSlot.FRONT);
                 fake.setWaxed(getText(upper).waxed);
                 try {
-                    if (item.tryApplyToSign(level, fake, false, player.getMainHandItem(), player)) {
+                    if (item.tryApplyToSign(level, fake, SignTextSlot.FRONT, player.getMainHandItem(), player)) {
                         if (!player.isCreative()) {
                             player.getMainHandItem().shrink(1);
                         }
-                        this.setText(upper, getText(upper).withText(fake.getText(false)).withWaxed(fake.isWaxed()));
+                        this.setText(upper, getText(upper).withText(fake.getText(SignTextSlot.FRONT)).withWaxed(fake.isWaxed()));
                         return InteractionResult.SUCCESS;
                     };
                 } catch (Throwable e) {
@@ -201,18 +183,18 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
 
     public record Sign(SignText text, Item item, float yaw, boolean waxed, boolean flip) {
         public static final Codec<Sign> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                SignText.DIRECT_CODEC.optionalFieldOf("text", new SignText()).forGetter(Sign::text),
+                SignText.CODEC.optionalFieldOf("text", SignText.EMPTY).forGetter(Sign::text),
                 BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("item", Items.AIR).forGetter(Sign::item),
                 Codec.FLOAT.optionalFieldOf("yaw", 0f).forGetter(Sign::yaw),
                 Codec.BOOL.optionalFieldOf("waxed", false).forGetter(Sign::waxed),
                 Codec.BOOL.optionalFieldOf("flip", false).forGetter(Sign::flip)
         ).apply(instance, Sign::new));
         public static Sign of() {
-            return new Sign(new SignText(), Items.AIR, 0, false, false);
+            return new Sign(SignText.EMPTY, Items.AIR, 0, false, false);
         }
 
         public static Sign of(Item item, float yaw, boolean flip) {
-            return new Sign(new SignText(), item, yaw, false, flip);
+            return new Sign(SignText.EMPTY, item, yaw, false, flip);
         }
 
         public Sign withText(SignText text) {
@@ -232,11 +214,11 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
         }
 
         public Component getText() {
-            return Component.empty().append(this.text.getMessage(0, false)).withColor(text.getColor().getTextColor());
+            return Component.empty().append(this.text.getMessages(false).getFirst()).withColor(text.getColor().getTextColor());
         }
 
         public Component getUncoloredText() {
-            return this.text.getMessage(0, false);
+            return this.text.getMessages(false).getFirst();
         }
 
         public Sign withFlip(boolean flip) {
@@ -299,7 +281,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
             var sign = getter.get();
             this.setColor(sign.text().getColor());
             var txt = Component.empty().append(Component.literal("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")).withStyle(ChatFormatting.BLACK, ChatFormatting.STRIKETHROUGH);
-            this.setLine(0, sign.text.getMessage(0, false));
+            this.setLine(0, sign.text.getMessages(false).getFirst());
             this.setLine(1, txt);
             this.setLine(2, txt);
             this.setLine(3, txt);
@@ -309,7 +291,7 @@ public class SignPostBlockEntity extends BlockEntity implements BlockEntityExtra
 
         @Override
         public void onManualClose() {
-            setter.accept(getter.get().withText(getter.get().text.setMessage(0, this.getLine(0))));
+            setter.accept(getter.get().withText(getter.get().text.asMutable().setLine(0, this.getLine(0)).asImmutable()));
             super.onManualClose();
         }
 

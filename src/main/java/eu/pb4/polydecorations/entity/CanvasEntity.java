@@ -38,6 +38,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -337,7 +338,7 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
             }
         }
 
-        serverPlayer.swing(InteractionHand.MAIN_HAND, true);
+        serverPlayer.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
     }
 
     @Override

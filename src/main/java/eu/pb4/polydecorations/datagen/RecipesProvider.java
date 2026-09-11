@@ -13,6 +13,7 @@ import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.triggers.Criterion;
@@ -26,6 +27,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
@@ -51,8 +53,8 @@ public class RecipesProvider extends FabricRecipeProvider {
     }
 
     @Override
-    protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, RecipeOutput exporter) {
-        return new RecipeProvider(registryLookup, exporter) {
+    protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+        return new RecipeProvider(recipes, advancements) {
             @Override
             public void buildRecipes() {
                 var itemWrap = registryLookup.lookupOrThrow(Registries.ITEM);
@@ -60,7 +62,7 @@ public class RecipesProvider extends FabricRecipeProvider {
                 //noinspection unchecked
                 var dyes = (List<DyeItem>) (Object) Items.DYE.asList();
 
-                woodRecipeProvider(WoodUtil.VANILLA, registryLookup, exporter).buildRecipes();
+                woodRecipeProvider(WoodUtil.VANILLA, recipes, advancements).buildRecipes();
 
                 DecorationsItems.SLEEPING_BAG.forEach(((color, item) -> {
                     var wool = BuiltInRegistries.ITEM.getValue(Identifier.parse(color.getSerializedName() + "_wool"));
@@ -309,7 +311,7 @@ public class RecipesProvider extends FabricRecipeProvider {
             }
 
             private void acceptWithUnlock(RecipeOutput output, ResourceKey<Recipe<?>> resourceKey, CraftingRecipe wax, Criterion<?> criterion) {
-                var advancement = output.advancement().addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceKey))
+                var advancement = output.advancement()
                         .rewards(AdvancementRewards.Builder.recipe(resourceKey))
                         .requirements(AdvancementRequirements.Strategy.OR)
                         .addCriterion("item", criterion);
@@ -318,8 +320,8 @@ public class RecipesProvider extends FabricRecipeProvider {
         };
     }
     
-    public static RecipeProvider woodRecipeProvider(List<WoodType> woodTypes, HolderLookup.Provider registryLookup, RecipeOutput exporter) {
-        return new RecipeProvider(registryLookup, exporter) {
+    public static RecipeProvider woodRecipeProvider(List<WoodType> woodTypes, BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+        return new RecipeProvider(recipes, advancements) {
             @Override
             public void buildRecipes() {
                 getValues(DecorationsItems.WOODEN_STATUE, woodTypes, (type, item) -> {

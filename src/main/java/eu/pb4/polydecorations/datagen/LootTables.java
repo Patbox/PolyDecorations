@@ -4,12 +4,19 @@ import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.WindChimeItem;
 import eu.pb4.polydecorations.mixin.BlockLootSubProviderAccessor;
+import eu.pb4.polydecorations.mixin.FabricBlockLootSubProviderAccessor;
 import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
+import net.fabricmc.fabric.impl.datagen.loot.FabricLootTableContext;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -25,7 +32,7 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import static eu.pb4.polydecorations.util.DecorationsUtil.getValues;
 
@@ -52,7 +60,7 @@ public class LootTables extends FabricBlockLootSubProvider {
         this.add(DecorationsBlocks.COPPER_CAMPFIRE, (block) -> {
             return this.createSilkTouchDispatchTable(block,
                     this.applyExplosionCondition(block, LootItem.lootTableItem(Items.CHARCOAL)
-                            .apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
+                            .apply(SetItemCountFunction.setCount(ContextIntProviders.exactly(2))))
             );
         });
         this.dropSelf(DecorationsBlocks.GLOBE);
@@ -65,7 +73,7 @@ public class LootTables extends FabricBlockLootSubProvider {
         this.dropSelf(DecorationsBlocks.TRASHCAN);
         this.dropSelf(DecorationsBlocks.ROPE);
         this.add(DecorationsBlocks.WIND_CHIME, (drop) -> LootTable.lootTable().withPool(
-                this.applyExplosionCondition(drop, LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                this.applyExplosionCondition(drop, LootPool.lootPool().setRolls(ContextIntProviders.exactly(1))
                         .add(LootItem.lootTableItem(drop).apply(CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY)
                                 .include(DecorationsDataComponents.WIND_CHIME_COLOR))))));
     }
@@ -73,15 +81,35 @@ public class LootTables extends FabricBlockLootSubProvider {
     @Override
     public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
         super.generate(biConsumer);
-        new WoodLootTables(WoodUtil.VANILLA, this.registries).generate(biConsumer);
+        var registries = ((FabricBlockLootSubProviderAccessor) LootTables.this).getRegistriesFuture().join();
+
+        new WoodLootTables(WoodUtil.VANILLA, new Context() {
+            @Override
+            public Holder.Reference<LootTable> accept(ResourceKey<LootTable> key, LootTable.Builder value) {
+                biConsumer.accept(key, value);
+                return Holder.Reference.createStandAlone(registries.lookupOrThrow(Registries.LOOT_TABLE), key);
+            }
+
+            @Override
+            public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> key) {
+                return registries.lookupOrThrow(key);
+            }
+
+            @Override
+            public <S> Stream<Holder.Reference<S>> listContextElements(ResourceKey<? extends Registry<? extends S>> key) {
+                return registries.lookupOrThrow(key).listElements();
+            }
+        }).run();
     }
 
     public static class WoodLootTables extends BlockLootSubProvider {
         private final List<WoodType> woodTypes;
+        private final LootTableSubProvider.Context output;
 
-        public WoodLootTables(List<WoodType> woodTypeList, HolderLookup.Provider provider) {
-            super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), provider);
+        public WoodLootTables(List<WoodType> woodTypeList, LootTableSubProvider.Context output) {
+            super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), output);
             this.woodTypes = woodTypeList;
+            this.output = output;
         }
 
         @Override
@@ -96,11 +124,11 @@ public class LootTables extends FabricBlockLootSubProvider {
         }
 
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+        public void run() {
             this.generate();
             for (Map.Entry<ResourceKey<LootTable>, LootTable.Builder> entry : ((BlockLootSubProviderAccessor) this).getMap().entrySet()) {
                 ResourceKey<LootTable> registryKey = entry.getKey();
-                biConsumer.accept(registryKey, entry.getValue());
+                output.accept(registryKey, entry.getValue());
             }
         }
     }
