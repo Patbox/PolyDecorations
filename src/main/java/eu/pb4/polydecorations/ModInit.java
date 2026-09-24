@@ -52,6 +52,7 @@ public class ModInit implements ModInitializer {
 			LOGGER.warn("=====================================================");
 		}
 
+		FeatureResourceCondition.register();
 		DecorationsBlocks.register();
 		DecorationsBlockEntities.register();
 		DecorationsModels.register();

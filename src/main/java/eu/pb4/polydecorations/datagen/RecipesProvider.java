@@ -53,7 +53,9 @@ public class RecipesProvider extends FabricRecipeProvider {
     }
 
     @Override
-    protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+    protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, BootstrapContext<Recipe<?>> recipeContext, BootstrapContext<Advancement> advancementContext) {
+        var recipes = FeatureConditions.recipes(recipeContext);
+        var advancements = FeatureConditions.recipes(advancementContext);
         return new RecipeProvider(recipes, advancements) {
             @Override
             public void buildRecipes() {

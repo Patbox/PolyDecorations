@@ -79,7 +79,9 @@ public class LootTables extends FabricBlockLootSubProvider {
     }
 
     @Override
-    public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+    public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer = (key, builder) ->
+                this.withConditions(output, FeatureConditions.lootTable(key.identifier())).accept(key, builder);
         super.generate(biConsumer);
         var registries = ((FabricBlockLootSubProviderAccessor) LootTables.this).getRegistriesFuture().join();
 

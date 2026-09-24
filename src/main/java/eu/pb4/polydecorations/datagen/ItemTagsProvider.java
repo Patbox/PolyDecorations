@@ -6,8 +6,10 @@ import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
@@ -94,6 +96,11 @@ class ItemTagsProvider extends FabricTagsProvider.ItemTagsProvider {
                 .add(get(DecorationsItems.CARDBOARD_BOX))
                 .addOptionalTag(ItemTags.SHULKER_BOXES)
         ;
+    }
+
+    @Override
+    protected TagAppender<Item> tag(TagKey<Item> tag) {
+        return FeatureConditions.optionalEntries(super.tag(tag));
     }
 
     // Temp workaround

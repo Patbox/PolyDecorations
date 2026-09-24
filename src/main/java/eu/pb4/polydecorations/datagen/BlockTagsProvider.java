@@ -7,8 +7,10 @@ import eu.pb4.polydecorations.util.WoodUtil;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -118,6 +120,11 @@ public class BlockTagsProvider extends FabricTagsProvider.BlockTagsProvider {
                 .addOptionalTag(DecorationsBlockTags.STUMPS);
     }
 
+
+    @Override
+    protected TagAppender<Block> tag(TagKey<Block> tag) {
+        return FeatureConditions.optionalEntries(super.tag(tag));
+    }
 
     // Temp workaround
     private ResourceKey<Block> get(Block item) {
