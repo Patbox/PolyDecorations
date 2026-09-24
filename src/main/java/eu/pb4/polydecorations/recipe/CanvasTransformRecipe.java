@@ -157,25 +157,25 @@ public class CanvasTransformRecipe extends ShapelessRecipe {
 
     @Override
     public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
-        NonNullList<ItemStack> defaultedList = NonNullList.withSize(input.size(), ItemStack.EMPTY);
+        var remainingItems = CraftingRecipe.defaultCraftingReminder(input);
 
-        for (int i = 0; i < defaultedList.size(); ++i) {
+        for (int i = 0; i < input.size(); i++) {
             var stack = input.getItem(i);
-            var remainer = stack.getCraftingRemainder();
-            var outStack = ItemStack.EMPTY;
-            if (remainer != null && stack.isDamageableItem()) {
-                outStack = stack.copy();
-                outStack.setDamageValue(outStack.getDamageValue() + 1);
-                if (outStack.getDamageValue() >= outStack.getMaxDamage()) {
-                    outStack = ItemStack.EMPTY;
+
+            if (stack.isDamageableItem()) {
+                var remainder = stack.copyWithCount(1);
+                var newDamage = remainder.getDamageValue() + 1;
+
+                if (newDamage < remainder.getMaxDamage()) {
+                    remainder.setDamageValue(newDamage);
+                    remainingItems.set(i, remainder);
+                } else {
+                    remainingItems.set(i, ItemStack.EMPTY);
                 }
-            } else if (stack.is(Items.WATER_BUCKET)) {
-                outStack = stack.copy();
             }
-            defaultedList.set(i, outStack);
         }
 
-        return defaultedList;
+        return remainingItems;
     }
 
     @Override
