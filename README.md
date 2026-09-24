@@ -14,6 +14,30 @@ that don't want to install mods on the client.
 This mod was heavily inspired by [Aurora's Decorations](https://modrinth.com/mod/aurorasdecorations) mod,
 which you should try out/use instead if you aren't looking for server side mod!
 
+## Configuration
+Features can be configured in `config/polydecorations.json` (created on first start, with everything enabled).
+Every feature can be set to one of these values:
+- `true` - enabled (default).
+- `false` - its recipes are removed, but its blocks and items still exist, so nothing gets removed from existing worlds.
+  Features without recipes (`wall_lanterns`, `fence_leads`) stop working instead.
+- `"hard"` - removed completely. Its blocks, items and entities aren't registered, it doesn't use
+  any Polymer block states and its assets aren't added to the resource pack.
+  Blocks and items of this feature are removed from existing worlds!
+
+```json
+{
+  "features": {
+    "bench": false,
+    "statues": "hard"
+  }
+}
+```
+
+Features: `canvas`, `mailbox`, `sign_post`, `rope`, `hammer`, `trowel`, `wall_lanterns` (placing lanterns on walls),
+`fence_leads` (tying a lead to a fence without a leashed mob), `shelf`, `bench`, `table`, `tool_rack`, `stump`, `sleeping_bag`,
+`brazier`, `copper_campfire`, `globe`, `display_case`, `flower_pots`, `ghost_lights`, `trashcan`, `basket`, `cardboard_box`,
+`wind_chime`, `statues` and `tied_containers` (tying containers with string to hide their contents).
+
 ## Extra mods you might want to use!
 
 ### Polymer AutoHost
