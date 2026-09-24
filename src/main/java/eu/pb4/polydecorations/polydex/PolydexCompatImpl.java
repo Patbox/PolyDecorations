@@ -19,7 +19,9 @@ import net.minecraft.world.item.crafting.RecipeType;
 
 public class PolydexCompatImpl {
     public static void register() {
-        HoverDisplayBuilder.register(DecorationsBlocks.DISPLAY_CASE, PolydexCompatImpl::replaceName);
+        if (DecorationsBlocks.DISPLAY_CASE != null) {
+            HoverDisplayBuilder.register(DecorationsBlocks.DISPLAY_CASE, PolydexCompatImpl::replaceName);
+        }
     }
 
     private static void replaceName(HoverDisplayBuilder builder) {

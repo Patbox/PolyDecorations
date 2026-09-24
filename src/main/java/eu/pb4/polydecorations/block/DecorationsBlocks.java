@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.block;
 
+import eu.pb4.polydecorations.DecorationsFeature;
 import eu.pb4.polydecorations.ModInit;
 import eu.pb4.polydecorations.block.extension.AttachedSignPostBlock;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
@@ -44,66 +45,66 @@ import static eu.pb4.polydecorations.ModInit.id;
 
 public class DecorationsBlocks {
     private static final List<Block> BLOCKS = new ArrayList<>();
-    public static final WallAttachedLanternBlock WALL_LANTERN = register("wall_lantern", (LanternBlock) Blocks.LANTERN, WallAttachedLanternBlock::new);
-    public static final WallAttachedLanternBlock WALL_SOUL_LANTERN = register("wall_soul_lantern", (LanternBlock) Blocks.SOUL_LANTERN, WallAttachedLanternBlock::new);
+    public static final WallAttachedLanternBlock WALL_LANTERN = DecorationsFeature.WALL_LANTERNS.isRegistered() ? register("wall_lantern", (LanternBlock) Blocks.LANTERN, WallAttachedLanternBlock::new) : null;
+    public static final WallAttachedLanternBlock WALL_SOUL_LANTERN = DecorationsFeature.WALL_LANTERNS.isRegistered() ? register("wall_soul_lantern", (LanternBlock) Blocks.SOUL_LANTERN, WallAttachedLanternBlock::new) : null;
 
-    public static WeatheringCopperCollection<Block> WALL_COPPER_LANTERNS = registerRelativeCopper("copper_wall_lantern", Blocks.COPPER_LANTERN,
+    public static WeatheringCopperCollection<Block> WALL_COPPER_LANTERNS = DecorationsFeature.WALL_LANTERNS.isRegistered() ? registerRelativeCopper("copper_wall_lantern", Blocks.COPPER_LANTERN,
             (settings, block) -> new WallAttachedLanternBlock(settings, (LanternBlock) block),
             (level, settings, block) -> new WallAttachedOxidizableLanternBlock(settings, (WeatheringLanternBlock) block),
             (level, block) -> BlockBehaviour.Properties.ofFullCopy(block)
-    );
+    ) : null;
 
-    public static final BrazierBlock BRAZIER = register("brazier", Blocks.LANTERN, (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
+    public static final BrazierBlock BRAZIER = DecorationsFeature.BRAZIER.isRegistered() ? register("brazier", Blocks.LANTERN, (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
                 return x.getValue(BrazierBlock.LIT) ? Blocks.CAMPFIRE.defaultBlockState().getLightEmission() : 0;
             }))
 
-    );
-    public static final BrazierBlock SOUL_BRAZIER = register("soul_brazier", Blocks.SOUL_LANTERN, (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
+    ) : null;
+    public static final BrazierBlock SOUL_BRAZIER = DecorationsFeature.BRAZIER.isRegistered() ? register("soul_brazier", Blocks.SOUL_LANTERN, (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
                 return x.getValue(BrazierBlock.LIT) ? Blocks.SOUL_CAMPFIRE.defaultBlockState().getLightEmission() : 0;
             }))
-    );
+    ) : null;
 
-    public static final BrazierBlock COPPER_BRAZIER = register("copper_brazier", Blocks.COPPER_LANTERN.weathering().unaffected(), (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
+    public static final BrazierBlock COPPER_BRAZIER = DecorationsFeature.BRAZIER.isRegistered() ? register("copper_brazier", Blocks.COPPER_LANTERN.weathering().unaffected(), (settings, ignored) -> new BrazierBlock(settings.noOcclusion().lightLevel(x -> {
                 return x.getValue(BrazierBlock.LIT) ? Blocks.CAMPFIRE.defaultBlockState().getLightEmission() : 0;
             }))
-    );
+    ) : null;
 
-    public static final PolymerCampfireBlock COPPER_CAMPFIRE = register("copper_campfire", Blocks.CAMPFIRE, (settings, block) -> new PolymerCampfireBlock(true, 1, settings));
+    public static final PolymerCampfireBlock COPPER_CAMPFIRE = DecorationsFeature.COPPER_CAMPFIRE.isRegistered() ? register("copper_campfire", Blocks.CAMPFIRE, (settings, block) -> new PolymerCampfireBlock(true, 1, settings)) : null;
 
-    public static final GlobeBlock GLOBE = register("globe", BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion(), GlobeBlock::new);
-    public static final RopeBlock ROPE = register("rope", BlockBehaviour.Properties.of().strength(1f).sound(SoundType.COBWEB).instabreak().noOcclusion(), RopeBlock::new);
-    public static final DisplayCaseBlock DISPLAY_CASE = register("display_case", BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).noOcclusion(), DisplayCaseBlock::new);
-    public static final WindChimeBlock WIND_CHIME = register("wind_chime", BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).noOcclusion(), WindChimeBlock::new);
-    public static final TrashCanBlock TRASHCAN = register("trashcan", settings -> new TrashCanBlock(settings
-            .mapColor(MapColor.METAL).strength(3.5F).sound(SoundType.LANTERN).noOcclusion()));
+    public static final GlobeBlock GLOBE = DecorationsFeature.GLOBE.isRegistered() ? register("globe", BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion(), GlobeBlock::new) : null;
+    public static final RopeBlock ROPE = DecorationsFeature.ROPE.isRegistered() ? register("rope", BlockBehaviour.Properties.of().strength(1f).sound(SoundType.COBWEB).instabreak().noOcclusion(), RopeBlock::new) : null;
+    public static final DisplayCaseBlock DISPLAY_CASE = DecorationsFeature.DISPLAY_CASE.isRegistered() ? register("display_case", BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).noOcclusion(), DisplayCaseBlock::new) : null;
+    public static final WindChimeBlock WIND_CHIME = DecorationsFeature.WIND_CHIME.isRegistered() ? register("wind_chime", BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).noOcclusion(), WindChimeBlock::new) : null;
+    public static final TrashCanBlock TRASHCAN = DecorationsFeature.TRASHCAN.isRegistered() ? register("trashcan", settings -> new TrashCanBlock(settings
+            .mapColor(MapColor.METAL).strength(3.5F).sound(SoundType.LANTERN).noOcclusion())) : null;
 
-    public static final PickableItemContainerBlock BASKET = register("basket", settings -> new BasketBlock(settings
+    public static final PickableItemContainerBlock BASKET = DecorationsFeature.BASKET.isRegistered() ? register("basket", settings -> new BasketBlock(settings
             .mapColor(MapColor.WOOD).strength(0.5F)
             .ignitedByLava()
-            .sound(SoundType.SCAFFOLDING).noOcclusion()));
+            .sound(SoundType.SCAFFOLDING).noOcclusion())) : null;
 
-    public static final PickableItemContainerBlock CARDBOARD_BOX = register("cardboard_box", settings -> new PickableItemContainerBlock(settings
+    public static final PickableItemContainerBlock CARDBOARD_BOX = DecorationsFeature.CARDBOARD_BOX.isRegistered() ? register("cardboard_box", settings -> new PickableItemContainerBlock(settings
             .mapColor(MapColor.WOOD).strength(0.4F)
             .ignitedByLava()
-            .sound(DecorationsSoundEvents.CARDBOARD).noOcclusion(), DecorationsSoundEvents.CARDBOARD_BOX_OPEN, DecorationsSoundEvents.CARDBOARD_BOX_CLOSE));
+            .sound(DecorationsSoundEvents.CARDBOARD).noOcclusion(), DecorationsSoundEvents.CARDBOARD_BOX_OPEN, DecorationsSoundEvents.CARDBOARD_BOX_CLOSE)) : null;
 
-    public static final LargeFlowerPotBlock LARGE_FLOWER_POT = register("large_flower_pot", settings -> new LargeFlowerPotBlock(settings
-            .mapColor(MapColor.COLOR_ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).noOcclusion()));
+    public static final LargeFlowerPotBlock LARGE_FLOWER_POT = DecorationsFeature.FLOWER_POTS.isRegistered() ? register("large_flower_pot", settings -> new LargeFlowerPotBlock(settings
+            .mapColor(MapColor.COLOR_ORANGE).instrument(NoteBlockInstrument.BASEDRUM).strength(1.25F).noOcclusion())) : null;
 
-    public static final LongFlowerPotBlock LONG_FLOWER_POT = register("long_flower_pot", BlockBehaviour.Properties.of()
-            .mapColor(MapColor.NONE).instabreak().noOcclusion(), LongFlowerPotBlock::new);
+    public static final LongFlowerPotBlock LONG_FLOWER_POT = DecorationsFeature.FLOWER_POTS.isRegistered() ? register("long_flower_pot", BlockBehaviour.Properties.of()
+            .mapColor(MapColor.NONE).instabreak().noOcclusion(), LongFlowerPotBlock::new) : null;
 
-    public static final GhostLightBlock GHOST_LIGHT = register("ghost_light",
+    public static final GhostLightBlock GHOST_LIGHT = DecorationsFeature.GHOST_LIGHTS.isRegistered() ? register("ghost_light",
             settings -> new GhostLightBlock(settings.noOcclusion()
-                    .noCollision().instabreak().lightLevel(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME));
+                    .noCollision().instabreak().lightLevel(x -> 7), 5, 1, 0.001f, ParticleTypes.SOUL_FIRE_FLAME)) : null;
 
-    public static final GhostLightBlock BURNING_GHOST_LIGHT = register("burning_ghost_light", BlockBehaviour.Properties.ofFullCopy(GHOST_LIGHT),
-            settings -> new GhostLightBlock(settings.lightLevel(x -> 9), 5, 1, 0.001f, ParticleTypes.FLAME));
+    public static final GhostLightBlock BURNING_GHOST_LIGHT = DecorationsFeature.GHOST_LIGHTS.isRegistered() ? register("burning_ghost_light", BlockBehaviour.Properties.ofFullCopy(GHOST_LIGHT),
+            settings -> new GhostLightBlock(settings.lightLevel(x -> 9), 5, 1, 0.001f, ParticleTypes.FLAME)) : null;
 
-    public static final GhostLightBlock COPPER_GHOST_LIGHT = register("copper_ghost_light", BlockBehaviour.Properties.ofFullCopy(GHOST_LIGHT),
-            settings -> new GhostLightBlock(settings.lightLevel(x -> 9), 5, 1, 0.001f, ParticleTypes.COPPER_FIRE_FLAME));
+    public static final GhostLightBlock COPPER_GHOST_LIGHT = DecorationsFeature.GHOST_LIGHTS.isRegistered() ? register("copper_ghost_light", BlockBehaviour.Properties.ofFullCopy(GHOST_LIGHT),
+            settings -> new GhostLightBlock(settings.lightLevel(x -> 9), 5, 1, 0.001f, ParticleTypes.COPPER_FIRE_FLAME)) : null;
 
-    public static final Map<WoodType, PlainShelfBlock> SHELF = registerWood("shelf", (x, id, settings) -> {
+    public static final Map<WoodType, PlainShelfBlock> SHELF = DecorationsFeature.SHELF.isRegistered() ? registerWood("shelf", (x, id, settings) -> {
         var planks = WoodUtil.getPlanksId(x);
         if (BuiltInRegistries.BLOCK.containsKey(planks)) {
             return new PlainShelfBlock(
@@ -113,9 +114,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<WoodType, BenchBlock> BENCH = registerWood("bench", (x, id, settings) -> {
+    public static final Map<WoodType, BenchBlock> BENCH = DecorationsFeature.BENCH.isRegistered() ? registerWood("bench", (x, id, settings) -> {
         var planks = WoodUtil.getPlanksId(x);
         if (BuiltInRegistries.BLOCK.containsKey(planks)) {
             return new BenchBlock(
@@ -127,9 +128,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<WoodType, ToolRackBlock> TOOL_RACK = registerWood("tool_rack", (x, id, settings) -> {
+    public static final Map<WoodType, ToolRackBlock> TOOL_RACK = DecorationsFeature.TOOL_RACK.isRegistered() ? registerWood("tool_rack", (x, id, settings) -> {
         var planks = WoodUtil.getPlanksId(x);
         if (BuiltInRegistries.BLOCK.containsKey(planks)) {
             return new ToolRackBlock(
@@ -140,9 +141,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<WoodType, TableBlock> TABLE = registerWood("table", (x, id, settings) -> {
+    public static final Map<WoodType, TableBlock> TABLE = DecorationsFeature.TABLE.isRegistered() ? registerWood("table", (x, id, settings) -> {
         var planks = WoodUtil.getPlanksId(x);
         if (BuiltInRegistries.BLOCK.containsKey(planks)) {
             return new TableBlock(id,
@@ -153,9 +154,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<WoodType, StumpBlock> STUMP = registerWood("stump", (x, id, settings) -> {
+    public static final Map<WoodType, StumpBlock> STUMP = DecorationsFeature.STUMP.isRegistered() ? registerWood("stump", (x, id, settings) -> {
         var log = WoodUtil.getLogId(x);
 
         if (WoodUtil.hasLog(x) && BuiltInRegistries.BLOCK.containsKey(log)) {
@@ -169,9 +170,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<WoodType, StumpBlock> STRIPPED_STUMP = registerWood("stripped_", "stump", (x, id, settings) -> {
+    public static final Map<WoodType, StumpBlock> STRIPPED_STUMP = DecorationsFeature.STUMP.isRegistered() ? registerWood("stripped_", "stump", (x, id, settings) -> {
         var log = WoodUtil.getStrippedLogId(x);
 
         if (!log.equals(WoodUtil.getLogId(x)) && WoodUtil.hasLog(x) && BuiltInRegistries.BLOCK.containsKey(log)) {
@@ -187,9 +188,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = registerWood("sign_post", (x, id, settings) -> {
+    public static final Map<WoodType, AttachedSignPostBlock> WOOD_SIGN_POST = DecorationsFeature.SIGN_POST.isRegistered() ? registerWood("sign_post", (x, id, settings) -> {
         var planks = WoodUtil.getFenceId(x);
         var block = BuiltInRegistries.BLOCK.getValue(planks);
         if (block instanceof FenceBlock) {
@@ -197,9 +198,9 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
-    public static final Map<DyeColor, SleepingBagBlock> SLEEPING_BAG = registerDye("sleeping_bag", (x, id, settings) -> {
+    public static final Map<DyeColor, SleepingBagBlock> SLEEPING_BAG = DecorationsFeature.SLEEPING_BAG.isRegistered() ? registerDye("sleeping_bag", (x, id, settings) -> {
         var bed = Identifier.parse(x.getSerializedName() + "_bed");
         var block = BuiltInRegistries.BLOCK.getValue(bed);
         if (block instanceof BedBlock) {
@@ -207,10 +208,13 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
     public static final Map<Block, AttachedSignPostBlock> WALL_SIGN_POST = Util.make(() -> {
       var map = new HashMap<Block, AttachedSignPostBlock>();
+      if (!DecorationsFeature.SIGN_POST.isRegistered()) {
+          return map;
+      }
       var l = new ArrayList<Block>();
       for (var b : BuiltInRegistries.BLOCK) {
           if (b instanceof WallBlock && BuiltInRegistries.BLOCK.getKey(b).getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
@@ -225,10 +229,10 @@ public class DecorationsBlocks {
       return map;
     });
 
-    public static final AttachedSignPostBlock NETHER_BRICK_SIGN_POST = register("nether_brick_sign_post", Blocks.NETHER_BRICK_FENCE,
-            (settings, block) -> new AttachedSignPostBlock(settings, block, 4));
+    public static final AttachedSignPostBlock NETHER_BRICK_SIGN_POST = DecorationsFeature.SIGN_POST.isRegistered() ? register("nether_brick_sign_post", Blocks.NETHER_BRICK_FENCE,
+            (settings, block) -> new AttachedSignPostBlock(settings, block, 4)) : null;
 
-    public static final Map<WoodType, MailboxBlock> WOODEN_MAILBOX = registerWood("mailbox", (x, id, settings) -> {
+    public static final Map<WoodType, MailboxBlock> WOODEN_MAILBOX = DecorationsFeature.MAILBOX.isRegistered() ? registerWood("mailbox", (x, id, settings) -> {
         var planks = WoodUtil.getPlanksId(x);
         if (BuiltInRegistries.BLOCK.containsKey(planks)) {
             var block = BuiltInRegistries.BLOCK.getValue(planks);
@@ -236,7 +240,7 @@ public class DecorationsBlocks {
         }
 
         return null;
-    });
+    }) : Map.of();
 
     private static <T extends Block & PolymerBlock> Map<WoodType, T> registerWood(String id, TriFunction<WoodType, Identifier, BlockBehaviour.Properties, T> object) {
         return registerWood("", id, object);
@@ -268,7 +272,9 @@ public class DecorationsBlocks {
     }
 
     public static void register() {
-        LongFlowerPotBlock.setupResourcesAndMapping();
+        if (DecorationsFeature.FLOWER_POTS.isRegistered()) {
+            LongFlowerPotBlock.setupResourcesAndMapping();
+        }
 
         if (ModInit.DEV_MODE) {
             ServerLifecycleEvents.SERVER_STARTED.register((DecorationsBlocks::validateLootTables));

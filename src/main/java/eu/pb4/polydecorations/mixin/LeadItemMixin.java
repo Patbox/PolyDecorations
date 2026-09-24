@@ -3,6 +3,7 @@ package eu.pb4.polydecorations.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import eu.pb4.polydecorations.DecorationsFeature;
 import eu.pb4.polydecorations.entity.DecorationsEntities;
 import eu.pb4.polydecorations.entity.FirstLeashFenceKnotEntity;
 import net.minecraft.core.BlockPos;
@@ -27,7 +28,7 @@ public class LeadItemMixin {
         List<Leashable> list = Leashable.leashableInArea(level, Vec3.atCenterOf(blockPos), (leashablex) -> leashablex.getLeashHolder() == player);
         var state = level.getBlockState(blockPos);
 
-        if (!list.isEmpty() || !state.is(BlockTags.FENCES)) {
+        if (!DecorationsFeature.FENCE_LEADS.isEnabled() || !list.isEmpty() || !state.is(BlockTags.FENCES)) {
             return original.call(player, level, blockPos);
         }
 

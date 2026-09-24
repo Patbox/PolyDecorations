@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.patch;
 
+import eu.pb4.polydecorations.DecorationsFeature;
 import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.core.Holder;
@@ -14,7 +15,9 @@ import java.util.List;
 
 public class DecorationsLootTablePatches {
     public static void register() {
-        LootTableEvents.MODIFY_DROPS.register(DecorationsLootTablePatches::modifyDrops);
+        if (DecorationsFeature.TIED_CONTAINERS.isRegistered()) {
+            LootTableEvents.MODIFY_DROPS.register(DecorationsLootTablePatches::modifyDrops);
+        }
     }
 
     private static void modifyDrops(Holder<LootTable> lootTableHolder, LootContext lootContext, List<ItemStack> itemStacks) {

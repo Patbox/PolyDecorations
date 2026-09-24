@@ -1,5 +1,6 @@
 package eu.pb4.polydecorations.mixin;
 
+import eu.pb4.polydecorations.DecorationsFeature;
 import eu.pb4.polydecorations.ModCompatStatus;
 import eu.pb4.polydecorations.block.DecorationsBlocks;
 import eu.pb4.polydecorations.block.extension.WallAttachedLanternBlock;
@@ -23,7 +24,7 @@ public abstract class LanternBlockMixin {
 
     @Inject(method = "getStateForPlacement", at = @At("HEAD"), cancellable = true)
     private void swapByDefault(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (ModCompatStatus.AURORALANTERNS || !ctx.isSecondaryUseActive() || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
+        if (ModCompatStatus.AURORALANTERNS || !DecorationsFeature.WALL_LANTERNS.isEnabled() || !ctx.isSecondaryUseActive() || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
             return;
         }
         var pos = ctx.getClickedPos().relative(ctx.getClickedFace(), -1);
@@ -43,7 +44,7 @@ public abstract class LanternBlockMixin {
     }
     @Inject(method = "getStateForPlacement", at = @At("RETURN"), cancellable = true)
     private void swapNullForWallAttached(BlockPlaceContext ctx, CallbackInfoReturnable<BlockState> cir) {
-        if (ModCompatStatus.AURORALANTERNS || cir.getReturnValue() != null || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
+        if (ModCompatStatus.AURORALANTERNS || !DecorationsFeature.WALL_LANTERNS.isEnabled() || cir.getReturnValue() != null || ctx.getClickedFace().getAxis() == Direction.Axis.Y) {
             return;
         }
         var pos = ctx.getClickedPos().relative(ctx.getClickedFace(), -1);
@@ -64,7 +65,7 @@ public abstract class LanternBlockMixin {
 
     @Inject(method = "canSurvive", at = @At("RETURN"), cancellable = true)
     private void attachToRopes(BlockState state, LevelReader world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (state.getValue(HANGING) && world.getBlockState(pos.relative(Direction.UP)).is(DecorationsBlocks.ROPE)) {
+        if (DecorationsFeature.ROPE.isRegistered() && state.getValue(HANGING) && world.getBlockState(pos.relative(Direction.UP)).is(DecorationsBlocks.ROPE)) {
             cir.setReturnValue(true);
         }
     }

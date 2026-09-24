@@ -2,6 +2,7 @@ package eu.pb4.polydecorations.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import eu.pb4.polydecorations.DecorationsFeature;
 import eu.pb4.polydecorations.item.DecorationsDataComponents;
 import eu.pb4.polydecorations.item.DecorationsItems;
 import net.minecraft.core.BlockPos;
@@ -25,12 +26,12 @@ public abstract class ShulkerBoxBlockEntityMixin extends BlockEntity {
 
     @ModifyReturnValue(method = "canPlaceItemThroughFace", at = @At("RETURN"))
     private boolean patchNesting(boolean original, @Local(argsOnly = true) ItemStack stack) {
-        return original && !stack.is(DecorationsItems.BASKET);
+        return original && !(DecorationsFeature.BASKET.isRegistered() && stack.is(DecorationsItems.BASKET));
     }
 
     @Inject(method = "startOpen", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;blockEvent(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;II)V"))
     private void removeTiesOnOpen(ContainerUser containerUser, CallbackInfo ci) {
-        if (this.components().has(DecorationsDataComponents.TIED)) {
+        if (DecorationsFeature.TIED_CONTAINERS.isRegistered() && this.components().has(DecorationsDataComponents.TIED)) {
             this.setComponents(DataComponentMap.builder().addAll(this.components()).set(DecorationsDataComponents.TIED, null).build());
         }
     }
