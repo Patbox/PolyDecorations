@@ -71,6 +71,7 @@ public class ModInit implements ModInitializer {
 		GuiTextures.register();
 		PolydexCompat.register();
 		PolymerResourcePackUtils.addModAssets(ID);
+		FeatureAssetFilter.register();
 		PolymerResourcePackUtils.markAsRequired();
 		ResourcePackExtras.forDefault().addBridgedModelsFolder(id("block"), id("sgui"));
 	}

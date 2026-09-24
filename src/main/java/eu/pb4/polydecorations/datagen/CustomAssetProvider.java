@@ -233,7 +233,7 @@ public class CustomAssetProvider implements DataProvider {
                             .toJson().getBytes(StandardCharsets.UTF_8));
         });
 
-        getValues(DecorationsItems.WOODEN_STATUE, types, (type, item) -> {
+        getValues(DecorationsItems.SIGN_POST, types, (type, item) -> {
             writer.accept("assets/polydecorations/models/block/" + type.name().replace(':', '/') + "_sign_post.json", BASE_WOOD_MODEL_JSON
                     .replace("|TYPE|", "sign_post")
                     .replace("|PLANKS|", "polydecorations:block/sign_post_" + type.name().replace(':', '/'))
@@ -244,7 +244,9 @@ public class CustomAssetProvider implements DataProvider {
             writer.accept(AssetPaths.itemAsset(id(type.name().replace(':', '/') + "_sign_post")),
                     new ItemAsset(new BasicItemModel(id("block/" + type.name().replace(':', '/') + "_sign_post")), ItemAsset.Properties.DEFAULT)
                             .toJson().getBytes(StandardCharsets.UTF_8));
+        });
 
+        getValues(DecorationsItems.WOODEN_STATUE, types, (type, item) -> {
             writeStatue(type.name().replace(':', '/'), WoodUtil.getPlanksTexture(type).toString(), writer);
         });
 
