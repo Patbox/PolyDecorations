@@ -219,7 +219,8 @@ public class DecorationsBlocks {
       }
 
       for (var b : l) {
-          map.put(b, register(BuiltInRegistries.BLOCK.getKey(b).getPath() + "_sign_post", (s) -> new AttachedSignPostBlock(s, b, 8)));
+           map.put(b, register(BuiltInRegistries.BLOCK.getKey(b).getPath() + "_sign_post", b,
+                   (settings, block) -> new AttachedSignPostBlock(settings, block, 8)));
       }
       return map;
     });
