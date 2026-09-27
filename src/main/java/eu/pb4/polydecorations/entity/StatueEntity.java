@@ -153,12 +153,12 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
     public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
         if (!this.isRemoved()) {
             if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-                this.kill(world);
+                this.kill(world, source.getEntity());
                 return false;
             } else if (!this.isInvulnerableTo(world, source) && !this.isInvisible() && !this.isMarker()) {
                 if (source.is(DamageTypeTags.IS_EXPLOSION)) {
                     this.brokenByAnything(world, source);
-                    this.kill(world);
+                    this.kill(world, source.getEntity());
                     return false;
                 } else if (source.is(DamageTypeTags.IGNITES_ARMOR_STANDS) && !this.item.getType().fireproof()) {
                     if (this.isOnFire()) {
@@ -188,7 +188,7 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
                         if (source.isCreativePlayer()) {
                             this.playBrokenSound();
                             this.showBreakingParticles();
-                            this.kill(world);
+                            this.kill(world, source.getEntity());
                             return true;
                         } else {
                             long l = this.level().getGameTime();
@@ -199,7 +199,7 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
                             } else {
                                 this.brokenByPlayer(world, source);
                                 this.showBreakingParticles();
-                                this.kill(world);
+                                this.kill(world, source.getEntity());
                             }
 
                             return true;
@@ -314,28 +314,50 @@ public class StatueEntity extends ArmorStand implements PolymerEntity {
     public record Type(String type, LazyItemStack head, LazyItemStack body, LazyItemStack leftArm, LazyItemStack rightArm, LazyItemStack leftLeg, LazyItemStack rightLeg, Block block, boolean fireproof) {
         public static final List<Type> NON_WOOD = new ArrayList<>();
         public static final Type STONE = nonWood("stone", Blocks.STONE);
+        public static final Type STONE_BRICKS = nonWood("stone_bricks", Blocks.STONE_BRICKS);
         public static final Type DEEPSLATE = nonWood("deepslate", Blocks.DEEPSLATE);
+        public static final Type DEEPSLATE_BRICKS = nonWood("deepslate_bricks", Blocks.DEEPSLATE_BRICKS);
         public static final Type BLACKSTONE = nonWood("blackstone", Blocks.BLACKSTONE);
+        public static final Type POLISHED_BLACKSTONE_BRICKS = nonWood("polished_blackstone_bricks", Blocks.POLISHED_BLACKSTONE_BRICKS);
+        public static final Type SULFUR = nonWood("sulfur", Blocks.SULFUR);
+        public static final Type SULFUR_BRICKS = nonWood("sulfur_bricks", Blocks.SULFUR_BRICKS);
+        public static final Type CINNABAR = nonWood("cinnabar", Blocks.CINNABAR);
+        public static final Type CINNABAR_BRICKS = nonWood("cinnabar_bricks", Blocks.CINNABAR_BRICKS);
+        public static final Type PACKED_MUD = nonWood("packed_mud", Blocks.PACKED_MUD);
+        public static final Type MUD_BRICKS = nonWood("mud_bricks", Blocks.MUD_BRICKS);
         public static final Type PRISMARINE = nonWood("prismarine", Blocks.PRISMARINE);
+        public static final Type PRISMARINE_BRICKS = nonWood("prismarine_bricks", Blocks.PRISMARINE_BRICKS);
+        public static final Type DARK_PRISMARINE_BRICKS = nonWood("dark_prismarine", Blocks.DARK_PRISMARINE);
         public static final Type SANDSTONE = nonWood("sandstone", Blocks.SANDSTONE);
         public static final Type RED_SANDSTONE = nonWood("red_sandstone", Blocks.RED_SANDSTONE);
         public static final Type QUARTZ = nonWood("quartz", Blocks.QUARTZ_BLOCK);
+        public static final Type QUARTZ_BRICKS = nonWood("quartz_bricks", Blocks.QUARTZ_BRICKS);
         public static final Type ANDESITE = nonWood("andesite", Blocks.ANDESITE);
         public static final Type DIORITE = nonWood("diorite", Blocks.DIORITE);
         public static final Type GRANITE = nonWood("granite", Blocks.GRANITE);
         public static final Type TUFF = nonWood("tuff", Blocks.TUFF);
-        public static final Type PACKED_MUD = nonWood("packed_mud", Blocks.PACKED_MUD);
-        public static final Type STONE_BRICKS = nonWood("stone_bricks", Blocks.STONE_BRICKS);
         public static final Type TUFF_BRICKS = nonWood("tuff_bricks", Blocks.TUFF_BRICKS);
+
+        public static final Type BRICKS = nonWood("bricks", Blocks.BRICKS);
+        public static final Type RESIN_BRICKS = nonWood("resin_bricks", Blocks.RESIN_BRICKS);
+        public static final Type NETHER_BRICKS = nonWood("nether_bricks", Blocks.NETHER_BRICKS);
+        public static final Type RED_NETHER_BRICKS = nonWood("red_nether_bricks", Blocks.RED_NETHER_BRICKS);
+        public static final Type END_STONE_BRICKS = nonWood("end_stone_bricks", Blocks.END_STONE_BRICKS);
+
         public static final Type TERRACOTTA = nonWood("terracotta", Blocks.TERRACOTTA);
         public static final Map<DyeColor, Type> COLORED_TERRACOTTA = Util.make(new HashMap<>(), (x) -> {
             for (var color : DecorationsUtil.COLORS_CREATIVE) {
-                x.put(color, nonWood(color.getSerializedName() + "_terracotta", BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(color.getSerializedName() + "_terracotta"))));
+                x.put(color, nonWood(color.getSerializedName() + "_terracotta", Blocks.DYED_TERRACOTTA.pick(color)));
+            }
+        });
+        public static final Map<DyeColor, Type> COLORED_CONCRETE = Util.make(new HashMap<>(), (x) -> {
+            for (var color : DecorationsUtil.COLORS_CREATIVE) {
+                x.put(color, nonWood(color.getSerializedName() + "_concrete", Blocks.CONCRETE.pick(color)));
             }
         });
         public static final Map<DyeColor, Type> COLORED_WOOL = Util.make(new HashMap<>(), (x) -> {
             for (var color : DecorationsUtil.COLORS_CREATIVE) {
-                x.put(color, burnableNonWood(color.getSerializedName() + "_wool", BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(color.getSerializedName() + "_wool"))));
+                x.put(color, burnableNonWood(color.getSerializedName() + "_wool", Blocks.WOOL.pick(color)));
             }
         });
 

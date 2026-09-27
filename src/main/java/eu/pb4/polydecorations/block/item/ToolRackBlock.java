@@ -21,6 +21,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
@@ -107,11 +109,13 @@ public class ToolRackBlock extends BaseEntityBlock implements FactoryBlock, Poly
                     be.setItem(slot, playerStack.copyWithCount(1));
                     playerStack.shrink(1);
                     be.setChanged();
+                    world.playSound(null, pos, SoundEvents.SHELF_PLACE_ITEM, SoundSource.BLOCKS, 1, 1);
                     return InteractionResult.SUCCESS_SERVER;
                 } else if (!currentStack.isEmpty() && playerStack.isEmpty()) {
                     be.setItem(slot, ItemStack.EMPTY);
                     player.setItemInHand(InteractionHand.MAIN_HAND, currentStack);
                     be.setChanged();
+                    world.playSound(null, pos, SoundEvents.SHELF_TAKE_ITEM, SoundSource.BLOCKS, 1, 1);
                     return InteractionResult.SUCCESS_SERVER;
                 }
 

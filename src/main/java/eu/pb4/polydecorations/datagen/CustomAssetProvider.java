@@ -481,6 +481,8 @@ public class CustomAssetProvider implements DataProvider {
         writeStatue("deepslate", "block/deepslate_top", writer);
         writeStatue("blackstone", "block/blackstone", writer);
         writeStatue("prismarine", "block/prismarine", writer);
+        writeStatue("dark_prismarine", "block/dark_prismarine", writer);
+        writeStatue("prismarine_bricks", "block/prismarine_bricks", writer);
         writeStatue("sandstone", "block/sandstone_top", writer);
         writeStatue("red_sandstone", "block/red_sandstone_top", writer);
         writeStatue("quartz", "block/quartz_block_bottom", writer);
@@ -492,11 +494,25 @@ public class CustomAssetProvider implements DataProvider {
         writeStatue("andesite", "block/andesite", writer);
         writeStatue("diorite", "block/diorite", writer);
         writeStatue("terracotta", "block/terracotta", writer);
+        writeStatue("polished_blackstone_bricks", "block/polished_blackstone_bricks", writer);
+        writeStatue("deepslate_bricks", "block/deepslate_bricks", writer);
+        writeStatue("sulfur_bricks", "block/sulfur_bricks", writer);
+        writeStatue("cinnabar_bricks", "block/cinnabar_bricks", writer);
+        writeStatue("cinnabar", "block/cinnabar", writer);
+        writeStatue("sulfur", "block/sulfur", writer);
+        writeStatue("mud_bricks", "block/mud_bricks", writer);
+        writeStatue("quartz_bricks", "block/quartz_bricks", writer);
+        writeStatue("bricks", "block/bricks", writer);
+        writeStatue("resin_bricks", "block/resin_bricks", writer);
+        writeStatue("nether_bricks", "block/nether_bricks", writer);
+        writeStatue("red_nether_bricks", "block/red_nether_bricks", writer);
+        writeStatue("end_stone_bricks", "block/end_stone_bricks", writer);
 
         //var b = new StringBuilder();
 
         for (var color : DyeColor.values()) {
             writeStatue(color.getSerializedName() + "_terracotta", "block/" + color.getSerializedName() + "_terracotta", writer);
+            writeStatue(color.getSerializedName() + "_concrete", "block/" + color.getSerializedName() + "_concrete", writer);
             writeStatue(color.getSerializedName() + "_wool", "block/" + color.getSerializedName() + "_wool", writer);
 
             //b.append('"').append("item.polydecorations.").append(color.getName()).append("_terracotta_statue\": \"")
