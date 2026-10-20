@@ -30,6 +30,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
@@ -41,6 +42,7 @@ import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagFile;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -130,10 +132,20 @@ public class ModdedCompat {
     private static void setupData() {
         var map = new HashMap<String, byte[]>();
         var registryAccess = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
-        var ops = registryAccess.createSerializationContext(JsonOps.INSTANCE);
 
         FabricBootstrapContext<Recipe<?>> recipes = new RecipeBootstrapContext(registryAccess, identifier -> Identifier.fromNamespaceAndPath(ModInit.ID, identifier.getPath()));
         FabricBootstrapContext<Advancement> advancements = new FabricBootstrapContext<>(registryAccess, Registries.ADVANCEMENT);
+
+        var ops = RegistryOps.create(JsonOps.INSTANCE, new RegistryOps.RegistryInfoLookup() {
+            @Override
+            public <T> Optional<HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> key) {
+                if (recipes.registryKey.equals(key)) {
+                    return Optional.of((HolderGetter<T>) recipes.entryLookup);
+                }
+
+                return registryAccess.lookup(key).map(x -> x);
+            }
+        });
 
         RecipesProvider.woodRecipeProvider(WoodUtil.MODDED, recipes, advancements).buildRecipes();
         new LootTables.WoodLootTables(WoodUtil.MODDED, new LootTableSubProvider.Context() {
@@ -147,12 +159,23 @@ public class ModdedCompat {
 
             @Override
             public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> key) {
-                return registryAccess.lookupOrThrow(key);
+
+                return registryAccess.lookup(key).map(x -> (HolderGetter<S>) x).orElse(new HolderGetter<S>() {
+                    @Override
+                    public Optional<Holder.Reference<S>> get(ResourceKey<S> id) {
+                        return Optional.empty();
+                    }
+
+                    @Override
+                    public Optional<HolderSet.Named<S>> get(TagKey<S> id) {
+                        return Optional.empty();
+                    }
+                });
             }
 
             @Override
             public <S> Stream<Holder.Reference<S>> listContextElements(ResourceKey<? extends Registry<? extends S>> key) {
-                return registryAccess.lookupOrThrow(key).listElements();
+                return registryAccess.lookup(key).map(HolderLookup::listElements).orElse(Stream.empty());
             }
         }).run();
 
@@ -301,7 +324,17 @@ public class ModdedCompat {
                 return (HolderGetter<S>) entryLookup;
             }
 
-            return registries.lookupOrThrow(key);
+            return registries.lookup(key).map(x -> (HolderGetter<S>) x).orElse(new HolderGetter<S>() {
+                @Override
+                public Optional<Holder.Reference<S>> get(ResourceKey<S> id) {
+                    return Optional.empty();
+                }
+
+                @Override
+                public Optional<HolderSet.Named<S>> get(TagKey<S> id) {
+                    return Optional.empty();
+                }
+            });
         }
 
         @Override
