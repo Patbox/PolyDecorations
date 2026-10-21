@@ -71,7 +71,9 @@ public class RecipesProvider extends FabricRecipeProvider {
                     }
                     shaped(RecipeCategory.DECORATIONS, item)
                             .group("polydecorations:sleeping_bag")
-                            .pattern("sss")
+                            .pattern(" s ")
+                            .pattern(" s ")
+                            .pattern(" s ")
                             .define('s', wool)
                             .unlockedBy("planks", InventoryChangeTrigger.TriggerInstance.hasItems(wool))
                             .save(output);
