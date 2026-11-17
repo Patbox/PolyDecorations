@@ -263,7 +263,7 @@ public class CanvasEntity extends HangingEntity implements PolymerEntity {
                     }
 
                     var ents = this.level().getEntities(EntityTypeTest.forExactClass(CanvasEntity.class),
-                            this.getBoundingBox().deflate(0.1f).move(xa, ya, za), c -> c.getDirection() == direction && c.rotation == this.rotation);
+                            this.getBoundingBox().deflate(0.1f).move(xa, ya, za), c -> c.getDirection() == direction && c.rotation == this.rotation && !c.waxed);
 
                     if (ents.isEmpty()) {
                         arr[i++] = VoidCanvas.INSTANCE;
